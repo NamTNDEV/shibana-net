@@ -1,19 +1,21 @@
-package com.shibana.profile_service.dto.request;
+package com.namudev.identity_service.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-@Builder
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+@Builder
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileCreationRequest {
     String userId;
     String firstName;
     String lastName;
-    String dob;
+    LocalDate dob;
     String address;
     String phoneNumber;
 }

@@ -1,17 +1,17 @@
-package com.shibana.profile_service.dto.response;
+package com.namudev.identity_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileResponse {
+public class ProfileCreationResponse {
     String firstName;
     String lastName;
     LocalDate dob;

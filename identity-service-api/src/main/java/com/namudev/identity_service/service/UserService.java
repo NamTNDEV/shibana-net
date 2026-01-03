@@ -1,5 +1,6 @@
 package com.namudev.identity_service.service;
 
+import com.namudev.identity_service.dto.request.ProfileCreationRequest;
 import com.namudev.identity_service.dto.request.UserCreationRequest;
 import com.namudev.identity_service.dto.request.UserUpdateRequest;
 import com.namudev.identity_service.dto.response.UserResponse;
@@ -7,8 +8,10 @@ import com.namudev.identity_service.entity.Role;
 import com.namudev.identity_service.entity.User;
 import com.namudev.identity_service.exception.AppException;
 import com.namudev.identity_service.exception.ErrorCode;
+import com.namudev.identity_service.mapper.ProfileMapper;
 import com.namudev.identity_service.mapper.UserMapper;
 import com.namudev.identity_service.repository.UserRepo;
+import com.namudev.identity_service.repository.http_client.ProfileClient;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +34,10 @@ import java.util.Set;
 public class UserService {
     RoleService roleService;
     UserRepo userRepo;
-    UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    UserMapper userMapper;
+    ProfileMapper profileMapper;
+    ProfileClient profileClient;
 
     public List<User> getAllUsers() {
         return userRepo.findAll();
@@ -48,10 +53,10 @@ public class UserService {
 
     @Transactional
     public User createUser(UserCreationRequest userRequest) {
-        if(userRepo.existsByUsername(userRequest.getUsername())) {
+        if (userRepo.existsByUsername(userRequest.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        User user =  userMapper.toUser(userRequest);
+        User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = new HashSet<>();
         roles.add(roleService.getRoleByName(RoleEnum.USER.name()));
@@ -64,13 +69,18 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        ProfileCreationRequest profileCreationRequest = profileMapper.toProfileCreationRequest(user);
+        profileCreationRequest.setUserId(user.getId());
+        var profileResponse = profileClient.createProfile(profileCreationRequest);
+        log.info("Profile Response: {}", profileResponse);
+
         return user;
     }
 
     public User updateUser(String id, UserUpdateRequest userRequest) {
         User user = userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, userRequest);
-        if(userRequest.getRoles() != null) {
+        if (userRequest.getRoles() != null) {
             Set<Role> roles = new HashSet<>(roleService.getRolesByNames(userRequest.getRoles()));
             user.setRoles(roles);
         }
