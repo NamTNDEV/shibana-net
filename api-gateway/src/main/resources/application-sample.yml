@@ -1,0 +1,11 @@
+server:
+  port: ${SERVER_PORT:8888}
+#  servlet:
+#    context-path: ${SERVER_CONTEXT_PATH}
+
+spring:
+  # =========================
+  #   App & Server
+  # =========================
+  application:
+    name: ${APPLICATION_NAME:api-gateway}
