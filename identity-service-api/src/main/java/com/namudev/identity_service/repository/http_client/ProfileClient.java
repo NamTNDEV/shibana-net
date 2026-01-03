@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "profile-service",
-        url = "http://localhost:8081/api/v1/profile"
+        url = "http://localhost:8081/profile"
 )
 public interface ProfileClient {
     @PostMapping(value = "/")
