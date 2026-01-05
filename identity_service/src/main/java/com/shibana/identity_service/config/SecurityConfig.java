@@ -43,10 +43,10 @@ public class SecurityConfig {
             "/users/hello-world",
             "/users/me",
             "/auth/login",
+            "/auth/introspect",
             "/auth/refresh-token",
             "/auth/outbound/authenticate",
             "/users/**",
-            "/auth/introspect"
     };
 
     String[] PRIVATE_URLS = {

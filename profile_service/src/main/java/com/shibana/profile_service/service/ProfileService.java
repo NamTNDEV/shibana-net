@@ -10,6 +10,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
@@ -29,6 +31,13 @@ public class ProfileService {
 //                .address(savedProfile.getAddress())
 //                .dob(savedProfile.getDob())
 //                .build();
+    }
+
+    public List<ProfileResponse> getAllProfiles() {
+        List<Profile> profiles = profileRepo.findAll();
+        return profiles.stream()
+                .map(profileMapper::toProfileResponse)
+                .toList();
     }
 
     public ProfileResponse getProfile(String id) {
