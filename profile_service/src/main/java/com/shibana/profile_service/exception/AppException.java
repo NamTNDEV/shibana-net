@@ -1,13 +1,12 @@
-package com.shibana.api_gateway.exception;
+package com.shibana.profile_service.exception;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AppException extends RuntimeException {
     ErrorCode errorCode;
 
@@ -16,7 +15,7 @@ public class AppException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-    public AppException(ErrorCode errorCode, Throwable cause) {
+    public  AppException(ErrorCode errorCode, Throwable cause) {
         super(errorCode.getMessage(), cause);
         this.errorCode = errorCode;
     }

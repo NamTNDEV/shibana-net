@@ -1,6 +1,7 @@
 package com.shibana.profile_service.controller;
 
 import com.shibana.profile_service.dto.request.ProfileCreationRequest;
+import com.shibana.profile_service.dto.response.ApiResponse;
 import com.shibana.profile_service.dto.response.ProfileResponse;
 import com.shibana.profile_service.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -17,23 +18,39 @@ public class ProfileController {
     ProfileService profileService;
 
     @GetMapping("/")
-    public List<ProfileResponse> getAllProfiles() {
-        return profileService.getAllProfiles();
+    public ApiResponse<List<ProfileResponse>> getAllProfiles() {
+        return ApiResponse.<List<ProfileResponse>>builder()
+                .code(200)
+                .message("Profiles retrieved successfully")
+                .data(profileService.getAllProfiles())
+                .build();
     }
 
     @GetMapping("/{id}")
-    public ProfileResponse getProfile(@PathVariable String id) {
-        return profileService.getProfile(id);
+    public ApiResponse<ProfileResponse> getProfile(@PathVariable String id) {
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("Profile retrieved successfully")
+                .data(profileService.getProfile(id))
+                .build();
     }
 
     @PostMapping("/")
-    public ProfileResponse createProfile(@RequestBody ProfileCreationRequest request) {
-        return profileService.createProfile(request);
+    public ApiResponse<ProfileResponse> createProfile(@RequestBody ProfileCreationRequest request) {
+        return ApiResponse.<ProfileResponse>builder()
+                .code(201)
+                .message("Profile created successfully")
+                .data(profileService.createProfile(request))
+                .build();
     }
 
     @DeleteMapping("/{id}")
-    public String deleteProfile(@PathVariable String id) {
+    public ApiResponse<String> deleteProfile(@PathVariable String id) {
         profileService.deleteProfile(id);
-        return "Profile has been deleted";
+        return ApiResponse.<String>builder()
+                .code(200)
+                .message("Profile deleted successfully")
+                .data(id)
+                .build();
     }
 }
