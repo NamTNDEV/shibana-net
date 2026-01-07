@@ -38,7 +38,7 @@ public class SecurityConfig {
     String ACCESS_SECRET_KEY_B64;
 
     String[] PUBLIC_URLS = {
-            "/profiles/**",
+            "/internal/**",
     };
 
     @Bean
@@ -49,7 +49,8 @@ public class SecurityConfig {
                         request -> request
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(PUBLIC_URLS).permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer(
                         oauth2 -> oauth2
                                 .jwt(
