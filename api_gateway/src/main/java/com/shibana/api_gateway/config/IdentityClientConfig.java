@@ -30,5 +30,4 @@ public class IdentityClientConfig {
 
         return factory.createClient(IdentityClient.class);
     }
-
 }
