@@ -40,6 +40,7 @@ public class ProfileController {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/")
     public ApiResponse<ProfileResponse> createProfile(@RequestBody ProfileCreationRequest request) {
         return ApiResponse.<ProfileResponse>builder()

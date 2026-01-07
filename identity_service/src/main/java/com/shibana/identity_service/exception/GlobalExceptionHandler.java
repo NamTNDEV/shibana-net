@@ -1,6 +1,7 @@
 package com.shibana.identity_service.exception;
 
 import com.shibana.identity_service.dto.response.ApiResponse;
+import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,20 @@ public class GlobalExceptionHandler {
                         .message(errorCode.getMessage())
                         .build()
         );
+    }
+
+    @ExceptionHandler(value = FeignException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFeignException(FeignException exception) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        if (exception.status() == HttpStatus.UNAUTHORIZED.value()) {
+            errorCode = ErrorCode.UNAUTHENTICATED;
+        } else if (exception.status() == HttpStatus.FORBIDDEN.value()) {
+            errorCode = ErrorCode.UNAUTHORIZED;
+        }
+        response.setCode(errorCode.getCode());
+        response.setMessage(errorCode.getMessage());
+        return ResponseEntity.status(exception.status()).body(response);
     }
 
     private String mappingAttributesToString(String oldMessage, Map<String, Object> attributes) {
