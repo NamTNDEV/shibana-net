@@ -95,7 +95,14 @@ public class AuthService {
 
     private String generateAccessToken(User user) {
         Instant now = Instant.now();
-        JWTClaimsSet claims = new JWTClaimsSet.Builder().subject(user.getUsername()).issuer(ISSUER).issueTime(Date.from(now)).expirationTime(Date.from(now.plus(ACCESS_TOKEN_TTL))).jwtID(UUID.randomUUID().toString()).claim("scope", buildScopeString(user.getRoles())).claim("typ", TokenType.ACCESS.name()).build();
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .issuer(ISSUER)
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plus(ACCESS_TOKEN_TTL)))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScopeString(user.getRoles()))
+                .claim("typ", TokenType.ACCESS.name()).build();
         return signHS512Token(claims, ACCESS_SECRET_KEY_B64);
     }
 

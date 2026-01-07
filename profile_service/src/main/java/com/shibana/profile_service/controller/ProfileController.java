@@ -7,16 +7,21 @@ import com.shibana.profile_service.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @RestController
 public class ProfileController {
     ProfileService profileService;
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/")
     public ApiResponse<List<ProfileResponse>> getAllProfiles() {
         return ApiResponse.<List<ProfileResponse>>builder()

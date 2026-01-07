@@ -1,6 +1,5 @@
 package com.shibana.identity_service.config;
 
-import com.shibana.identity_service.service.RedisTokenBlacklist;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -37,8 +36,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
-    RedisTokenBlacklist redisTokenBlacklist;
-
     String[] PUBLIC_URLS = {
             "/users/hello-world",
             "/users/me",
@@ -56,11 +53,11 @@ public class SecurityConfig {
 
     @NonFinal
     @Value("${jwt.issuer}")
-    private String ISSUER;
+    String ISSUER;
 
     @NonFinal
     @Value("${jwt.access.secret-key}")
-    private String ACCESS_SECRET_KEY_B64;
+    String ACCESS_SECRET_KEY_B64;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -139,7 +136,7 @@ public class SecurityConfig {
         var defaultValidator = JwtValidators.createDefaultWithIssuer(ISSUER);
         nimbus.setJwtValidator(defaultValidator);
 
-        return new CustomJwtDecoder(nimbus, redisTokenBlacklist);
+        return new CustomJwtDecoder(nimbus);
     }
 
     @Bean

@@ -18,3 +18,4 @@ spring:
     authentication:
       username: ${NEO4J_USERNAME:neo4j}
       password: ${NEO4J_PASSWORD:neo4j}
+
