@@ -3,6 +3,7 @@ package com.shibana.notification_service.exeption;
 import com.shibana.notification_service.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -33,6 +34,20 @@ public class GlobalException {
                         ApiResponse.<ErrorCode>builder()
                                 .code(unknownError.getCode())
                                 .message(unknownError.getMessage())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public  ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied exception occurred:: {}", ex.getMessage());
+        ErrorCode accessDeniedError = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity
+                .status(accessDeniedError.getHttpStatus())
+                .body(
+                        ApiResponse.<ErrorCode>builder()
+                                .code(accessDeniedError.getCode())
+                                .message(accessDeniedError.getMessage())
                                 .build()
                 );
     }

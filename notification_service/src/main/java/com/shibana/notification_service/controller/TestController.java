@@ -1,10 +1,9 @@
 package com.shibana.notification_service.controller;
 
-import com.shibana.notification_service.exeption.AppException;
-import com.shibana.notification_service.exeption.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class TestController {
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/test")
     public String test() {
         log.info("Test endpoint called");
