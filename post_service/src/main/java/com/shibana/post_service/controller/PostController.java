@@ -1,13 +1,16 @@
 package com.shibana.post_service.controller;
 
 import com.shibana.post_service.dto.response.ApiResponse;
+import com.shibana.post_service.dto.response.PostResponse;
+import com.shibana.post_service.dto.resquest.PostCreationRequest;
 import com.shibana.post_service.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
     PostService postService;
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/health-check")
     public ApiResponse<?> healthCheck() {
         return ApiResponse.<String>builder()
@@ -24,4 +26,56 @@ public class PostController {
                 .message("Post Service is up and running!")
                 .build();
     }
+
+    @GetMapping("/")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<List<PostResponse>> getAllByAdminPosts() {
+        log.info("Get All Posts Request...");
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Posts retrieved successfully")
+                .data(postService.getAllPosts())
+                .build();
+    }
+
+    @GetMapping("/{postId}")
+    public ApiResponse<PostResponse> getPostById(@PathVariable String postId) {
+        log.info("Get Post By Id Request...");
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Post retrieved successfully")
+                .data(postService.getPostById(postId))
+                .build();
+    }
+
+    @GetMapping("/my-posts")
+    public ApiResponse<List<PostResponse>> getAllMyPosts() {
+        log.info("Get My Posts Request...");
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Posts retrieved successfully")
+                .data(postService.getPostsByAuthorId())
+                .build();
+    }
+
+    @PostMapping("/")
+    public ApiResponse<PostResponse> createPost(@RequestBody PostCreationRequest postCreationRequest) {
+        log.info("Post Creation Request...");
+        return ApiResponse.<PostResponse>builder()
+                .code(201)
+                .message("Post created successfully")
+                .data(postService.createPost(postCreationRequest))
+                .build();
+    }
+
+    @DeleteMapping("/{postId}")
+    public ApiResponse<?> deletePost(@PathVariable String postId) {
+        log.info("Post Deletion Request...");
+        postService.deletePostById(postId);
+        return ApiResponse.builder()
+                .code(200)
+                .message("Post deleted successfully")
+                .build();
+    }
+
 }
