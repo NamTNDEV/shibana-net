@@ -102,7 +102,9 @@ public class AuthService {
                 .expirationTime(Date.from(now.plus(ACCESS_TOKEN_TTL)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScopeString(user.getRoles()))
-                .claim("typ", TokenType.ACCESS.name()).build();
+                .claim("typ", TokenType.ACCESS.name())
+                .claim("user_id", user.getId())
+                .build();
         return signHS512Token(claims, ACCESS_SECRET_KEY_B64);
     }
 
