@@ -30,7 +30,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     String apiPrefix;
 
     String[] excludedPaths = {
-            "/identity/auth/login"
+            "/identity/auth/login",
+            "/identity/auth/register",
     };
 
     @Override
@@ -41,6 +42,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
+        log.info("Request Path: {}", path);
         if (isMatchedExcludedPath(path)) {
             return chain.filter(exchange);
         }

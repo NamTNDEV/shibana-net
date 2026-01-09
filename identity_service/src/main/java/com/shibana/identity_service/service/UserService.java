@@ -10,6 +10,7 @@ import com.shibana.identity_service.exception.AppException;
 import com.shibana.identity_service.exception.ErrorCode;
 import com.shibana.identity_service.mapper.ProfileMapper;
 import com.shibana.identity_service.mapper.UserMapper;
+import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.repository.UserRepo;
 import com.shibana.identity_service.repository.http_client.ProfileClient;
 import jakarta.transaction.Transactional;
@@ -38,6 +39,7 @@ public class UserService {
     UserMapper userMapper;
     ProfileMapper profileMapper;
     ProfileClient profileClient;
+    NotificationEventPublisher notificationEventPublisher;
 
     public List<User> getAllUsers() {
         return userRepo.findAll();
@@ -73,6 +75,11 @@ public class UserService {
         profileCreationRequest.setUserId(user.getId());
         var profileResponse = profileClient.createProfile(profileCreationRequest);
         log.info("Profile Response: {}", profileResponse);
+
+        notificationEventPublisher.publishWelcomeEmailEvent(
+                user.getUsername(),
+                userRequest.getUsername() + "@yopmail.com"
+        );
 
         return user;
     }

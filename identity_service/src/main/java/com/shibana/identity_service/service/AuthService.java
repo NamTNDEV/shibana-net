@@ -215,7 +215,7 @@ public class AuthService {
         return true;
     }
 
-    public AuthResponse authenticate(LoginRequest loginRequest) {
+    public AuthResponse login(LoginRequest loginRequest) {
         User user = userService.getUserByUsername(loginRequest.getUsername());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isPasswordMatching = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
@@ -225,6 +225,27 @@ public class AuthService {
         String accessToken = generateAccessToken(user);
         String refreshToken = generateRefreshToken(user);
         return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+    }
+
+    public AuthResponse register(RegisterRequest registerRequest) {
+        log.info("::: Processing user registration for username :: {}", registerRequest.getUsername());
+        User newUser = userService.createUser(
+                UserCreationRequest.builder()
+                        .username(registerRequest.getUsername())
+                        .password(registerRequest.getPassword())
+                        .firstName(registerRequest.getFirstName())
+                        .lastName(registerRequest.getLastName())
+                        .dob(registerRequest.getDob())
+                        .build()
+        );
+
+        String accessToken = generateAccessToken(newUser);
+        String refreshToken = generateRefreshToken(newUser);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public void logout(String bearerToken) {

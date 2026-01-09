@@ -39,6 +39,7 @@ public class SecurityConfig {
     String[] PUBLIC_URLS = {
             "/users/hello-world",
             "/users/me",
+            "/auth/register",
             "/auth/login",
             "/auth/introspect",
             "/auth/refresh-token",

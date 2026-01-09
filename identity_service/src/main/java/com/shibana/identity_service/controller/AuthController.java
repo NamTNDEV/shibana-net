@@ -3,6 +3,7 @@ package com.shibana.identity_service.controller;
 import com.shibana.identity_service.dto.request.IntrospectRequest;
 import com.shibana.identity_service.dto.request.LoginRequest;
 import com.shibana.identity_service.dto.request.RefreshTokenRequest;
+import com.shibana.identity_service.dto.request.RegisterRequest;
 import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.AuthResponse;
 import com.shibana.identity_service.dto.response.IntrospectResponse;
@@ -21,12 +22,21 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     AuthService authService;
 
+    @PostMapping("/register")
+    public ApiResponse<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
+        return ApiResponse.<AuthResponse>builder()
+                .code(201)
+                .message("Registration successful")
+                .data(authService.register(registerRequest))
+                .build();
+    }
+
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
         return ApiResponse.<AuthResponse>builder()
                 .code(200)
                 .message("Login successful")
-                .data(authService.authenticate(loginRequest))
+                .data(authService.login(loginRequest))
                 .build();
     }
 
