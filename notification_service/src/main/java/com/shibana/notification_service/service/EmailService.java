@@ -1,6 +1,5 @@
 package com.shibana.notification_service.service;
 
-import com.shibana.notification_service.dto.request.BrevoRecipient;
 import com.shibana.notification_service.dto.request.BrevoSendEmailRequest;
 import com.shibana.notification_service.dto.request.BrevoSender;
 import com.shibana.notification_service.dto.request.SendEmailRequest;

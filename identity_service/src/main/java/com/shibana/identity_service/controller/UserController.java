@@ -6,7 +6,7 @@ import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.mapper.UserMapper;
-import com.shibana.identity_service.message.producer.KafkaPublisher;
+import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +26,14 @@ import java.util.List;
 public class UserController {
     UserService userService;
     UserMapper userMapper;
-    KafkaPublisher kafkaPublisher;
+    NotificationEventPublisher notificationEventPublisher;
 
     @GetMapping("/hello-world")
     public String helloWorld() {
-        log.info("Sending hello world message to Kafka topic");
-        kafkaPublisher.publishTestMessage("Hello, World!");
+        notificationEventPublisher.publishWelcomeEmailEvent(
+                "Shibana Test",
+                "shibanatest@yopmail.com"
+        );
         return "Hello, World!";
     }
 
@@ -47,7 +49,7 @@ public class UserController {
                 .build();
     }
 
-//    @PostAuthorize("returnObject.data.username == authentication.name")
+    //    @PostAuthorize("returnObject.data.username == authentication.name")
     @GetMapping("/{id}")
     ApiResponse<UserResponse> getUserById(@PathVariable String id) {
         User result = userService.getUserById(id);
