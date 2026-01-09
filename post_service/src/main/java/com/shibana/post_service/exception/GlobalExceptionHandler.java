@@ -3,6 +3,7 @@ package com.shibana.post_service.exception;
 import com.shibana.post_service.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -31,14 +32,14 @@ public class GlobalExceptionHandler {
         );
     }
 
-//    @ExceptionHandler(value = AccessDeniedException.class)
-//    public ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException exception) {
-//        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-//        return ResponseEntity.status(errorCode.getHttpStatus()).body(
-//                ApiResponse.<ErrorCode>builder()
-//                        .code(errorCode.getCode())
-//                        .message(errorCode.getMessage())
-//                        .build()
-//        );
-//    }
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(
+                ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
+    }
 }

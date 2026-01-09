@@ -32,6 +32,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     String[] excludedPaths = {
             "/identity/auth/login",
             "/identity/auth/register",
+            "/posts/health-check",
     };
 
     @Override
@@ -44,6 +45,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         }
         log.info("Request Path: {}", path);
         if (isMatchedExcludedPath(path)) {
+            log.info("Excluded Path Matched:: {}", path);
             return chain.filter(exchange);
         }
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
