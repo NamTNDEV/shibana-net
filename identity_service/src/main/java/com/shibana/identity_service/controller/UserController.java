@@ -6,6 +6,7 @@ import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.mapper.UserMapper;
+import com.shibana.identity_service.message.producer.KafkaPublisher;
 import com.shibana.identity_service.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,12 @@ import java.util.List;
 public class UserController {
     UserService userService;
     UserMapper userMapper;
+    KafkaPublisher kafkaPublisher;
 
     @GetMapping("/hello-world")
     public String helloWorld() {
+        log.info("Sending hello world message to Kafka topic");
+        kafkaPublisher.publishTestMessage("Hello, World!");
         return "Hello, World!";
     }
 
