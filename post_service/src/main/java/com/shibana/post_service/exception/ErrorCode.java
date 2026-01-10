@@ -14,7 +14,11 @@ public enum ErrorCode {
     UNKNOWN_ERROR(5000, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     UNAUTHENTICATED(4001, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(4003, "Forbidden", HttpStatus.FORBIDDEN),
-    FORBIDDEN_OPERATION(4004, "You do not have permission to perform this operation", HttpStatus.FORBIDDEN);
+    FORBIDDEN_OPERATION(4004, "You do not have permission to perform this operation", HttpStatus.FORBIDDEN),
+    CONTENT_NOT_NULL(1004, "Content must not be null", HttpStatus.BAD_REQUEST),
+    CONTENT_LENGTH_NOT_VALID(1005, "Content length must be between 1 and 5000", HttpStatus.BAD_REQUEST),
+    INVALID_ERROR_CODE(9999, "Invalid error code", HttpStatus.BAD_REQUEST)
+    ;
 
     int code;
     String message;

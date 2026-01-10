@@ -1,4 +1,4 @@
-package com.shibana.post_service.config;
+package com.shibana.post_service.security.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+//                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         ).authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 );
         return http.build();

@@ -1,4 +1,4 @@
-package com.shibana.post_service.config;
+package com.shibana.post_service.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shibana.post_service.dto.response.ApiResponse;
