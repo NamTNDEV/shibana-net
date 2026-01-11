@@ -3,6 +3,7 @@ package com.shibana.identity_service.service;
 import com.shibana.identity_service.dto.request.*;
 import com.shibana.identity_service.dto.request.*;
 import com.shibana.identity_service.dto.response.AuthResponse;
+import com.shibana.identity_service.entity.Permission;
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.enums.TokenType;
@@ -30,6 +31,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -77,31 +79,28 @@ public class AuthService {
     OutboundIdentityClient outboundIdentityClient;
     OutboundUserClient outboundUserClient;
 
-    private String buildScopeString(Set<Role> roles) {
-        if (roles == null || roles.isEmpty()) {
-            return "";
-        }
+    private String buildPermissionsClaimString(Set<Role> roles) {
+        return roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(Permission::getName)
+                .collect(Collectors.joining(" "));
+    }
 
-        StringJoiner joiner = new StringJoiner(" ");
-        roles.forEach(role -> {
-            joiner.add("ROLE_" + role.getName());
-            var permissions = role.getPermissions();
-            if (permissions != null) {
-                permissions.forEach(permission -> joiner.add(permission.getName()));
-            }
-        });
-        return joiner.toString();
+    private String buildRoleClaimString(Set<Role> roles) {
+        return String.join(" ", roles.stream().map(Role::getName).toList());
     }
 
     private String generateAccessToken(User user) {
         Instant now = Instant.now();
+
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
                 .issuer(ISSUER)
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(ACCESS_TOKEN_TTL)))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", buildScopeString(user.getRoles()))
+                .claim("role", buildRoleClaimString(user.getRoles()))
+                .claim("permissions", buildPermissionsClaimString(user.getRoles()))
                 .claim("typ", TokenType.ACCESS.name())
                 .claim("user_id", user.getId())
                 .build();

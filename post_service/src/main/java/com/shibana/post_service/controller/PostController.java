@@ -32,8 +32,8 @@ public class PostController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ApiResponse<List<PostResponse>> getAllByAdminPosts() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<PostResponse>> getAllPostsByAdmin() {
         log.info("Get All Posts Request...");
         return ApiResponse.<List<PostResponse>>builder()
                 .code(200)

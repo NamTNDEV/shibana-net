@@ -58,10 +58,22 @@ public class SecurityConfig {
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+        JwtGrantedAuthoritiesConverter roleConverter = new JwtGrantedAuthoritiesConverter();
+        roleConverter.setAuthorityPrefix("ROLE_");
+        roleConverter.setAuthoritiesClaimName("role");
+
+        JwtGrantedAuthoritiesConverter permissionsConverter = new JwtGrantedAuthoritiesConverter();
+        permissionsConverter.setAuthorityPrefix("");
+        permissionsConverter.setAuthoritiesClaimName("permissions");
+
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+                jwt -> {
+                    var authorities = roleConverter.convert(jwt);
+                    authorities.addAll(permissionsConverter.convert(jwt));
+                    return authorities;
+                }
+        );
         return jwtAuthenticationConverter;
     }
 

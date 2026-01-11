@@ -116,14 +116,26 @@ public class SecurityConfig {
 //        return new CorsFilter(urlBasedCorsConfigurationSource);
 //    }
 
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
-    }
+@Bean
+JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtGrantedAuthoritiesConverter roleConverter = new JwtGrantedAuthoritiesConverter();
+    roleConverter.setAuthorityPrefix("ROLE_");
+    roleConverter.setAuthoritiesClaimName("role");
+
+    JwtGrantedAuthoritiesConverter permissionsConverter = new JwtGrantedAuthoritiesConverter();
+    roleConverter.setAuthorityPrefix("");
+    roleConverter.setAuthoritiesClaimName("permissions");
+
+    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+            jwt -> {
+                var authorities = roleConverter.convert(jwt);
+                authorities.addAll(permissionsConverter.convert(jwt));
+                return authorities;
+            }
+    );
+    return jwtAuthenticationConverter;
+}
 
     @Bean
     JwtDecoder jwtDecoder() {

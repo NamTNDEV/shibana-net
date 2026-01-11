@@ -27,7 +27,7 @@ public class PostPolicy {
                 .anyMatch(
                         a ->
                                 a.getAuthority()
-                                        .equals("ROLE_" + RoleEnum.ADMIN)
+                                        .equals("ROLE_" + RoleEnum.ADMIN.name())
                 );
     }
 
