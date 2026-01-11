@@ -11,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,8 +27,7 @@ public class PostService {
         log.info("Post Service is up and running!");
     }
 
-    public PostResponse createPost(PostCreationRequest postCreationRequest, Jwt jwt) {
-        String authorId = jwt.getClaimAsString("user_id");
+    public PostResponse createPost(PostCreationRequest postCreationRequest, String authorId) {
         Post post = Post.builder()
                 .authorId(authorId)
                 .content(postCreationRequest.getContent())
@@ -52,8 +50,7 @@ public class PostService {
         postRepo.delete(post);
     }
 
-    public List<PostResponse> getPostsByAuthorId(Jwt jwt) {
-        String authorId = jwt.getClaim("user_id");
+    public List<PostResponse> getPostsByAuthorId(String authorId) {
         return postRepo.findByAuthorId(authorId).stream()
                 .map(postMapper::toPostResponse)
                 .toList();

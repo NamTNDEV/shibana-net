@@ -56,10 +56,11 @@ public class PostController {
     @GetMapping("/my-posts")
     public ApiResponse<List<PostResponse>> getAllMyPosts(@AuthenticationPrincipal Jwt jwt) {
         log.info("Get My Posts Request...");
+        String authorId = jwt.getClaimAsString("user_id");
         return ApiResponse.<List<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getPostsByAuthorId(jwt))
+                .data(postService.getPostsByAuthorId(authorId))
                 .build();
     }
 
@@ -69,10 +70,11 @@ public class PostController {
             @Valid @RequestBody PostCreationRequest postCreationRequest
     ) {
         log.info("Post Creation Request...");
+        String authorId = jwt.getClaimAsString("user_id");
         return ApiResponse.<PostResponse>builder()
                 .code(201)
                 .message("Post created successfully")
-                .data(postService.createPost(postCreationRequest, jwt))
+                .data(postService.createPost(postCreationRequest, authorId))
                 .build();
     }
 
