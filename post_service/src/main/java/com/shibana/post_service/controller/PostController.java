@@ -1,6 +1,7 @@
 package com.shibana.post_service.controller;
 
 import com.shibana.post_service.dto.response.ApiResponse;
+import com.shibana.post_service.dto.response.PageResponse;
 import com.shibana.post_service.dto.response.PostResponse;
 import com.shibana.post_service.dto.resquest.PostCreationRequest;
 import com.shibana.post_service.service.PostService;
@@ -8,6 +9,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -54,13 +60,27 @@ public class PostController {
     }
 
     @GetMapping("/my-posts")
-    public ApiResponse<List<PostResponse>> getAllMyPosts(@AuthenticationPrincipal Jwt jwt) {
+    public ApiResponse<PageResponse<PostResponse>> getAllMyPosts(
+            @PageableDefault(page = 0, size = 1, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         log.info("Get My Posts Request...");
         String authorId = jwt.getClaimAsString("user_id");
-        return ApiResponse.<List<PostResponse>>builder()
+        Slice<PostResponse> postSlice = postService.getPostsByAuthorId(authorId, pageable);
+        return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getPostsByAuthorId(authorId))
+                .data(
+                        PageResponse.<PostResponse>builder()
+                                .payload(postSlice.getContent())
+                                .page(pageable.getPageNumber())
+                                .size(pageable.getPageSize())
+                                .hasNext(postSlice.hasNext())
+//                                .totalElements(-1)
+//                                .totalPages(-1)
+                                .build()
+                )
                 .build();
     }
 

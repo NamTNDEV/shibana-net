@@ -11,6 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,10 +54,9 @@ public class PostService {
         postRepo.delete(post);
     }
 
-    public List<PostResponse> getPostsByAuthorId(String authorId) {
-        return postRepo.findByAuthorId(authorId).stream()
-                .map(postMapper::toPostResponse)
-                .toList();
+    public Slice<PostResponse> getPostsByAuthorId(String authorId, Pageable pageable) {
+        Slice<Post> postSlice = postRepo.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable);
+        return postSlice.map(postMapper::toPostResponse);
     }
 
     private Post findByPostId(String postId) {
