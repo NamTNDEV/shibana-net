@@ -11,6 +11,12 @@ spring:
       uri: ${MONGODB_URI}
       database: ${MONGODB_DATABASE}
 
+jwt:
+  issuer: com.shibana.identity_service
+  access:
+    secret-key: ${JWT_ACCESS_SECRET_KEY}
+
+
 logging:
   level:
     org.springframework: INFO

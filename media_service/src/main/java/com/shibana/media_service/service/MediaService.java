@@ -14,6 +14,5 @@ import org.springframework.stereotype.Service;
 public class MediaService {
     public void testService() {
         log.info("MediaService testService called");
-        throw new AppException(ErrorCode.UNKNOWN_ERROR);
     }
 }
