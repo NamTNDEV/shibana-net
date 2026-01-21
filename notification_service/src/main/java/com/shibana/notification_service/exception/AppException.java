@@ -1,4 +1,4 @@
-package com.shibana.notification_service.exeption;
+package com.shibana.notification_service.exception;
 
 import lombok.Builder;
 import lombok.Getter;

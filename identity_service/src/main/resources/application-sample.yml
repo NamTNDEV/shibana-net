@@ -1,29 +1,15 @@
-# =========================
-# ? Server
-# =========================
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
   servlet:
-    context-path: /api/v1/identity
+    context-path: /identity
 
-# =========================
-# ? Spring
-# =========================
 spring:
   application:
     name: identity_service
-
-  # =========================
-  # ?? Database (MySQL)
-  # =========================
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/identity_db}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:123123}
-
-  # =========================
-  # ? JPA / Hibernate
-  # =========================
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -31,53 +17,53 @@ spring:
     # properties:
     #   hibernate:
     #     format_sql: true
-
-  # =========================
-  # ? Redis
-  # =========================
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      username: ${REDIS_USERNAME:default}
-      password: ${REDIS_PASSWORD:}
-      timeout: ${REDIS_TIMEOUT:30s}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
       # ssl:
       #   enabled: true
+      timeout: 30s
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      allow.auto.create.topics: true # Công dụng: Tự động tạo topic nếu chưa tồn tại
 
-# =========================
-# ? JWT
-# =========================
 jwt:
-  issuer: ${JWT_ISSUER:com.shibana.identity_service}
-
+  issuer: com.shibana.identity_service
   access:
-    ttl: ${JWT_ACCESS_TTL:PT15M}
-    secret-key: ${JWT_ACCESS_SECRET}
-
+    ttl: PT15M # Theo tiêu chuẩn ISO-8601: PT15M = 15 phút
+    secret-key: ${JWT_ACCESS_SECRET_KEY} # Base64, >= 64B cho HS512
   refresh:
-    ttl: ${JWT_REFRESH_TTL:P7D}
-    secret-key: ${JWT_REFRESH_SECRET}
+    ttl: P7D # Theo tiêu chuẩn ISO-8601: P7D = 7 ngày
+    secret-key: ${JWT_REFRESH_SECRET_KEY} # Base64, >= 64B cho HS512
 
-# =========================
-# ? Logging
-# =========================
 logging:
   level:
     org.springframework: INFO
-    com.shibana.identity_service: DEBUG
+    com.namudev.identity_service: DEBUG
     io.lettuce.core: INFO
     org.springframework.data.redis: INFO
     # org.hibernate.SQL: DEBUG
     # org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     # org.springframework.orm.jpa: DEBUG
 
-# =========================
-# ? Google OAuth2
-# =========================
 google:
   oauth2:
-    client-id: ${GOOGLE_CLIENT_ID}
-    client-secret: ${GOOGLE_CLIENT_SECRET}
-    redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:3000/authenticate}
-    grant-type: authorization_code
+    client_id: ${GOOGLE_OAUTH2_CLIENT_ID}
+    client_secret: ${GOOGLE_OAUTH2_CLIENT_SECRET}
+    redirect_uri: ${GOOGLE_OAUTH2_REDIRECT_URI}
+    grant_type: authorization_code
+
+infra:
+  kafka:
+    producer:
+      name: identity-service
+    topics:
+      notification:
+        welcome-email-requested: welcome-email-requested

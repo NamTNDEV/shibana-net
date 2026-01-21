@@ -1,0 +1,46 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /notification
+
+spring:
+  application:
+    name: notification_service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: ${KAFKA_JSON_TRUSTED_PACKAGES}
+        spring.json.value.default.type: ${KAFKA_JSON_VALUE_DEFAULT_TYPE}
+
+jwt:
+  issuer: com.shibana.identity_service
+  access:
+    secret-key: ${JWT_ACCESS_SECRET_KEY}
+
+service:
+  email:
+    brevo:
+      api-key: ${BREVO_API_KEY}
+      sender-email: ${BREVO_SENDER_EMAIL}
+      sender-name: ShibaNa Net
+
+logging:
+  level:
+    org.springframework: INFO
+    com.shibana.notification_service: DEBUG
+    io.lettuce.core: INFO
+
+app:
+  kafka:
+    topics:
+      notification:
+        welcome-email-requested: welcome-email-requested

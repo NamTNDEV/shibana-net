@@ -1,21 +1,25 @@
 server:
-  port: ${SERVER_PORT:8081}
+  port: 8081
   servlet:
-    context-path: /api/v1/profile
+    context-path: /profile
 
 spring:
-  # =========================
-  #   App & Server
-  # =========================
   application:
     name: profile_service
 
-  # =========================
-  #   Database - Neo4j
-  # =========================
   neo4j:
-    uri: ${NEO4J_URI:bolt://localhost:7687}
+    uri: ${NEO4J_URI}
     authentication:
-      username: ${NEO4J_USERNAME:neo4j}
-      password: ${NEO4J_PASSWORD:neo4j}
+      username: ${NEO4J_USERNAME}
+      password: ${NEO4J_PASSWORD}
 
+jwt:
+  issuer: com.shibana.identity_service
+  access:
+    secret-key: ${JWT_ACCESS_SECRET_KEY}
+
+logging:
+  level:
+    org.springframework: INFO
+    com.shibana.profile_service: DEBUG
+    io.lettuce.core: INFO

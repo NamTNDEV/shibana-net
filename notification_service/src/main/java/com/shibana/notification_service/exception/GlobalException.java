@@ -1,4 +1,4 @@
-package com.shibana.notification_service.exeption;
+package com.shibana.notification_service.exception;
 
 import com.shibana.notification_service.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;

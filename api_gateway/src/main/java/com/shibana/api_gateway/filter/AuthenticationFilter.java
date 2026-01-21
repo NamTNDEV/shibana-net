@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 public class AuthenticationFilter implements GlobalFilter, Ordered {
     AuthService authService;
 
-    @Value("${app.api-prefix}")
+    @Value("${server.api-prefix}")
     @NonFinal
     String apiPrefix;
 
@@ -33,6 +33,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/auth/login",
             "/identity/auth/register",
             "/posts/health-check",
+            "/media/internal/health",
     };
 
     @Override

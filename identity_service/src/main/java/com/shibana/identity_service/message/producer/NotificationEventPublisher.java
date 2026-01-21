@@ -18,18 +18,20 @@ public class NotificationEventPublisher {
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @NonFinal
-    @Value("${app.kafka.topics.test}")
-    String TEST_TOPIC;
+    @Value("${infra.kafka.producer.name}")
+    String PRODUCER_NAME;
+
+    @NonFinal
+    @Value("${infra.kafka.topics.notification.welcome-email-requested}")
+    String WELCOME_EMAIL_TOPIC;
 
     public void publishWelcomeEmailEvent(
             String name,
             String email
     ) {
         WelcomeEmailRequestedEvent event = new WelcomeEmailRequestedEvent(name, email);
+        EventEnvelop<WelcomeEmailRequestedEvent> envelop = new EventEnvelop<>(PRODUCER_NAME, event);
 
-        String PRODUCER = "identity-service";
-        EventEnvelop<WelcomeEmailRequestedEvent> envelop = new EventEnvelop<>(PRODUCER, event);
-
-        kafkaTemplate.send(TEST_TOPIC, envelop);
+        kafkaTemplate.send(WELCOME_EMAIL_TOPIC, envelop);
     }
 }

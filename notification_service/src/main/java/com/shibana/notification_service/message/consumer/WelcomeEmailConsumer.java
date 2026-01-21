@@ -23,7 +23,7 @@ public class WelcomeEmailConsumer {
     ObjectMapper objectMapper;
     EmailService emailService;
 
-    @KafkaListener(topics = "${app.kafka.topics.test}")
+    @KafkaListener(topics = "${app.kafka.topics.notification.welcome-email-requested}")
     public void onMessage(EventEnvelop<?> envelop) {
         if(envelop == null) {
             log.warn("Received null envelop");

@@ -3,8 +3,8 @@ package com.shibana.notification_service.service;
 import com.shibana.notification_service.dto.request.BrevoSendEmailRequest;
 import com.shibana.notification_service.dto.request.BrevoSender;
 import com.shibana.notification_service.dto.request.SendEmailRequest;
-import com.shibana.notification_service.exeption.AppException;
-import com.shibana.notification_service.exeption.ErrorCode;
+import com.shibana.notification_service.exception.AppException;
+import com.shibana.notification_service.exception.ErrorCode;
 import com.shibana.notification_service.repo.httpClient.BrevoEmailClient;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,8 +12,6 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service

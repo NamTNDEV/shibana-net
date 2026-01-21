@@ -1,0 +1,24 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /posts
+
+spring:
+  application:
+    name: post_service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: Shibana-Net
+      auto-index-creation: true
+
+jwt:
+  issuer: com.shibana.identity_service
+  access:
+    secret-key: ${JWT_ACCESS_SECRET_KEY}
+
+logging:
+  level:
+    org.springframework: INFO
+    com.shibana.notification_service: DEBUG
+    io.lettuce.core: INFO

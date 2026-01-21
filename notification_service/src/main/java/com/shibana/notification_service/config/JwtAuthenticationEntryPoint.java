@@ -2,7 +2,7 @@ package com.shibana.notification_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shibana.notification_service.dto.response.ApiResponse;
-import com.shibana.notification_service.exeption.ErrorCode;
+import com.shibana.notification_service.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
