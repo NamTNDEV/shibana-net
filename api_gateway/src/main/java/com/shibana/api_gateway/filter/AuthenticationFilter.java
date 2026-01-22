@@ -33,7 +33,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/auth/login",
             "/identity/auth/register",
             "/posts/health-check",
-            "/media/internal/health",
+            "/media/static/.*",
     };
 
     @Override

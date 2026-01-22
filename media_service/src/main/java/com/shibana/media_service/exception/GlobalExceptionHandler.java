@@ -5,9 +5,12 @@ import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.Map;
 import java.util.Objects;
@@ -37,16 +40,38 @@ public class GlobalExceptionHandler {
         );
     }
 
-//    @ExceptionHandler(value = AccessDeniedException.class)
-//    public ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException exception) {
-//        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-//        return ResponseEntity.status(errorCode.getHttpStatus()).body(
-//                ApiResponse.<ErrorCode>builder()
-//                        .code(errorCode.getCode())
-//                        .message(errorCode.getMessage())
-//                        .build()
-//        );
-//    }
+    @ExceptionHandler(value = MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleMaxSizeException(MaxUploadSizeExceededException exception) {
+        ErrorCode errorCode = ErrorCode.FILE_TOO_LARGE;
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(
+                ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(value = MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleMissingServletRequestPartException(MissingServletRequestPartException exception) {
+        ErrorCode errorCode = ErrorCode.MISSING_FILE_PART;
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(
+                ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(
+                ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
+    }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException exception) {

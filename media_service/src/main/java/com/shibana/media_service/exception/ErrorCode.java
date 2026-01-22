@@ -16,6 +16,7 @@ public enum ErrorCode {
 
     METADATA_INVALID(4000, "Invalid metadata", HttpStatus.BAD_REQUEST),
     FILE_TOO_LARGE(4001, "File size exceeds the limit", HttpStatus.BAD_REQUEST),
+    MISSING_FILE_PART(4002, "Missing file part in the request", HttpStatus.BAD_REQUEST),
 
     FILE_NOT_FOUND(4040, "File not found", HttpStatus.NOT_FOUND),
 

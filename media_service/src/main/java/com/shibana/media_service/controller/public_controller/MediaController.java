@@ -5,8 +5,7 @@ import com.shibana.media_service.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -14,14 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class MediaController {
     MediaService mediaService;
-
-    @GetMapping("/health")
-    public ApiResponse<String> healthCheck() {
-        log.info("Health check endpoint called");
-        return ApiResponse.<String>builder()
+    @GetMapping("/static/{fileName:.+}")
+    public ApiResponse<Void> staticFile(@PathVariable String fileName) {
+        return ApiResponse.<Void>builder()
                 .code(200)
-                .message("Media Service is up and running")
-                .data("OK")
+                .message("Static file access endpoint placeholder")
                 .build();
     }
 }

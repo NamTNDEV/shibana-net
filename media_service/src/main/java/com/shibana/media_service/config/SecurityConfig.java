@@ -40,6 +40,10 @@ public class SecurityConfig {
             "/internal/**",
     };
 
+    String[] PRIVATE_URLS = {
+            "/internal/upload",
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -47,7 +51,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         request -> request
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/internal/**").permitAll()
+                                .requestMatchers(PUBLIC_URLS).permitAll()
+                                .requestMatchers(PRIVATE_URLS).authenticated()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(
