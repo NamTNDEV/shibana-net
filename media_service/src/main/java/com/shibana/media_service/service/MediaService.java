@@ -1,5 +1,6 @@
 package com.shibana.media_service.service;
 
+import com.shibana.media_service.dto.response.FileResponse;
 import com.shibana.media_service.dto.response.UploadedMediaResponse;
 import com.shibana.media_service.entity.Media;
 import com.shibana.media_service.enums.StorageType;
@@ -12,14 +13,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,15 +31,9 @@ public class MediaService {
     MediaRepo mediaRepo;
     StorageService storageService;
 
-
-
     @NonFinal
     @Value("${media.public-access-url}")
     String PUBLIC_ACCESS_URL;
-
-    public void testService() {
-        log.info("MediaService testService called");
-    }
 
     private String generateUniqueFileName(String originalFileName) {
         String fileExtension = StringUtils.getFilenameExtension(originalFileName);
@@ -78,5 +72,23 @@ public class MediaService {
                 .build();
     }
 
+    public FileResponse staticFile(String fileName) {
+        var uploadedMediaMetadata = mediaRepo.findByFileName(fileName)
+                .orElseThrow(() -> {
+                    log.error("Static file not found: {}", fileName);
+                    return new AppException(ErrorCode.FILE_NOT_FOUND);
+                });
+
+        try {
+            Resource fileResource = storageService.read(fileName);
+            return FileResponse.builder()
+                    .file(fileResource)
+                    .contentType(uploadedMediaMetadata.getContentType())
+                    .build();
+        } catch (IOException e) {
+            log.error("Error reading static file: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_NOT_FOUND);
+        }
+    }
 
 }

@@ -8,5 +8,5 @@ import java.nio.file.Path;
 
 public interface StorageService {
     void store(InputStream inputStream, String fileName) throws IOException;
-    Resource read(Path filePath) throws IOException;
+    Resource read(String filePath) throws IOException;
 }

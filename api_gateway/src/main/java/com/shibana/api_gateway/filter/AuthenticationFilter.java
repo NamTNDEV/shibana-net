@@ -32,21 +32,17 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     String[] excludedPaths = {
             "/identity/auth/login",
             "/identity/auth/register",
-            "/posts/health-check",
             "/media/static/.*",
     };
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("Authentication Filtering...");
         var request = exchange.getRequest();
         var path = request.getURI().getPath();
         if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
-        log.info("Request Path: {}", path);
         if (isMatchedExcludedPath(path)) {
-            log.info("Excluded Path Matched:: {}", path);
             return chain.filter(exchange);
         }
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -62,7 +58,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         }
         return authService.introspectToken(token).flatMap(response -> {
             if (response != null && response.getData() != null && response.getData().isValid()) {
-                log.info("Authentication Success");
                 return chain.filter(exchange);
             } else {
                 return Mono.error(new AppException(ErrorCode.UNAUTHENTICATED));

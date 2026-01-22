@@ -37,11 +37,8 @@ public class SecurityConfig {
     String ACCESS_SECRET_KEY_B64;
 
     String[] PUBLIC_URLS = {
-            "/internal/**",
-    };
-
-    String[] PRIVATE_URLS = {
-            "/internal/upload",
+            "/error",
+            "/static/**",
     };
 
     @Bean
@@ -52,7 +49,6 @@ public class SecurityConfig {
                         request -> request
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(PUBLIC_URLS).permitAll()
-                                .requestMatchers(PRIVATE_URLS).authenticated()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(

@@ -8,6 +8,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,9 @@ public class LocalStorageServiceImpl implements StorageService {
     }
 
     @Override
-    public Resource read(Path filePath) throws IOException {
-        Files.readAllBytes(filePath);
-        return null;
+    public Resource read(String fileName) throws IOException {
+        var filePath = getPublicUploadDir().resolve(fileName).normalize();
+        byte[] data = Files.readAllBytes(filePath);
+        return new ByteArrayResource(data);
     }
 }

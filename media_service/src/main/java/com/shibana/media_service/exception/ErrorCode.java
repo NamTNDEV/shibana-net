@@ -19,12 +19,13 @@ public enum ErrorCode {
     MISSING_FILE_PART(4002, "Missing file part in the request", HttpStatus.BAD_REQUEST),
 
     FILE_NOT_FOUND(4040, "File not found", HttpStatus.NOT_FOUND),
+    RESOURCE_NOT_FOUND(4041, "Resource not found", HttpStatus.NOT_FOUND),
 
     UNSUPPORTED_MEDIA_TYPE(4150, "Unsupported file type", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
 
     UNKNOWN_ERROR(5000, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_UPLOAD_FAILED(5001, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_ERROR_CODE(5002, "Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR)
+    INVALID_ERROR_CODE(5002, "Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     int code;
