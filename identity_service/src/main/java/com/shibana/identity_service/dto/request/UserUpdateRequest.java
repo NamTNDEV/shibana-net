@@ -15,8 +15,5 @@ import java.util.Set;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserUpdateRequest {
-    String firstName;
-    String lastName;
-    LocalDate dob;
     Set<String> roles;
 }

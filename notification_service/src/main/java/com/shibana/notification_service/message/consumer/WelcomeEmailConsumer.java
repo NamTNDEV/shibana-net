@@ -35,11 +35,10 @@ public class WelcomeEmailConsumer {
                 .name(eventPayload.getName())
                 .build();
         SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
-                .htmlContent("<html><head>Welcome to ShibaNa Net</head><body><p>Hello,</p>This is my first transactional email sent from Brevo.</p></body></html>")
+                .htmlContent("<html><head>Welcome to ShibaNa Net</head><body><p>Hello" + recipient.getName() + ",</p>This is my first transactional email sent from Brevo.</p></body></html>")
                 .subject("Welcome to ShibaNa Net")
                 .recipientList(List.of(recipient))
                 .build();
-        log.info("Sending email to:: {}", eventPayload.getName());
         emailService.sendEmail(sendEmailRequest);
         log.info("Email sent successfully");
     }

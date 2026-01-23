@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @Setter
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileCreationRequest {
     String userId;
@@ -18,4 +19,5 @@ public class ProfileCreationRequest {
     LocalDate dob;
     String address;
     String phoneNumber;
+    String email;
 }

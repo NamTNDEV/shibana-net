@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 @Node("user_profiles")
 public class Profile {
@@ -25,9 +26,15 @@ public class Profile {
     @Property("user_id")
     String userId;
 
+    @Property("first_name")
     String firstName;
+
+    @Property("last_name")
     String lastName;
+
+    String avatar;
     LocalDate dob;
     String address;
     String phoneNumber;
+    String email;
 }

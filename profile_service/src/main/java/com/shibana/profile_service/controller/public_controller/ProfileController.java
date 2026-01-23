@@ -8,6 +8,8 @@ import lombok.experimental.FieldDefaults;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +37,16 @@ public class ProfileController {
                 .code(200)
                 .message("Profile retrieved successfully")
                 .data(profileService.getProfile(id))
+                .build();
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getClaim("user_id");
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("Profile retrieved successfully")
+                .data(profileService.getMe(userId))
                 .build();
     }
 }

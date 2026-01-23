@@ -1,5 +1,6 @@
 package com.shibana.identity_service.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -11,9 +12,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginRequest {
-    @NotBlank(message = "INVALID_CREDENTIALS")
-    private String username;
+    @Email(message = "INVALID_EMAIL")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    private String email;
 
-    @NotBlank(message = "INVALID_CREDENTIALS")
+    @NotBlank(message = "PASSWORD_REQUIRED")
     private String password;
 }

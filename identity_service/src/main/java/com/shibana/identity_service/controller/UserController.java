@@ -92,13 +92,13 @@ public class UserController {
         return response;
     }
 
-    @GetMapping("/me")
-    ApiResponse<UserResponse> getUserInfo() {
-        UserResponse userResponse = userService.getUserInfo();
-        return ApiResponse.<UserResponse>builder()
-                .code(200)
-                .data(userResponse)
-//                .message("User info fetched successfully.")
-                .build();
-    }
+//    @GetMapping("/me")
+//    ApiResponse<UserResponse> getUserInfo() {
+//        UserResponse userResponse = userService.getUserInfo();
+//        return ApiResponse.<UserResponse>builder()
+//                .code(200)
+//                .data(userResponse)
+////                .message("User info fetched successfully.")
+//                .build();
+//    }
 }

@@ -3,7 +3,6 @@ package com.shibana.identity_service.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -14,9 +13,6 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
     String id;
-    String username;
-    String firstName;
-    String lastName;
-    LocalDate dob;
+    String email;
     Set<RoleResponse> roles;
 }

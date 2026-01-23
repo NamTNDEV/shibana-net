@@ -49,13 +49,13 @@ public class UserService {
         return userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public User getUserByUsername(String username) {
-        return userRepo.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    public User getUserByEmail(String email) {
+        return userRepo.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Transactional
     public User createUser(UserCreationRequest userRequest) {
-        if (userRepo.existsByUsername(userRequest.getUsername())) {
+        if (userRepo.existsByEmail(userRequest.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = userMapper.toUser(userRequest);
@@ -71,14 +71,19 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        ProfileCreationRequest profileCreationRequest = profileMapper.toProfileCreationRequest(user);
-        profileCreationRequest.setUserId(user.getId());
-        var profileResponse = profileClient.createProfile(profileCreationRequest);
-        log.info("Profile Response: {}", profileResponse);
+        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
+                .userId(user.getId())
+                .firstName(userRequest.getFirstName())
+                .lastName(userRequest.getLastName())
+                .dob(userRequest.getDob())
+                .email(userRequest.getEmail())
+                .build();
 
+        profileClient.createProfile(profileCreationRequest);
         notificationEventPublisher.publishWelcomeEmailEvent(
-                user.getUsername(),
-                userRequest.getUsername() + "@yopmail.com"
+//                user.getUsername(),
+                "Hello World !!!",
+                userRequest.getEmail()
         );
 
         return user;
@@ -102,14 +107,13 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-    public UserResponse getUserInfo() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("Username : {}", username);
-        User user = getUserByUsername(username);
-        return userMapper.toUserResponse(user);
-    }
+//    public UserResponse getUserInfo() {
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        User user = getUserByEmail(username);
+//        return userMapper.toUserResponse(user);
+//    }
 
-    public boolean isUserExist(String username) {
-        return userRepo.existsByUsername(username);
+    public boolean isUserExist(String email) {
+        return userRepo.existsByEmail(email);
     }
 }

@@ -52,6 +52,16 @@ public class ProfileService {
         return profileMapper.toProfileResponse(profile);
     }
 
+    public ProfileResponse getMe (String userId) {
+        Profile profile = profileRepo.findByUserId(userId).orElseThrow(
+                () -> {
+                    log.error("Profile with userId {} not found", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                }
+        );
+        return profileMapper.toProfileResponse(profile);
+    }
+
     public void deleteProfile(String id) {
         profileRepo.deleteById(id);
     }

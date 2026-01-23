@@ -8,6 +8,7 @@ import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.AuthResponse;
 import com.shibana.identity_service.dto.response.IntrospectResponse;
 import com.shibana.identity_service.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +24,7 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/register")
-    public ApiResponse<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
         return ApiResponse.<AuthResponse>builder()
                 .code(201)
                 .message("Registration successful")
@@ -32,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         return ApiResponse.<AuthResponse>builder()
                 .code(200)
                 .message("Login successful")

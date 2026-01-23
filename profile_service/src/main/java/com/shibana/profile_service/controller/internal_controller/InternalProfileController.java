@@ -7,6 +7,8 @@ import com.shibana.profile_service.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -27,7 +29,9 @@ public class InternalProfileController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteProfile(@PathVariable String id) {
+    public ApiResponse<String> deleteProfile(
+            @PathVariable String id
+    ) {
         profileService.deleteProfile(id);
         return ApiResponse.<String>builder()
                 .code(200)

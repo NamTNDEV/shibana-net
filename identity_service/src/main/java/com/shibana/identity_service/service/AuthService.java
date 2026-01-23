@@ -94,7 +94,7 @@ public class AuthService {
         Instant now = Instant.now();
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(user.getEmail())
                 .issuer(ISSUER)
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(ACCESS_TOKEN_TTL)))
@@ -109,7 +109,7 @@ public class AuthService {
 
     private String generateRefreshToken(User user) {
         Instant now = Instant.now();
-        JWTClaimsSet claims = new JWTClaimsSet.Builder().subject(user.getUsername()).issuer(ISSUER).issueTime(Date.from(now)).expirationTime(Date.from(now.plus(REFRESH_TOKEN_TTL))).jwtID(UUID.randomUUID().toString()).claim("typ", TokenType.REFRESH.name()).build();
+        JWTClaimsSet claims = new JWTClaimsSet.Builder().subject(user.getEmail()).issuer(ISSUER).issueTime(Date.from(now)).expirationTime(Date.from(now.plus(REFRESH_TOKEN_TTL))).jwtID(UUID.randomUUID().toString()).claim("typ", TokenType.REFRESH.name()).build();
         return signHS512Token(claims, REFRESH_SECRET_KEY_B64);
     }
 
@@ -217,7 +217,7 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
-        User user = userService.getUserByUsername(loginRequest.getUsername());
+        User user = userService.getUserByEmail(loginRequest.getEmail());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isPasswordMatching = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
         if (!isPasswordMatching) {
@@ -229,10 +229,9 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest registerRequest) {
-        log.info("::: Processing user registration for username :: {}", registerRequest.getUsername());
         User newUser = userService.createUser(
                 UserCreationRequest.builder()
-                        .username(registerRequest.getUsername())
+                        .email(registerRequest.getEmail())
                         .password(registerRequest.getPassword())
                         .firstName(registerRequest.getFirstName())
                         .lastName(registerRequest.getLastName())
@@ -277,10 +276,10 @@ public class AuthService {
             var expDate = signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
             tokenBlacklist.blacklist(jti, expDate);
 
-            String username = signedJWT.getJWTClaimsSet().getSubject();
-            User existedUser = userService.getUserByUsername(username);
+            String email = signedJWT.getJWTClaimsSet().getSubject();
+            User existedUser = userService.getUserByEmail(email);
             if (existedUser == null) {
-                log.error("Invalid username for token :: {}", username);
+                log.error("Invalid email for token :: {}", email);
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 
@@ -317,15 +316,12 @@ public class AuthService {
         if(!userService.isUserExist(userInfo.getEmail())) {
             onBoardedUser = userService.createUser(
                     UserCreationRequest.builder()
-                            .username(userInfo.getEmail())
+                            .email(userInfo.getEmail())
                             .password(UUID.randomUUID().toString()) // Random password since we don't use it
-                            .lastName(userInfo.getFamilyName())
-                            .firstName(userInfo.getGivenName())
-                            .dob(LocalDate.of(1970, 1, 1)) // Default DOB
                             .build()
             );
         } else {
-            onBoardedUser = userService.getUserByUsername(userInfo.getEmail());
+            onBoardedUser = userService.getUserByEmail(userInfo.getEmail());
         }
 
         String accessToken = generateAccessToken(onBoardedUser);

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -15,26 +14,19 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@ToString
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
+    @NotNull
     @Column(unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
-    String username;
-
-    String password;
-
-    @Column(name = "first_name")
-    String firstName;
-
-    @Column(name = "last_name")
-    String lastName;
+    String email;
 
     @NotNull
-    LocalDate dob;
+    String password;
 
     @ManyToMany
     @JoinTable(

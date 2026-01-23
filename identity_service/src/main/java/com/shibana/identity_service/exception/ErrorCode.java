@@ -9,6 +9,11 @@ import org.springframework.http.HttpStatus;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     MALFORMED_TOKEN(4000, "Malformed or unreadable token", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL(4001, "Invalid email format", HttpStatus.BAD_REQUEST),
+    EMAIL_REQUIRED(4002, "Email is required", HttpStatus.BAD_REQUEST),
+    PASSWORD_REQUIRED(4003, "Password is required", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(4004, "Password must be at least 6 characters", HttpStatus.BAD_REQUEST),
+    INCORRECT_PASSWORD(4005, "Incorrect password", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN(4011, "Invalid token", HttpStatus.UNAUTHORIZED),
@@ -21,7 +26,7 @@ public enum ErrorCode {
 
     UNAUTHORIZED(4030, "Unauthorized", HttpStatus.FORBIDDEN),
 
-    USER_EXISTED(4090, "Username already exists", HttpStatus.CONFLICT),
+    USER_EXISTED(4090, "Email already exists", HttpStatus.CONFLICT),
     ROLE_ALREADY_EXISTS(4091, "Role already exists", HttpStatus.CONFLICT),
     PERMISSION_ALREADY_EXISTS(4092, "Permission already exists", HttpStatus.CONFLICT),
 

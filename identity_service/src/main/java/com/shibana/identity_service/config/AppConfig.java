@@ -2,6 +2,7 @@ package com.shibana.identity_service.config;
 
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
+import com.shibana.identity_service.enums.RoleEnum;
 import com.shibana.identity_service.repository.PermissionRepo;
 import com.shibana.identity_service.repository.RoleRepo;
 import com.shibana.identity_service.repository.UserRepo;
@@ -27,7 +28,8 @@ import java.util.Set;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AppConfig {
-    static final String ADMIN = "admin";
+    static final String ADMIN_EMAIL = "admin312@yopmail.com";
+    static final String ADMIN_PASSWORD = "admin312";
 
     PasswordEncoder passwordEncoder;
     RedisTestService redisTestService;
@@ -37,7 +39,6 @@ public class AppConfig {
         return args -> {
             try {
                 var pong = srt.execute((RedisCallback<Object>) RedisConnectionCommands::ping);
-                System.out.println("Redis PING => " + pong);
 //                redisTestService.testBasicOps();
             } catch (Exception e) {
                 System.err.println("❌ Redis connect failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
@@ -48,12 +49,12 @@ public class AppConfig {
     @Bean
     public ApplicationRunner applicationRunner(UserRepo userRepo, RoleRepo roleRepo, PermissionRepo permissionRepo) {
         return args -> {
-            if (userRepo.findByUsername(ADMIN).isPresent()) {
-                log.warn("User with name {} already exists", ADMIN);
+            if (userRepo.findByEmail(ADMIN_EMAIL).isPresent()) {
+                log.warn("User with name {} already exists", ADMIN_EMAIL);
                 return;
             }
             var allPermissions = permissionRepo.findAll();
-            var adminRole = roleRepo.findByName("ADMIN").map(
+            var adminRole = roleRepo.findByName(RoleEnum.ADMIN.name()).map(
                     r -> {
                         if (r.getPermissions() == null) {
                             r.setPermissions(new HashSet<>(allPermissions));
@@ -75,13 +76,12 @@ public class AppConfig {
 
 
             var userAdmin = User.builder()
-                    .username(ADMIN)
-                    .password(passwordEncoder.encode(ADMIN))
-                    .dob(LocalDate.of(2000, 1, 1))
+                    .email(ADMIN_EMAIL)
+                    .password(passwordEncoder.encode(ADMIN_PASSWORD))
                     .roles(roles)
                     .build();
             userRepo.save(userAdmin);
-            log.info("Admin user created with username: {} and password: {}", ADMIN, ADMIN);
+            log.info("Admin user created with username: {} and password: {}", ADMIN_EMAIL, ADMIN_PASSWORD);
         };
     }
 }

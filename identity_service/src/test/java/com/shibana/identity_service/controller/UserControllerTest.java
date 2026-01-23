@@ -46,27 +46,18 @@ public class UserControllerTest {
         LocalDate date = LocalDate.of(2002, 1, 3);
         user = User.builder()
                 .id("user-id-123")
-                .username("namudev")
+                .email("namudev@gmail.com")
                 .password("password")
-                .firstName("Namu")
-                .lastName("Dev")
-                .dob(date)
                 .build();
 
         userCreationRequest = UserCreationRequest.builder()
-                .username("namudev")
+                .email("namudev@gmail.com")
                 .password("password")
-                .firstName("Namu")
-                .lastName("Dev")
-                .dob(date)
                 .build();
 
         userResponse = UserResponse.builder()
                 .id("user-id-123")
-                .username("namudev")
-                .firstName("Namu")
-                .lastName("Dev")
-                .dob(date)
+                .email("namudev@gmail.com")
                 .build();
     }
 
@@ -76,8 +67,8 @@ public class UserControllerTest {
         Mockito.when(userMapper.toUserResponse(any(User.class))).thenReturn(userResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(userCreationRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userCreationRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(201))
@@ -87,14 +78,12 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.lastName").value("Dev"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.dob").value("2002-01-03"));
     }
+
     @Test
     void addUser_usernameInvalid_BadRequest() throws Exception {
         UserCreationRequest invalidRequest = UserCreationRequest.builder()
-                .username("") // Invalid: empty username
+                .email("") // Invalid: empty username
                 .password("password")
-                .firstName("Namu")
-                .lastName("Dev")
-                .dob(LocalDate.of(2002, 1, 3))
                 .build();
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")

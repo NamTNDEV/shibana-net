@@ -37,14 +37,13 @@ import java.util.List;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
     String[] PUBLIC_URLS = {
-            "/users/hello-world",
-            "/users/me",
             "/auth/register",
             "/auth/login",
             "/auth/introspect",
             "/auth/refresh-token",
             "/auth/outbound/authenticate",
             "/users/**",
+            "/error"
     };
 
     String[] PRIVATE_URLS = {
