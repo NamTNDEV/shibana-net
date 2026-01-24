@@ -1,5 +1,7 @@
 package com.shibana.profile_service.controller.public_controller;
 
+import com.shibana.profile_service.dto.request.AvatarUpdateRequest;
+import com.shibana.profile_service.dto.request.ProfileUpdateRequest;
 import com.shibana.profile_service.dto.response.ApiResponse;
 import com.shibana.profile_service.dto.response.ProfileResponse;
 import com.shibana.profile_service.service.ProfileService;
@@ -49,4 +51,31 @@ public class ProfileController {
                 .data(profileService.getMe(userId))
                 .build();
     }
+
+    @PutMapping("/me")
+    public ApiResponse<ProfileResponse> updateProfile(
+            @RequestBody ProfileUpdateRequest profileUpdateRequest,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String userId = jwt.getClaim("user_id");
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("Profile updated successfully")
+                .data(profileService.updateMe(userId, profileUpdateRequest))
+                .build();
+    }
+
+    @PatchMapping("/me/avatar")
+    public ApiResponse<ProfileResponse> updateAvatar(
+            @RequestBody AvatarUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String userId = jwt.getClaim("user_id");
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("Avatar updated successfully")
+                .data(profileService.updateAvatar(userId, request))
+                .build();
+    }
+
 }

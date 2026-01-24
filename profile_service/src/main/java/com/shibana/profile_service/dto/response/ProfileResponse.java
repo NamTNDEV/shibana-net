@@ -19,4 +19,5 @@ public class ProfileResponse {
     String phoneNumber;
     String userId;
     String email;
+    String avatar;
 }

@@ -33,7 +33,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/auth/login",
             "/identity/auth/register",
             "/media/static/.*",
-            "/profile/me",
+            "/profile/me/.*",
     };
 
     @Override
