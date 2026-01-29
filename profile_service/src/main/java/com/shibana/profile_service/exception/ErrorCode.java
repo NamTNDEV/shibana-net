@@ -9,15 +9,13 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
-    UNAUTHENTICATED(4010, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
-    UNAUTHORIZED(4030, "Forbidden", HttpStatus.FORBIDDEN),
+    FORBIDDEN(4030105, "profile-service:: You do not have permission", HttpStatus.FORBIDDEN),
 
-    INVALID_REQUEST(4000, "Invalid request", HttpStatus.BAD_REQUEST),
+    PROFILE_NOT_FOUND(4040105, "profile-service:: Profile not found", HttpStatus.NOT_FOUND),
 
-    UNKNOWN_ERROR(5000, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
-
-    PROFILE_NOT_FOUND(4040, "Profile not found", HttpStatus.NOT_FOUND),
+    INTERNAL_SERVER_ERROR(5000105, "profile-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     int code;

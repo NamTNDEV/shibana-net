@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<ApiResponse<ErrorCode>> handleRuntimeException(RuntimeException exception) {
-        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(errorCode.getHttpStatus()).body(
                 ApiResponse.<ErrorCode>builder()
                         .code(errorCode.getCode())
@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        ErrorCode errorCode = ErrorCode.FORBIDDEN;
         return ResponseEntity.status(errorCode.getHttpStatus()).body(
                 ApiResponse.<ErrorCode>builder()
                         .code(errorCode.getCode())

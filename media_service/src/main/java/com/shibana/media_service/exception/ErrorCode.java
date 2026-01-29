@@ -10,22 +10,22 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
-    UNAUTHENTICATED(4010, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    FILE_TOO_LARGE(4000103, "media-service:: File size exceeds the limit", HttpStatus.BAD_REQUEST),
+    METADATA_INVALID(4000203, "media-service:: Invalid metadata", HttpStatus.BAD_REQUEST),
+    MISSING_FILE_PART(4000303, "media-service:: Missing file part in the request", HttpStatus.BAD_REQUEST),
 
-    UNAUTHORIZED(4030, "Forbidden", HttpStatus.FORBIDDEN),
+    UNAUTHENTICATED(4010103, "media-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
-    METADATA_INVALID(4000, "Invalid metadata", HttpStatus.BAD_REQUEST),
-    FILE_TOO_LARGE(4001, "File size exceeds the limit", HttpStatus.BAD_REQUEST),
-    MISSING_FILE_PART(4002, "Missing file part in the request", HttpStatus.BAD_REQUEST),
+    FORBIDDEN(4030103, "media-service:: You do not have permission", HttpStatus.FORBIDDEN),
 
-    FILE_NOT_FOUND(4040, "File not found", HttpStatus.NOT_FOUND),
-    RESOURCE_NOT_FOUND(4041, "Resource not found", HttpStatus.NOT_FOUND),
+    FILE_NOT_FOUND(4040103, "media-service:: File not found", HttpStatus.NOT_FOUND),
+    RESOURCE_NOT_FOUND(4040203, "media-service:: Resource not found", HttpStatus.NOT_FOUND),
 
-    UNSUPPORTED_MEDIA_TYPE(4150, "Unsupported file type", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    UNSUPPORTED_MEDIA_TYPE(4150103, "media-service:: Unsupported file type", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
 
-    UNKNOWN_ERROR(5000, "Unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_UPLOAD_FAILED(5001, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_ERROR_CODE(5002, "Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
+    INTERNAL_SERVER_ERROR(5000103, "media-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_UPLOAD_FAILED(5000203, "media-service:: Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_ERROR_CODE(5000303, "media-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     int code;

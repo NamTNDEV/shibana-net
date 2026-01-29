@@ -10,9 +10,10 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public enum ErrorCode {
-    UNAUTHENTICATED(4010, "Unauthenticated", HttpStatus.UNAUTHORIZED),
-    INVALID_AUTH_HEADER(4011, "Invalid Authorization header", HttpStatus.UNAUTHORIZED),
-    INTERNAL_SERVER_ERROR(5000, "An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNAUTHENTICATED(4010101, "api-gateway:: Unauthenticated", HttpStatus.UNAUTHORIZED),
+    INVALID_AUTH_HEADER(4010201, "api-gateway:: Invalid Authorization header", HttpStatus.UNAUTHORIZED),
+
+    INTERNAL_SERVER_ERROR(5000101, "api-gateway:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     int code;
