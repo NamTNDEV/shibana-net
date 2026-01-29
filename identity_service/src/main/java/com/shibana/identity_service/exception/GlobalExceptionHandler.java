@@ -29,8 +29,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException exception) {
         ApiResponse<Void> response = new ApiResponse<>();
-        response.setCode(ErrorCode.UNKNOWN_ERROR.getCode());
-        response.setMessage(ErrorCode.UNKNOWN_ERROR.getMessage());
+        response.setCode(ErrorCode.INTERNAL_SERVER_ERROR.getCode());
+        response.setMessage(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        ErrorCode errorCode = ErrorCode.FORBIDDEN;
         return ResponseEntity.status(errorCode.getHttpStatus()).body(
                 ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
@@ -67,11 +67,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = FeignException.class)
     public ResponseEntity<ApiResponse<Void>> handleFeignException(FeignException exception) {
         ApiResponse<Void> response = new ApiResponse<>();
-        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         if (exception.status() == HttpStatus.UNAUTHORIZED.value()) {
             errorCode = ErrorCode.UNAUTHENTICATED;
         } else if (exception.status() == HttpStatus.FORBIDDEN.value()) {
-            errorCode = ErrorCode.UNAUTHORIZED;
+            errorCode = ErrorCode.FORBIDDEN;
         }
         response.setCode(errorCode.getCode());
         response.setMessage(errorCode.getMessage());

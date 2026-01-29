@@ -31,7 +31,7 @@ public class UserController {
 
     @GetMapping("/hello-world")
     ApiResponse<String> helloWorld() {
-        throw new AppException(ErrorCode.UNKNOWN_ERROR);
+        throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
 //        return ApiResponse.<String>builder()
 //                .code(200)
 //                .data("Hello, World!")

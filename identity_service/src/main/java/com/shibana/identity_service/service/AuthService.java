@@ -134,7 +134,7 @@ public class AuthService {
 
             if (!JWSAlgorithm.HS512.equals(alg)) {
                 log.error(":: Invalid JWT algorithm ::");
-                throw new AppException(ErrorCode.INVALID_TOKEN);
+                throw new AppException(ErrorCode.INVALID_AUTH_HEADER);
             }
 
             // 2. Signature
@@ -189,7 +189,7 @@ public class AuthService {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error validating token: {}", e.getMessage());
-            throw new AppException(ErrorCode.UNKNOWN_ERROR);
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

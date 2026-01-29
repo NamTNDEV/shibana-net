@@ -38,7 +38,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             String errorCodeStr = oauth2Exception.getError().getErrorCode();
             errorCode = switch (errorCodeStr) {
                 case "token_invalidated" -> ErrorCode.TOKEN_INVALIDATED;
-                case "invalid_token" -> ErrorCode.INVALID_TOKEN;
+                case "invalid_token" -> ErrorCode.INVALID_AUTH_HEADER;
                 default -> ErrorCode.UNAUTHENTICATED;
             };
         }
