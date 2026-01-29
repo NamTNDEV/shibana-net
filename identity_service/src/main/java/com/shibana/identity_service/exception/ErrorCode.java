@@ -30,9 +30,9 @@ public enum ErrorCode {
     ROLE_ALREADY_EXISTS(4091, "Role already exists", HttpStatus.CONFLICT),
     PERMISSION_ALREADY_EXISTS(4092, "Permission already exists", HttpStatus.CONFLICT),
 
-    USER_NOT_FOUND(4030, "User not found", HttpStatus.NOT_FOUND),
-    PERMISSION_NOT_FOUND(4031, "Permission not found", HttpStatus.NOT_FOUND),
-    ROLE_NOT_FOUND(4032, "Role not found", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND(4040, "User not found", HttpStatus.NOT_FOUND),
+    PERMISSION_NOT_FOUND(4041, "Permission not found", HttpStatus.NOT_FOUND),
+    ROLE_NOT_FOUND(4042, "Role not found", HttpStatus.NOT_FOUND),
 
     UNKNOWN_ERROR(5000, "An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5001, "Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),

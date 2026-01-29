@@ -32,7 +32,7 @@ public class GlobalGatewayExceptionHandler implements ErrorWebExceptionHandler {
         }
 
         log.error("Gateway unknown exception", ex);
-        return ErrorCode.UNKNOWN_ERROR;
+        return ErrorCode.INTERNAL_SERVER_ERROR;
     }
 
     @Override

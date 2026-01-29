@@ -32,6 +32,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     String[] excludedPaths = {
             "/identity/auth/login",
             "/identity/auth/register",
+            "/identity/users/hello-world",
             "/media/static/.*",
             "/profile/me/.*",
     };

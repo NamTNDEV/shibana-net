@@ -5,6 +5,8 @@ import com.shibana.identity_service.dto.request.UserUpdateRequest;
 import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
+import com.shibana.identity_service.exception.AppException;
+import com.shibana.identity_service.exception.ErrorCode;
 import com.shibana.identity_service.mapper.UserMapper;
 import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.service.UserService;
@@ -26,15 +28,15 @@ import java.util.List;
 public class UserController {
     UserService userService;
     UserMapper userMapper;
-    NotificationEventPublisher notificationEventPublisher;
 
     @GetMapping("/hello-world")
-    public String helloWorld() {
-        notificationEventPublisher.publishWelcomeEmailEvent(
-                "Shibana Test",
-                "shibanatest@yopmail.com"
-        );
-        return "Hello, World!";
+    ApiResponse<String> helloWorld() {
+        throw new AppException(ErrorCode.UNKNOWN_ERROR);
+//        return ApiResponse.<String>builder()
+//                .code(200)
+//                .data("Hello, World!")
+//                .message("Service is up and running.")
+//                .build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
