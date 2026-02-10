@@ -17,4 +17,6 @@ public class ProfileUpdateRequest {
     String lastName;
     String address;
     LocalDate dob;
+    String phoneNumber;
+    String bio;
 }

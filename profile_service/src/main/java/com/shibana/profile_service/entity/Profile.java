@@ -1,5 +1,6 @@
 package com.shibana.profile_service.entity;
 
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
@@ -33,8 +34,12 @@ public class Profile {
     String lastName;
 
     String avatar;
+    String cover;
+
+    @Size(max = 160, message = "INVALID_BIO_LENGTH")
+    String bio;
+
     LocalDate dob;
     String address;
     String phoneNumber;
-    String email;
 }

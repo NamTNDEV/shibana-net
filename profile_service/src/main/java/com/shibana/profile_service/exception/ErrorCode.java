@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
+    INVALID_BIO_LENGTH(4000105, "profile-service:: Bio length is not valid", HttpStatus.BAD_REQUEST),
+
     UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
     FORBIDDEN(4030105, "profile-service:: You do not have permission", HttpStatus.FORBIDDEN),

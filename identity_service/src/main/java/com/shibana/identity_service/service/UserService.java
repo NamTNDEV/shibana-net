@@ -3,15 +3,12 @@ package com.shibana.identity_service.service;
 import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
-import com.shibana.identity_service.dto.response.ApiResponse;
 import com.shibana.identity_service.dto.response.GetMeResponse;
 import com.shibana.identity_service.dto.response.ProfileResponse;
-import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.exception.AppException;
 import com.shibana.identity_service.exception.ErrorCode;
-import com.shibana.identity_service.mapper.ProfileMapper;
 import com.shibana.identity_service.mapper.UserMapper;
 import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.repository.UserRepo;
@@ -22,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.shibana.identity_service.enums.RoleEnum;
@@ -84,7 +80,6 @@ public class UserService {
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
                 .dob(userRequest.getDob())
-                .email(userRequest.getEmail())
                 .build();
 
         profileClient.createProfile(profileCreationRequest);
