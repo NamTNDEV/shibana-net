@@ -3,6 +3,9 @@ package com.shibana.identity_service.service;
 import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
+import com.shibana.identity_service.dto.response.ApiResponse;
+import com.shibana.identity_service.dto.response.GetMeResponse;
+import com.shibana.identity_service.dto.response.ProfileResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
@@ -37,7 +40,6 @@ public class UserService {
     UserRepo userRepo;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
-    ProfileMapper profileMapper;
     ProfileClient profileClient;
     NotificationEventPublisher notificationEventPublisher;
 
@@ -60,8 +62,14 @@ public class UserService {
         }
         User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         Set<Role> roles = new HashSet<>();
-        roles.add(roleService.getRoleByName(RoleEnum.USER.name()));
+        Set<Role> creationRoles = userRequest.getRoles();
+        if (creationRoles != null && !creationRoles.isEmpty()) {
+            roles.addAll(creationRoles);
+        } else {
+            roles.add(roleService.getRoleByName(RoleEnum.USER.name()));
+        }
         user.setRoles(roles);
 
         try {
@@ -81,8 +89,7 @@ public class UserService {
 
         profileClient.createProfile(profileCreationRequest);
         notificationEventPublisher.publishWelcomeEmailEvent(
-//                user.getUsername(),
-                "Hello World !!!",
+                user.getUsername(),
                 userRequest.getEmail()
         );
 
@@ -107,11 +114,14 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-//    public UserResponse getUserInfo() {
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User user = getUserByEmail(username);
-//        return userMapper.toUserResponse(user);
-//    }
+    public GetMeResponse getUserInfo(String userId) {
+        User user = getUserById(userId);
+        ProfileResponse profileResponse = profileClient.getProfileByUserId(userId).getData();
+        return userMapper.toGetMeResponse(
+                user,
+                profileResponse
+        );
+    }
 
     public boolean isUserExist(String email) {
         return userRepo.existsByEmail(email);

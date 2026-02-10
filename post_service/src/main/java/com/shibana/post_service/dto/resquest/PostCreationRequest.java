@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PostCreationRequest {
-    @NotBlank(message = "CONTENT_NOT_NULL")
-    @Size(max = 5000, min = 1, message = "CONTENT_LENGTH_NOT_VALID")
+    @NotBlank(message = "CONTENT_REQUIRED")
+    @Size(max = 5000, min = 1, message = "INVALID_CONTENT_LENGTH")
     String content;
 }

@@ -7,8 +7,6 @@ import com.shibana.profile_service.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -25,6 +23,24 @@ public class InternalProfileController {
                 .code(201)
                 .message("Profile created successfully")
                 .data(profileService.createProfile(request))
+                .build();
+    }
+
+//    @GetMapping("/{id}")
+//    public ApiResponse<ProfileResponse> getProfile(@PathVariable String id) {
+//        return ApiResponse.<ProfileResponse>builder()
+//                .code(200)
+//                .message("Profile retrieved successfully")
+//                .data(profileService.getProfileById(id))
+//                .build();
+//    }
+
+    @GetMapping("/{userId}")
+    public ApiResponse<ProfileResponse> getProfileByUserId(@PathVariable String userId) {
+        return ApiResponse.<ProfileResponse>builder()
+                .code(200)
+                .message("Profile retrieved successfully")
+                .data(profileService.getInfo(userId))
                 .build();
     }
 

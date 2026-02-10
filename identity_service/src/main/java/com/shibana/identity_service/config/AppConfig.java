@@ -1,5 +1,6 @@
 package com.shibana.identity_service.config;
 
+import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.enums.RoleEnum;
@@ -7,6 +8,7 @@ import com.shibana.identity_service.repository.PermissionRepo;
 import com.shibana.identity_service.repository.RoleRepo;
 import com.shibana.identity_service.repository.UserRepo;
 import com.shibana.identity_service.service.RedisTestService;
+import com.shibana.identity_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +30,13 @@ import java.util.Set;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AppConfig {
-    static final String ADMIN_EMAIL = "admin312@yopmail.com";
-    static final String ADMIN_PASSWORD = "admin312";
+    static String ADMIN_EMAIL = "admin312@yopmail.com";
+    static String ADMIN_PASSWORD = "admin312";
+    static String ADMIN_USERNAME = "admin312";
 
     PasswordEncoder passwordEncoder;
     RedisTestService redisTestService;
+    UserService userService;
 
     @Bean
     CommandLineRunner redisPing(StringRedisTemplate srt) {
@@ -74,13 +78,18 @@ public class AppConfig {
             Set<Role> roles = new HashSet<>();
             roles.add(adminRole);
 
+            userService.createUser(
+                    UserCreationRequest.builder()
+                            .email(ADMIN_EMAIL)
+                            .username(ADMIN_USERNAME)
+                            .password(ADMIN_PASSWORD)
+                            .firstName("Admin 312")
+                            .lastName("")
+                            .roles(roles)
+                            .dob(LocalDate.of(1990, 1, 1))
+                            .build()
+            );
 
-            var userAdmin = User.builder()
-                    .email(ADMIN_EMAIL)
-                    .password(passwordEncoder.encode(ADMIN_PASSWORD))
-                    .roles(roles)
-                    .build();
-            userRepo.save(userAdmin);
             log.info("Admin user created with username: {} and password: {}", ADMIN_EMAIL, ADMIN_PASSWORD);
         };
     }

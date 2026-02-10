@@ -3,6 +3,7 @@ package com.shibana.identity_service.controller;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
 import com.shibana.identity_service.dto.response.ApiResponse;
+import com.shibana.identity_service.dto.response.GetMeResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.exception.AppException;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +32,13 @@ public class UserController {
     UserService userService;
     UserMapper userMapper;
 
-    @GetMapping("/hello-world")
-    ApiResponse<String> helloWorld() {
-        throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
-//        return ApiResponse.<String>builder()
-//                .code(200)
-//                .data("Hello, World!")
-//                .message("Service is up and running.")
-//                .build();
+    @PostMapping("/hello-world")
+    ApiResponse<Object> helloWorld(@RequestBody Object helloBody) {
+        return ApiResponse.<Object>builder()
+                .code(201)
+                .data(helloBody)
+                .message("Hello World executed successfully.")
+                .build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -94,13 +96,16 @@ public class UserController {
         return response;
     }
 
-//    @GetMapping("/me")
-//    ApiResponse<UserResponse> getUserInfo() {
-//        UserResponse userResponse = userService.getUserInfo();
-//        return ApiResponse.<UserResponse>builder()
-//                .code(200)
-//                .data(userResponse)
-////                .message("User info fetched successfully.")
-//                .build();
-//    }
+    @GetMapping("/me")
+    ApiResponse<GetMeResponse> getUserInfo(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String userId = jwt.getClaimAsString("user_id");
+        GetMeResponse userResponse = userService.getUserInfo(userId);
+        return ApiResponse.<GetMeResponse>builder()
+                .code(200)
+                .data(userResponse)
+//                .message("User info fetched successfully.")
+                .build();
+    }
 }

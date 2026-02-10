@@ -17,11 +17,11 @@ import java.time.LocalDate;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequest {
-    @Email(message = "INVALID_EMAIL")
-    @NotNull(message = "EMAIL_REQUIRED")
+    @Email(message = "INCORRECT_CREDENTIALS")
+    @NotNull(message = "INCORRECT_CREDENTIALS")
     String email;
 
-    @NotNull(message = "PASSWORD_REQUIRED")
+    @NotNull(message = "INCORRECT_CREDENTIALS")
     String password;
 
     String firstName;

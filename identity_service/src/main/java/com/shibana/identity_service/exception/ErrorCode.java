@@ -15,6 +15,8 @@ public enum ErrorCode {
     INVALID_PASSWORD(4000502, "identity-service:: Password must be at least 6 characters", HttpStatus.BAD_REQUEST),
     INCORRECT_PASSWORD(4000602, "identity-service:: Incorrect password", HttpStatus.BAD_REQUEST),
     INCORRECT_CREDENTIALS(4000702, "identity-service:: Email or password is incorrect", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(4000802, "identity-service:: Invalid token", HttpStatus.BAD_REQUEST),
+    INVALID_USERNAME(4000902, "identity-service:: Invalid username", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010102, "identity-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
     INVALID_AUTH_HEADER(4010202, "identity-service:: Invalid Authorization header", HttpStatus.UNAUTHORIZED),

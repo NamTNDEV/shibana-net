@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
+    CONTENT_REQUIRED(4000104, "post-service:: Bad request", HttpStatus.BAD_REQUEST),
+    INVALID_CONTENT_LENGTH(4000204, "post-service:: Content length is not valid", HttpStatus.BAD_REQUEST),
+
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
     FORBIDDEN(4030104, "post-service:: You do not have permission", HttpStatus.FORBIDDEN),

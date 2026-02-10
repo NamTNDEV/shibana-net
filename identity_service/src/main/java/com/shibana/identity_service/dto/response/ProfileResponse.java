@@ -1,16 +1,16 @@
-package com.shibana.profile_service.dto.response;
+package com.shibana.identity_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @ToString
-@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileResponse {
     String firstName;

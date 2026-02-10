@@ -12,10 +12,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginRequest {
-    @Email(message = "INVALID_EMAIL")
-    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "INCORRECT_CREDENTIALS")
+    @NotBlank(message = "INCORRECT_CREDENTIALS")
     private String email;
 
-    @NotBlank(message = "PASSWORD_REQUIRED")
+    @NotBlank(message = "INCORRECT_CREDENTIALS")
     private String password;
 }

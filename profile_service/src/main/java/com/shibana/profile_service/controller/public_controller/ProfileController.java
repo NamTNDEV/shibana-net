@@ -38,21 +38,21 @@ public class ProfileController {
         return ApiResponse.<ProfileResponse>builder()
                 .code(200)
                 .message("Profile retrieved successfully")
-                .data(profileService.getProfile(id))
+                .data(profileService.getProfileById(id))
                 .build();
     }
 
-    @GetMapping("/me")
+    @GetMapping("/info")
     public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getClaim("user_id");
         return ApiResponse.<ProfileResponse>builder()
                 .code(200)
                 .message("Profile retrieved successfully")
-                .data(profileService.getMe(userId))
+                .data(profileService.getInfo(userId))
                 .build();
     }
 
-    @PutMapping("/me")
+    @PutMapping("/info")
     public ApiResponse<ProfileResponse> updateProfile(
             @RequestBody ProfileUpdateRequest profileUpdateRequest,
             @AuthenticationPrincipal Jwt jwt
@@ -61,11 +61,11 @@ public class ProfileController {
         return ApiResponse.<ProfileResponse>builder()
                 .code(200)
                 .message("Profile updated successfully")
-                .data(profileService.updateMe(userId, profileUpdateRequest))
+                .data(profileService.updateInfo(userId, profileUpdateRequest))
                 .build();
     }
 
-    @PatchMapping("/me/avatar")
+    @PatchMapping("/info/avatar")
     public ApiResponse<ProfileResponse> updateAvatar(
             @RequestBody AvatarUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt

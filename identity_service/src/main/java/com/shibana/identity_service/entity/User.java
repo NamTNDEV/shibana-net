@@ -1,10 +1,14 @@
 package com.shibana.identity_service.entity;
 
+import com.shibana.identity_service.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.Set;
 
 @Entity
@@ -26,7 +30,23 @@ public class User {
     String email;
 
     @NotNull
+    @Column(unique = true)
+    String username;
+
+    @NotNull
     String password;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
+    Instant createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    Instant updatedAt;
 
     @ManyToMany
     @JoinTable(

@@ -221,7 +221,7 @@ public class AuthService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isPasswordMatching = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
         if (!isPasswordMatching) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.INCORRECT_CREDENTIALS);
         }
         String accessToken = generateAccessToken(user);
         String refreshToken = generateRefreshToken(user);

@@ -2,6 +2,8 @@ package com.shibana.identity_service.mapper;
 
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
+import com.shibana.identity_service.dto.response.GetMeResponse;
+import com.shibana.identity_service.dto.response.ProfileResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
 import org.mapstruct.Mapper;
@@ -17,4 +19,15 @@ public interface UserMapper {
     void updateUser(@MappingTarget User user, UserUpdateRequest userUpdateRequest);
 
     UserResponse toUserResponse(User user);
+
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "email", source = "user.email")
+    @Mapping(target = "roles", source = "user.roles")
+    @Mapping(target = "firstName", source = "profileResponse.firstName")
+    @Mapping(target = "lastName", source = "profileResponse.lastName")
+    @Mapping(target = "dob", source = "profileResponse.dob")
+    @Mapping(target = "address", source = "profileResponse.address")
+    @Mapping(target = "phoneNumber", source = "profileResponse.phoneNumber")
+    @Mapping(target = "avatar", source = "profileResponse.avatar")
+    GetMeResponse toGetMeResponse(User user, ProfileResponse profileResponse);
 }

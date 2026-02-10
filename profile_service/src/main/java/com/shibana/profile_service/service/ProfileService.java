@@ -46,7 +46,7 @@ public class ProfileService {
                 .toList();
     }
 
-    public ProfileResponse getProfile(String id) {
+    public ProfileResponse getProfileById(String id) {
         Profile profile = profileRepo.findById(id).orElseThrow(
                 () -> {
                     log.error("Profile with id {} not found", id);
@@ -56,12 +56,12 @@ public class ProfileService {
         return profileMapper.toProfileResponse(profile);
     }
 
-    public ProfileResponse getMe (String userId) {
+    public ProfileResponse getInfo (String userId) {
         Profile profile = findProfileByUserId(userId);
         return profileMapper.toProfileResponse(profile);
     }
 
-    public ProfileResponse updateMe(String userId, ProfileUpdateRequest request) {
+    public ProfileResponse updateInfo(String userId, ProfileUpdateRequest request) {
         Profile existingProfile = findProfileByUserId(userId);
         profileMapper.updateProfileFromRequest(existingProfile, request);
         Profile updatedProfile = profileRepo.save(existingProfile);
