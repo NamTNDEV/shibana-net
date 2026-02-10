@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
     RoleService roleService;
 
@@ -35,9 +36,7 @@ public class RoleController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('' + T(com.shibana.identity_service.enums.RoleEnum).ADMIN.name())")
     public ApiResponse<List<RoleResponse>> getListRole() {
-        log.info("Get all roles endpoint called");
         return ApiResponse.<List<RoleResponse>>builder()
                 .code(200)
                 .message("Roles retrieved successfully")

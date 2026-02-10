@@ -68,7 +68,7 @@ public class AppConfig {
                     }).orElseGet(
                     () -> roleRepo.save(
                             Role.builder()
-                                    .name("ADMIN")
+                                    .name(RoleEnum.ADMIN.name())
                                     .description("Administrator role with all permissions")
                                     .permissions(new HashSet<>(allPermissions))
                                     .build()

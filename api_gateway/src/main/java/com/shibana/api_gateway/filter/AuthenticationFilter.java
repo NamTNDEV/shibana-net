@@ -34,6 +34,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/auth/register",
             "/identity/auth/refresh-token",
             "/identity/users/hello-world",
+            "/identity/roles/.*",
+            "/identity/permissions/.*",
             "/media/static/.*",
             "/profile/me/.*",
     };

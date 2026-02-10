@@ -66,7 +66,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_URLS).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_URLS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
                         .requestMatchers(PRIVATE_URLS).hasRole("ADMIN")
                         .anyRequest().authenticated()
         );
@@ -122,8 +121,8 @@ JwtAuthenticationConverter jwtAuthenticationConverter() {
     roleConverter.setAuthoritiesClaimName("role");
 
     JwtGrantedAuthoritiesConverter permissionsConverter = new JwtGrantedAuthoritiesConverter();
-    roleConverter.setAuthorityPrefix("");
-    roleConverter.setAuthoritiesClaimName("permissions");
+    permissionsConverter.setAuthorityPrefix("");
+    permissionsConverter.setAuthoritiesClaimName("permissions");
 
     JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
     jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
