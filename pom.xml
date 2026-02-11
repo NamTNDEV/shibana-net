@@ -11,7 +11,7 @@
     <modules>
         <module>common</module>
         <module>identity_service</module>
-        <module>profile_service</module>
+        <module>social_service</module>
         <module>notification_service</module>
         <module>api_gateway</module>
     </modules>

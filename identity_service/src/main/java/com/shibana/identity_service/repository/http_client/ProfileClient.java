@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
-        name = "profile-service",
-        url = "http://localhost:8081/profile"
+        name = "social-service",
+        url = "http://localhost:8081/social/internal/profile"
 )
 public interface ProfileClient {
-    @PostMapping(value = "/internal/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<ProfileResponse> createProfile(@RequestBody ProfileCreationRequest request);
 
-    @GetMapping("/internal/{userId}")
+    @GetMapping("/{userId}")
     ApiResponse<ProfileResponse> getProfileByUserId(@PathVariable String userId);
 }

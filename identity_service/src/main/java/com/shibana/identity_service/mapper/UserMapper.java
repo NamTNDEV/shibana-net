@@ -22,6 +22,7 @@ public interface UserMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "email", source = "user.email")
+    @Mapping(target = "username", source = "user.username")
     @Mapping(target = "roles", source = "user.roles")
     @Mapping(target = "firstName", source = "profileResponse.firstName")
     @Mapping(target = "lastName", source = "profileResponse.lastName")
@@ -29,5 +30,7 @@ public interface UserMapper {
     @Mapping(target = "address", source = "profileResponse.address")
     @Mapping(target = "phoneNumber", source = "profileResponse.phoneNumber")
     @Mapping(target = "avatar", source = "profileResponse.avatar")
+    @Mapping(target = "cover", source = "profileResponse.cover")
+    @Mapping(target = "bio", source = "profileResponse.bio")
     GetMeResponse toGetMeResponse(User user, ProfileResponse profileResponse);
 }

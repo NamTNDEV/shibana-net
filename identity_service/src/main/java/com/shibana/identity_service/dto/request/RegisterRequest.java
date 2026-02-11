@@ -22,12 +22,17 @@ public class RegisterRequest {
     String email;
 
     @NotNull(message = "INCORRECT_CREDENTIALS")
+    @Size(min = 3, message = "INCORRECT_CREDENTIALS")
+    String username;
+
+    @NotNull(message = "INCORRECT_CREDENTIALS")
+    @Size(min = 6, message = "INCORRECT_CREDENTIALS")
     String password;
 
     String firstName;
     String lastName;
 
     @DobConstraint
-    @NotNull
+//    @NotNull
     LocalDate dob;
 }

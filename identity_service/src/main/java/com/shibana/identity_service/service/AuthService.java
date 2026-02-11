@@ -232,6 +232,7 @@ public class AuthService {
                 UserCreationRequest.builder()
                         .email(registerRequest.getEmail())
                         .password(registerRequest.getPassword())
+                        .username(registerRequest.getUsername())
                         .firstName(registerRequest.getFirstName())
                         .lastName(registerRequest.getLastName())
                         .dob(registerRequest.getDob())

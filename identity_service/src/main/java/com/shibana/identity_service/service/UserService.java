@@ -56,6 +56,11 @@ public class UserService {
         if (userRepo.existsByEmail(userRequest.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+
+        if(userRepo.existsByUsername(userRequest.getUsername())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
         User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

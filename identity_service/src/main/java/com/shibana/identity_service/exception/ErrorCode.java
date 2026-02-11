@@ -32,7 +32,7 @@ public enum ErrorCode {
     PERMISSION_NOT_FOUND(4040202, "identity-service:: Permission not found", HttpStatus.NOT_FOUND),
     ROLE_NOT_FOUND(4040302, "identity-service:: Role not found", HttpStatus.NOT_FOUND),
 
-    USER_EXISTED(4090102, "identity-service:: Email already exists", HttpStatus.CONFLICT),
+    USER_EXISTED(4090102, "identity-service:: Email or Username already exists", HttpStatus.CONFLICT),
     ROLE_ALREADY_EXISTS(4090202, "identity-service:: Role already exists", HttpStatus.CONFLICT),
     PERMISSION_ALREADY_EXISTS(4090302, "identity-service:: Permission already exists", HttpStatus.CONFLICT),
 

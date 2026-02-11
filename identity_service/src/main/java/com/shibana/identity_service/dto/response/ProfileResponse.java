@@ -20,5 +20,8 @@ public class ProfileResponse {
     String phoneNumber;
     String userId;
     String email;
+    String username;
     String avatar;
+    String bio;
+    String cover;
 }
