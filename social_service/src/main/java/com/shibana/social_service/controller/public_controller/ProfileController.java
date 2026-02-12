@@ -20,53 +20,30 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/profiles")
 public class ProfileController {
     ProfileService profileService;
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/")
-    public ApiResponse<List<ProfileResponse>> getAllProfiles() {
+    public ApiResponse<List<ProfileResponse>> getAll() {
         return ApiResponse.<List<ProfileResponse>>builder()
                 .code(200)
                 .message("Profiles retrieved successfully")
-                .data(profileService.getAllProfiles())
+                .data(profileService.getAll())
                 .build();
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<ProfileResponse> getProfile(@PathVariable String id) {
+    @GetMapping("/{username}")
+    public ApiResponse<ProfileResponse> getProfileByUsername(@PathVariable String username) {
         return ApiResponse.<ProfileResponse>builder()
                 .code(200)
                 .message("Profile retrieved successfully")
-                .data(profileService.getProfileById(id))
+                .data(profileService.getProfileByUsername(username))
                 .build();
     }
 
-    @GetMapping("/info")
-    public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getClaim("user_id");
-        return ApiResponse.<ProfileResponse>builder()
-                .code(200)
-                .message("Profile retrieved successfully")
-                .data(profileService.getInfo(userId))
-                .build();
-    }
-
-    @PutMapping("/info")
-    public ApiResponse<ProfileResponse> updateProfile(
-            @RequestBody ProfileUpdateRequest profileUpdateRequest,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        String userId = jwt.getClaim("user_id");
-        return ApiResponse.<ProfileResponse>builder()
-                .code(200)
-                .message("Profile updated successfully")
-                .data(profileService.updateInfo(userId, profileUpdateRequest))
-                .build();
-    }
-
-    @PatchMapping("/info/avatar")
+    @PatchMapping("/me/avatar")
     public ApiResponse<ProfileResponse> updateAvatar(
             @RequestBody AvatarUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt

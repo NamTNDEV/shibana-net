@@ -2,8 +2,8 @@ package com.shibana.identity_service.mapper;
 
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
-import com.shibana.identity_service.dto.response.GetMeResponse;
-import com.shibana.identity_service.dto.response.ProfileResponse;
+import com.shibana.identity_service.dto.response.MyAccountResponse;
+import com.shibana.identity_service.dto.response.ProfileMetadataResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
 import org.mapstruct.Mapper;
@@ -26,11 +26,6 @@ public interface UserMapper {
     @Mapping(target = "roles", source = "user.roles")
     @Mapping(target = "firstName", source = "profileResponse.firstName")
     @Mapping(target = "lastName", source = "profileResponse.lastName")
-    @Mapping(target = "dob", source = "profileResponse.dob")
-    @Mapping(target = "address", source = "profileResponse.address")
-    @Mapping(target = "phoneNumber", source = "profileResponse.phoneNumber")
     @Mapping(target = "avatar", source = "profileResponse.avatar")
-    @Mapping(target = "cover", source = "profileResponse.cover")
-    @Mapping(target = "bio", source = "profileResponse.bio")
-    GetMeResponse toGetMeResponse(User user, ProfileResponse profileResponse);
+    MyAccountResponse toGetMeResponse(User user, ProfileMetadataResponse profileResponse);
 }

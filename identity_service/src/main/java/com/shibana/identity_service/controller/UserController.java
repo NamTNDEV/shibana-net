@@ -3,13 +3,10 @@ package com.shibana.identity_service.controller;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
 import com.shibana.identity_service.dto.response.ApiResponse;
-import com.shibana.identity_service.dto.response.GetMeResponse;
+import com.shibana.identity_service.dto.response.MyAccountResponse;
 import com.shibana.identity_service.dto.response.UserResponse;
 import com.shibana.identity_service.entity.User;
-import com.shibana.identity_service.exception.AppException;
-import com.shibana.identity_service.exception.ErrorCode;
 import com.shibana.identity_service.mapper.UserMapper;
-import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -96,13 +93,13 @@ public class UserController {
         return response;
     }
 
-    @GetMapping("/me")
-    ApiResponse<GetMeResponse> getUserInfo(
+    @GetMapping("/me/account")
+    ApiResponse<MyAccountResponse> getMyAccount(
             @AuthenticationPrincipal Jwt jwt
     ) {
         String userId = jwt.getClaimAsString("user_id");
-        GetMeResponse userResponse = userService.getUserInfo(userId);
-        return ApiResponse.<GetMeResponse>builder()
+        MyAccountResponse userResponse = userService.getMyAccount(userId);
+        return ApiResponse.<MyAccountResponse>builder()
                 .code(200)
                 .data(userResponse)
 //                .message("User info fetched successfully.")

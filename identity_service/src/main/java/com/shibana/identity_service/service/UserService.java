@@ -3,8 +3,8 @@ package com.shibana.identity_service.service;
 import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.request.UserUpdateRequest;
-import com.shibana.identity_service.dto.response.GetMeResponse;
-import com.shibana.identity_service.dto.response.ProfileResponse;
+import com.shibana.identity_service.dto.response.MyAccountResponse;
+import com.shibana.identity_service.dto.response.ProfileMetadataResponse;
 import com.shibana.identity_service.entity.Role;
 import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.exception.AppException;
@@ -82,12 +82,13 @@ public class UserService {
 
         ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
                 .userId(user.getId())
+                .username(userRequest.getUsername())
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
                 .dob(userRequest.getDob())
                 .build();
 
-        profileClient.createProfile(profileCreationRequest);
+        profileClient.create(profileCreationRequest);
         notificationEventPublisher.publishWelcomeEmailEvent(
                 user.getUsername(),
                 userRequest.getEmail()
@@ -114,12 +115,12 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-    public GetMeResponse getUserInfo(String userId) {
+    public MyAccountResponse getMyAccount(String userId) {
         User user = getUserById(userId);
-        ProfileResponse profileResponse = profileClient.getProfileByUserId(userId).getData();
+        ProfileMetadataResponse metadataResponse = profileClient.getMetadataByUserId(userId).getData();
         return userMapper.toGetMeResponse(
                 user,
-                profileResponse
+                metadataResponse
         );
     }
 

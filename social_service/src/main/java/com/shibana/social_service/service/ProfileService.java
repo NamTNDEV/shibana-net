@@ -3,6 +3,7 @@ package com.shibana.social_service.service;
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.request.ProfileUpdateRequest;
+import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.exception.AppException;
@@ -24,13 +25,23 @@ public class ProfileService {
     ProfileRepo profileRepo;
     ProfileMapper profileMapper;
 
-    private Profile findProfileByUserId(String userId) {
+    private Profile findByUserId(String userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
-                () -> {
-                    log.error("Profile with userId {} not found", userId);
-                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                }
+                () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
         );
+    }
+
+    private Profile findProfileMetadata(String userId) {
+        return profileRepo.findProfileMetadata(userId).orElseThrow(
+                () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
+        );
+    }
+
+    public ProfileResponse getProfileByUsername(String username) {
+        Profile profile = profileRepo.findByUsername(username).orElseThrow(
+                () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
+        );
+        return profileMapper.toProfileResponse(profile);
     }
 
     public ProfileResponse createProfile(ProfileCreationRequest request) {
@@ -39,7 +50,7 @@ public class ProfileService {
         return profileMapper.toProfileResponse(savedProfile);
     }
 
-    public List<ProfileResponse> getAllProfiles() {
+    public List<ProfileResponse> getAll() {
         List<Profile> profiles = profileRepo.findAll();
         return profiles.stream()
                 .map(profileMapper::toProfileResponse)
@@ -56,20 +67,21 @@ public class ProfileService {
         return profileMapper.toProfileResponse(profile);
     }
 
-    public ProfileResponse getInfo (String userId) {
-        Profile profile = findProfileByUserId(userId);
-        return profileMapper.toProfileResponse(profile);
+    public ProfileMetadataResponse getMetadataByUserId(String userId) {
+        return profileMapper.toProfileMetadataResponse(
+                findProfileMetadata(userId)
+        );
     }
 
     public ProfileResponse updateInfo(String userId, ProfileUpdateRequest request) {
-        Profile existingProfile = findProfileByUserId(userId);
+        Profile existingProfile = findByUserId(userId);
         profileMapper.updateProfileFromRequest(existingProfile, request);
         Profile updatedProfile = profileRepo.save(existingProfile);
         return profileMapper.toProfileResponse(updatedProfile);
     }
 
     public ProfileResponse updateAvatar(String userId, AvatarUpdateRequest request) {
-        Profile existingProfile = findProfileByUserId(userId);
+        Profile existingProfile = findByUserId(userId);
         existingProfile.setAvatar(request.getAvatarUrl());
         Profile updatedProfile = profileRepo.save(existingProfile);
         return profileMapper.toProfileResponse(updatedProfile);
