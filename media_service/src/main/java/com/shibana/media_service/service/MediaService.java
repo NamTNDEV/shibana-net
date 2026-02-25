@@ -73,6 +73,7 @@ public class MediaService {
     }
 
     public FileResponse staticFile(String fileName) {
+        log.info("Requesting static file: {}", fileName);
         var uploadedMediaMetadata = mediaRepo.findByFileName(fileName)
                 .orElseThrow(() -> {
                     log.error("Static file not found: {}", fileName);

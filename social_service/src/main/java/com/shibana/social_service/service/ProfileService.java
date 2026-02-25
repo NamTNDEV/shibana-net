@@ -1,6 +1,7 @@
 package com.shibana.social_service.service;
 
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
+import com.shibana.social_service.dto.request.CoverUpdateRequest;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.ProfileMetadataResponse;
@@ -80,11 +81,26 @@ public class ProfileService {
         return profileMapper.toProfileResponse(updatedProfile);
     }
 
-    public ProfileResponse updateAvatar(String userId, AvatarUpdateRequest request) {
+//    public ProfileResponse updateAvatar(String userId, AvatarUpdateRequest request) {
+//        Profile existingProfile = findByUserId(userId);
+//        existingProfile.setAvatar(request.getAvatarUrl());
+//        Profile updatedProfile = profileRepo.save(existingProfile);
+//        return profileMapper.toProfileResponse(updatedProfile);
+//    }
+
+    public void updateCover(String userId, CoverUpdateRequest request) {
         Profile existingProfile = findByUserId(userId);
-        existingProfile.setAvatar(request.getAvatarUrl());
-        Profile updatedProfile = profileRepo.save(existingProfile);
-        return profileMapper.toProfileResponse(updatedProfile);
+        String oldCoverMediaId = null;
+        String newCoverMediaId = request.getCoverMediaId();
+        if(newCoverMediaId != null && !newCoverMediaId.equals(existingProfile.getCoverMediaId())) {
+            oldCoverMediaId = existingProfile.getCoverMediaId();
+            existingProfile.setCoverMediaId(request.getCoverMediaId());
+        }
+        existingProfile.setCoverPositionY(request.getCoverPositionY());
+        profileRepo.save(existingProfile);
+        if(oldCoverMediaId != null) {
+            log.info("Deleted old cover media with id {}", oldCoverMediaId);
+        }
     }
 
     public void deleteProfile(String id) {
