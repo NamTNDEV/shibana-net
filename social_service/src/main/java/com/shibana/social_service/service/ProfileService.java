@@ -90,16 +90,16 @@ public class ProfileService {
 
     public void updateCover(String userId, CoverUpdateRequest request) {
         Profile existingProfile = findByUserId(userId);
-        String oldCoverMediaId = null;
-        String newCoverMediaId = request.getCoverMediaId();
-        if(newCoverMediaId != null && !newCoverMediaId.equals(existingProfile.getCoverMediaId())) {
-            oldCoverMediaId = existingProfile.getCoverMediaId();
-            existingProfile.setCoverMediaId(request.getCoverMediaId());
+        String oldCoverMediaName = null;
+        String newCoverMediaId = request.getCoverMediaName();
+        if(newCoverMediaId != null && !newCoverMediaId.equals(existingProfile.getCoverMediaName())) {
+            oldCoverMediaName = existingProfile.getCoverMediaName();
+            existingProfile.setCoverMediaName(request.getCoverMediaName());
         }
         existingProfile.setCoverPositionY(request.getCoverPositionY());
         profileRepo.save(existingProfile);
-        if(oldCoverMediaId != null) {
-            log.info("Deleted old cover media with id {}", oldCoverMediaId);
+        if(oldCoverMediaName != null) {
+            log.info("Deleted old cover media with id {}", oldCoverMediaName);
         }
     }
 

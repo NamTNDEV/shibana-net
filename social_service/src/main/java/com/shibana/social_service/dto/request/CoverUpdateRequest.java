@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CoverUpdateRequest {
-    String coverMediaId;
+    String coverMediaName;
 
     @NotNull(message = "COVER_POSITION_Y_REQUIRED")
     @Min(value = 0, message = "INVALID_COVER_POSITION")
