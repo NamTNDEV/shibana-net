@@ -20,6 +20,9 @@ public interface ProfileRepo extends Neo4jRepository<Profile, String> {
             "RETURN p.id as id, " +
             "p.firstName as firstName, " +
             "p.lastName as lastName, " +
-            "coalesce(p.avatar, '') as avatar")
-    Optional<Profile>  findProfileMetadata(@Param("userId") String userId);
+            "p.avatarMediaName as avatarMediaName, " +
+            "p.avatarScale as avatarScale, " +
+            "p.avatarPositionX as avatarPositionX, " +
+            "p.avatarPositionY as avatarPositionY")
+    Optional<Profile> findProfileMetadata(@Param("userId") String userId);
 }

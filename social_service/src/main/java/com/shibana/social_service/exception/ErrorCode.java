@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVALID_BIO_LENGTH(4000105, "profile-service:: Bio length is not valid", HttpStatus.BAD_REQUEST),
     INVALID_COVER_POSITION(4000106, "profile-service:: Cover position must be between 0 and 100", HttpStatus.BAD_REQUEST),
     COVER_POSITION_Y_REQUIRED(4000107, "profile-service:: Cover position Y is required", HttpStatus.BAD_REQUEST),
+    INVALID_AVATAR(4000108, "profile-service:: Invalid avatar (Avatar must be an image file)", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 

@@ -11,5 +11,8 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class AvatarUpdateRequest {
-    String avatarUrl;
+    String avatarMediaName;
+    Double avatarScale;
+    Double avatarPositionX;
+    Double avatarPositionY;
 }

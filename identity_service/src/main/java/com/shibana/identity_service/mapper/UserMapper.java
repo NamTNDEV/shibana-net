@@ -27,5 +27,8 @@ public interface UserMapper {
     @Mapping(target = "firstName", source = "profileResponse.firstName")
     @Mapping(target = "lastName", source = "profileResponse.lastName")
     @Mapping(target = "avatar", source = "profileResponse.avatar")
+    @Mapping(target = "avatarScale", source = "profileResponse.avatarScale")
+    @Mapping(target = "avatarPositionX", source = "profileResponse.avatarPositionX")
+    @Mapping(target = "avatarPositionY", source = "profileResponse.avatarPositionY")
     MyAccountResponse toGetMeResponse(User user, ProfileMetadataResponse profileResponse);
 }

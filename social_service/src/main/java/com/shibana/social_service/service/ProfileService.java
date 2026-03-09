@@ -81,24 +81,37 @@ public class ProfileService {
         return profileMapper.toProfileResponse(updatedProfile);
     }
 
-//    public ProfileResponse updateAvatar(String userId, AvatarUpdateRequest request) {
-//        Profile existingProfile = findByUserId(userId);
-//        existingProfile.setAvatar(request.getAvatarUrl());
-//        Profile updatedProfile = profileRepo.save(existingProfile);
-//        return profileMapper.toProfileResponse(updatedProfile);
-//    }
+    public void updateAvatar(String userId, AvatarUpdateRequest request) {
+        if (request.getAvatarMediaName() == null) {
+            throw new AppException(ErrorCode.INVALID_AVATAR);
+        }
+        Profile existingProfile = findByUserId(userId);
+        String oldAvatarName = null;
+        String newAvatarName = request.getAvatarMediaName();
+        if (!newAvatarName.equals(existingProfile.getAvatarMediaName())) {
+            oldAvatarName = existingProfile.getAvatarMediaName();
+            existingProfile.setAvatarMediaName(request.getAvatarMediaName());
+        }
+        existingProfile.setAvatarScale(request.getAvatarScale());
+        existingProfile.setAvatarPositionX(request.getAvatarPositionX());
+        existingProfile.setAvatarPositionY(request.getAvatarPositionY());
+        profileRepo.save(existingProfile);
+        if (oldAvatarName != null) {
+            log.info("Deleted old avatar media with id {}", oldAvatarName);
+        }
+    }
 
     public void updateCover(String userId, CoverUpdateRequest request) {
         Profile existingProfile = findByUserId(userId);
         String oldCoverMediaName = null;
-        String newCoverMediaId = request.getCoverMediaName();
-        if(newCoverMediaId != null && !newCoverMediaId.equals(existingProfile.getCoverMediaName())) {
+        String newCoverMediaName = request.getCoverMediaName();
+        if (newCoverMediaName != null && !newCoverMediaName.equals(existingProfile.getCoverMediaName())) {
             oldCoverMediaName = existingProfile.getCoverMediaName();
             existingProfile.setCoverMediaName(request.getCoverMediaName());
         }
         existingProfile.setCoverPositionY(request.getCoverPositionY());
         profileRepo.save(existingProfile);
-        if(oldCoverMediaName != null) {
+        if (oldCoverMediaName != null) {
             log.info("Deleted old cover media with id {}", oldCoverMediaName);
         }
     }

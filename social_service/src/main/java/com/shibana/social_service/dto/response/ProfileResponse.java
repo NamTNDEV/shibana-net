@@ -22,4 +22,8 @@ public class ProfileResponse {
     String avatar;
     String cover;
     String bio;
+    Double coverPositionY;
+    Double avatarScale;
+    Double avatarPositionX;
+    Double avatarPositionY;
 }

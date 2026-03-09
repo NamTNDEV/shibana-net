@@ -36,9 +36,13 @@ public class Profile {
     @Size(max = 160, message = "INVALID_BIO_LENGTH")
     String bio;
 
-    String avatarMediaName;
     String coverMediaName;
     Double coverPositionY;
+
+    String avatarMediaName;
+    Double avatarScale;
+    Double avatarPositionX;
+    Double avatarPositionY;
 
     LocalDate dob;
     String address;

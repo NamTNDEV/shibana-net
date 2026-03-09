@@ -15,4 +15,7 @@ public class ProfileMetadataResponse {
     String firstName;
     String lastName;
     String avatar;
+    Double avatarScale;
+    Double avatarPositionX;
+    Double avatarPositionY;
 }

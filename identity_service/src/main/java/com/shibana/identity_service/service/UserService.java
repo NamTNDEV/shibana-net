@@ -89,10 +89,10 @@ public class UserService {
                 .build();
 
         profileClient.create(profileCreationRequest);
-        notificationEventPublisher.publishWelcomeEmailEvent(
-                user.getUsername(),
-                userRequest.getEmail()
-        );
+//        notificationEventPublisher.publishWelcomeEmailEvent(
+//                user.getUsername(),
+//                userRequest.getEmail()
+//        );
 
         return user;
     }

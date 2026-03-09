@@ -10,6 +10,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MyAccountResponse {
     String userId;
@@ -19,4 +20,7 @@ public class MyAccountResponse {
     String firstName;
     String lastName;
     String avatar;
+    Double avatarScale;
+    Double avatarPositionX;
+    Double avatarPositionY;
 }

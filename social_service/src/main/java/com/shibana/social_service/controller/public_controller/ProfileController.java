@@ -46,15 +46,15 @@ public class ProfileController {
     }
 
     @PatchMapping("/me/avatar")
-    public ApiResponse<ProfileResponse> updateAvatar(
+    public ApiResponse<Void> updateAvatar(
             @RequestBody AvatarUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
         String userId = jwt.getClaim("user_id");
-        return ApiResponse.<ProfileResponse>builder()
+        profileService.updateAvatar(userId, request);
+        return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Avatar updated successfully")
-//                .data(profileService.updateAvatar(userId, request))
                 .data(null)
                 .build();
     }
