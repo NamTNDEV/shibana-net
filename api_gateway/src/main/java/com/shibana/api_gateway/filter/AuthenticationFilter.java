@@ -38,7 +38,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/permissions/.*",
             "/media/static/.*",
             "/social/me/.*",
-            "/social/profiles/.*"
+            "/social/profiles/.*",
+            "/social/privacies/.*"
     };
 
     @Override

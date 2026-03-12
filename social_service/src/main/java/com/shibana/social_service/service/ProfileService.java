@@ -10,11 +10,12 @@ import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
-import com.shibana.social_service.repo.ProfileRepo;
+import com.shibana.social_service.repo.neo4j.ProfileRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,9 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+//@Transactional(readOnly = true)
 public class ProfileService {
     ProfileRepo profileRepo;
     ProfileMapper profileMapper;
+    PrivacyService privacyService;
 
     private Profile findByUserId(String userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
@@ -45,9 +48,19 @@ public class ProfileService {
         return profileMapper.toProfileResponse(profile);
     }
 
+    @Transactional("neo4jTransactionManager")
     public ProfileResponse createProfile(ProfileCreationRequest request) {
         Profile profileRequest = profileMapper.toProfileEntity(request);
         Profile savedProfile = profileRepo.save(profileRequest);
+
+        try {
+            privacyService.initDefaultFieldsPrivacyForProfile(savedProfile.getId());
+        } catch (Exception e) {
+            log.error("Failed to init privacy for profile {}, rolling back Neo4j", savedProfile.getId());
+            profileRepo.delete(savedProfile);
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
         return profileMapper.toProfileResponse(savedProfile);
     }
 

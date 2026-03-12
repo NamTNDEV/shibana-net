@@ -1,6 +1,5 @@
-package com.shibana.social_service.repo;
+package com.shibana.social_service.repo.neo4j;
 
-import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.entity.Profile;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -18,6 +17,7 @@ public interface ProfileRepo extends Neo4jRepository<Profile, String> {
 
     @Query("MATCH (p:user_profiles) WHERE p.userId = $userId " +
             "RETURN p.id as id, " +
+            "p.username as username, " +
             "p.firstName as firstName, " +
             "p.lastName as lastName, " +
             "p.avatarMediaName as avatarMediaName, " +
