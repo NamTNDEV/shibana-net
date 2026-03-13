@@ -16,15 +16,15 @@ public class ProfileResponse {
     String username;
     String firstName;
     String lastName;
-    LocalDate dob;
-    String address;
-    String phoneNumber;
     String userId;
     String avatar;
     String cover;
-    String bio;
     Double coverPositionY;
     Double avatarScale;
     Double avatarPositionX;
     Double avatarPositionY;
+    String bio;
+    LocalDate dob;
+    String address;
+    String phoneNumber;
 }

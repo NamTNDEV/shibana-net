@@ -2,8 +2,8 @@ package com.shibana.social_service.controller.public_controller;
 
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.CoverUpdateRequest;
-import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.ApiResponse;
+import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +37,10 @@ public class ProfileController {
     }
 
     @GetMapping("/{username}")
-    public ApiResponse<ProfileResponse> getProfileByUsername(@PathVariable String username) {
-        return ApiResponse.<ProfileResponse>builder()
+    public ApiResponse<ProfileDetailResponse> getProfileByUsername(
+            @PathVariable String username
+    ) {
+        return ApiResponse.<ProfileDetailResponse>builder()
                 .code(200)
                 .message("Profile retrieved successfully")
                 .data(profileService.getProfileByUsername(username))

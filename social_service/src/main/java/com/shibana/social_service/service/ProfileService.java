@@ -1,19 +1,24 @@
 package com.shibana.social_service.service;
 
+import com.shibana.social_service.dto.PrivacyContext;
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.CoverUpdateRequest;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
+import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
 import com.shibana.social_service.repo.neo4j.ProfileRepo;
+import com.shibana.social_service.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.security.SecurityUtil;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +28,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-//@Transactional(readOnly = true)
+@Transactional(readOnly = true)
 public class ProfileService {
     ProfileRepo profileRepo;
     ProfileMapper profileMapper;
     PrivacyService privacyService;
+    FieldPrivacyService fieldPrivacyService;
 
     private Profile findByUserId(String userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
@@ -41,11 +47,16 @@ public class ProfileService {
         );
     }
 
-    public ProfileResponse getProfileByUsername(String username) {
-        Profile profile = profileRepo.findByUsername(username).orElseThrow(
+    public ProfileDetailResponse getProfileByUsername(String username) {
+        Profile targetProfile = profileRepo.findByUsername(username).orElseThrow(
                 () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
         );
-        return profileMapper.toProfileResponse(profile);
+        var fpList = fieldPrivacyService.getListByProfileId(targetProfile.getId());
+        var currentViewerId = SecurityUtils.getCurrentUserId();
+        boolean isOwner = targetProfile.getUserId().equals(currentViewerId);
+        boolean isFriend = false;
+        PrivacyContext privacyContext = new PrivacyContext(isOwner, isFriend);
+        return profileMapper.toProfileDetailResponse(targetProfile, fpList, privacyContext);
     }
 
     @Transactional("neo4jTransactionManager")
