@@ -68,7 +68,6 @@ public class ProfileService {
     public ProfileResponse createProfile(ProfileCreationRequest request) {
         Profile profileRequest = profileMapper.toProfileEntity(request);
         Profile savedProfile = profileRepo.save(profileRequest);
-
         try {
             privacyService.initDefaultFieldsPrivacyForProfile(savedProfile.getId());
         } catch (Exception e) {

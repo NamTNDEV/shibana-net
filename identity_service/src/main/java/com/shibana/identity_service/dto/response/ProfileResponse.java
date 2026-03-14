@@ -20,8 +20,8 @@ public class ProfileResponse {
     String avatar;
     String cover;
 
-    ProfileFieldWithPrivacyResponse<String> bio;
-    ProfileFieldWithPrivacyResponse<LocalDate> dob;
-    ProfileFieldWithPrivacyResponse<String> address;
-    ProfileFieldWithPrivacyResponse<String> phoneNumber;
+    String bio;
+    LocalDate dob;
+    String address;
+    String phoneNumber;
 }

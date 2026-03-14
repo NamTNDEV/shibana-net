@@ -27,6 +27,8 @@ public class Profile {
 
     String username;
 
+    String email;
+
     String firstName;
 
     String lastName;

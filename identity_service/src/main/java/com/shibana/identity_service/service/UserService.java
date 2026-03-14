@@ -83,11 +83,11 @@ public class UserService {
         ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
                 .userId(user.getId())
                 .username(userRequest.getUsername())
+                .email(userRequest.getEmail())
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
                 .dob(userRequest.getDob())
                 .build();
-
         profileClient.create(profileCreationRequest);
 //        notificationEventPublisher.publishWelcomeEmailEvent(
 //                user.getUsername(),

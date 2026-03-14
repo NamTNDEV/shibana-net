@@ -11,7 +11,7 @@ import java.util.function.BiFunction;
 public enum ProfileField {
     BIO(
             (Profile targetProfile, String newValue) -> {
-                String oldValue  = targetProfile.getBio();
+                String oldValue = targetProfile.getBio();
                 if (checkIsContentChanged(oldValue, newValue)) {
                     targetProfile.setBio(newValue);
                     return true;
@@ -20,7 +20,7 @@ public enum ProfileField {
             }),
     ADDRESS(
             (Profile targetProfile, String newValue) -> {
-                String oldValue  = targetProfile.getAddress();
+                String oldValue = targetProfile.getAddress();
                 if (checkIsContentChanged(oldValue, newValue)) {
                     targetProfile.setAddress(newValue);
                     return true;
@@ -39,9 +39,18 @@ public enum ProfileField {
             }),
     PHONE(
             (Profile targetProfile, String newValue) -> {
-                String oldValue  = targetProfile.getPhoneNumber();
+                String oldValue = targetProfile.getPhoneNumber();
                 if (checkIsContentChanged(oldValue, newValue)) {
                     targetProfile.setPhoneNumber(newValue);
+                    return true;
+                }
+                return false;
+            }),
+    EMAIL(
+            (Profile targetProfile, String newValue) -> {
+                String oldValue = targetProfile.getEmail();
+                if (checkIsContentChanged(oldValue, newValue)) {
+                    targetProfile.setEmail(newValue);
                     return true;
                 }
                 return false;
