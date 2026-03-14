@@ -9,6 +9,7 @@ import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.entity.Profile;
+import com.shibana.social_service.enums.ProfileField;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
@@ -17,12 +18,12 @@ import com.shibana.social_service.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.security.SecurityUtil;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,10 @@ public class ProfileService {
         return profileRepo.findProfileMetadata(userId).orElseThrow(
                 () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
         );
+    }
+
+    private boolean checkIsContentChanged(String oldContent, String newContent) {
+        return !Objects.equals(oldContent, newContent);
     }
 
     public ProfileDetailResponse getProfileByUsername(String username) {
@@ -98,11 +103,18 @@ public class ProfileService {
         );
     }
 
-    public ProfileResponse updateInfo(String userId, ProfileUpdateRequest request) {
-        Profile existingProfile = findByUserId(userId);
-        profileMapper.updateProfileFromRequest(existingProfile, request);
-        Profile updatedProfile = profileRepo.save(existingProfile);
-        return profileMapper.toProfileResponse(updatedProfile);
+    @Transactional("neo4jTransactionManager")
+    public void updateProfileFieldWithPrivacy(ProfileUpdateRequest request) {
+        String userId = SecurityUtils.getCurrentUserId();
+        Profile targetProfile = findByUserId(userId);
+        ProfileField fieldKey = request.getFieldKey();
+        String newContent = (request.getContent() == null || request.getContent().isBlank()) ? null : request.getContent();
+        boolean isModified = request.getFieldKey().handleUpdate(targetProfile, newContent);
+
+        // Level 0: Chưa tối ưu
+        if (isModified) profileRepo.save(targetProfile);
+
+        fieldPrivacyService.updateByProfileId(targetProfile.getId(), request.getPrivacyLevel(), fieldKey);
     }
 
     public void updateAvatar(String userId, AvatarUpdateRequest request) {

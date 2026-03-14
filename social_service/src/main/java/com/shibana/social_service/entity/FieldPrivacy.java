@@ -19,7 +19,7 @@ import jakarta.persistence.*;
                 @UniqueConstraint(columnNames = {"profile_id", "profile_field"})
         },
         indexes = {
-                @Index(name = "idx_field_privacy_profile_id", columnList = "profile_id")
+                @Index(name = "idx_field_privacy_profile_id", columnList = "profile_id"),
         }
 )
 public class FieldPrivacy {

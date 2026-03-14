@@ -2,6 +2,7 @@ package com.shibana.social_service.controller.public_controller;
 
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.CoverUpdateRequest;
+import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.ApiResponse;
 import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
@@ -25,6 +26,14 @@ import java.util.List;
 @RequestMapping("/profiles")
 public class ProfileController {
     ProfileService profileService;
+
+    @GetMapping("/test")
+    public ApiResponse<Void> test() {
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Success")
+                .build();
+    }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/")
@@ -74,4 +83,14 @@ public class ProfileController {
                 .build();
     }
 
+    @PatchMapping("/me")
+    public ApiResponse<Void> updateMe(
+            @Validated @RequestBody ProfileUpdateRequest request
+    ) {
+        profileService.updateProfileFieldWithPrivacy(request);
+        return ApiResponse.<Void>builder()
+                .code(201)
+                .message("Profile updated successfully")
+                .build();
+    }
 }

@@ -24,7 +24,7 @@ public abstract class ProfileMapper {
     // --- Common mappers ---
     public abstract Profile toProfileEntity(ProfileCreationRequest request);
 
-    public abstract void updateProfileFromRequest(@MappingTarget Profile entity, ProfileUpdateRequest request);
+//    public abstract void updateProfileFromRequest(@MappingTarget Profile entity, ProfileUpdateRequest request);
 
     // --- Complex Mappers ---
     @Mapping(target = "avatar", source = "avatarMediaName", qualifiedByName = "toFullUrl")
