@@ -41,7 +41,6 @@ public class SecurityConfig {
             "/internal/**",
             "/profiles/{username}",
             "/profiles/test",
-            "/privacies/**"
     };
 
     @Bean

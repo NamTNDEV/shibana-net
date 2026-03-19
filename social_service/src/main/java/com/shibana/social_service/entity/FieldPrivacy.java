@@ -1,5 +1,6 @@
 package com.shibana.social_service.entity;
 
+import com.shibana.social_service.enums.PrivacyLevel;
 import com.shibana.social_service.enums.ProfileField;
 import jakarta.persistence.*;
         import lombok.*;
@@ -34,7 +35,7 @@ public class FieldPrivacy {
     @Column(name = "profile_field",  nullable = false)
     ProfileField  profileField;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="privacy_id", nullable = false)
-    Privacy privacy;
+    @Enumerated(EnumType.STRING)
+    @Column(name="privacy", nullable = false)
+    PrivacyLevel privacy;
 }

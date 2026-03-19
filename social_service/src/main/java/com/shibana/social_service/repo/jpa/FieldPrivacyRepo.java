@@ -18,8 +18,8 @@ public interface FieldPrivacyRepo extends JpaRepository<FieldPrivacy, Long> {
     @Query("SELECT fp FROM FieldPrivacy fp JOIN FETCH fp.privacy WHERE fp.profileId = :profileId")
     List<FieldPrivacy> getListByProfileIdV1(@Param("profileId") String profileId);
 
-    @Query("SELECT new com.shibana.social_service.dto.response.FieldPrivacyResponse(fp.profileField, p.name) " +
-            "FROM FieldPrivacy fp JOIN fp.privacy p " +
+    @Query("SELECT new com.shibana.social_service.dto.response.FieldPrivacyResponse(fp.profileField, fp.privacy) " +
+            "FROM FieldPrivacy fp " +
             "WHERE fp.profileId = :profileId")
     List<FieldPrivacyResponse> getListByProfileIdV2(@Param("profileId") String profileId);
 

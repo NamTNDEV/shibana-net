@@ -36,7 +36,7 @@ public class ProfileController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/")
+    @GetMapping("")
     public ApiResponse<List<ProfileResponse>> getAll() {
         return ApiResponse.<List<ProfileResponse>>builder()
                 .code(200)

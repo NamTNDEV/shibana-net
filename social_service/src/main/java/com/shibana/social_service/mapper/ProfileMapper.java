@@ -40,6 +40,7 @@ public abstract class ProfileMapper {
     @Mapping(target = "dob", ignore = true)
     @Mapping(target = "address", ignore = true)
     @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "email",  ignore = true)
     public abstract ProfileDetailResponse toProfileDetailResponse(
             Profile profile,
             @Context List<FieldPrivacyResponse> fieldPrivacyList,
@@ -63,9 +64,9 @@ public abstract class ProfileMapper {
                                 (oldValue, newValue) -> oldValue
                         )
                 );
-
         response.setBio(wrapField(profile.getBio(), ProfileField.BIO, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
         response.setDob(wrapField(profile.getDob(), ProfileField.DOB, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
+        response.setEmail(wrapField(profile.getEmail(), ProfileField.EMAIL, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
         response.setAddress(wrapField(profile.getAddress(), ProfileField.ADDRESS, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
         response.setPhoneNumber(wrapField(profile.getPhoneNumber(), ProfileField.PHONE, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
     }

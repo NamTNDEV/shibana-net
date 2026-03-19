@@ -27,4 +27,5 @@ public class ProfileDetailResponse {
     ProfileFieldWithPrivacyResponse<LocalDate> dob;
     ProfileFieldWithPrivacyResponse<String> address;
     ProfileFieldWithPrivacyResponse<String> phoneNumber;
+    ProfileFieldWithPrivacyResponse<String> email;
 }

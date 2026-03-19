@@ -88,7 +88,9 @@ public class UserService {
                 .lastName(userRequest.getLastName())
                 .dob(userRequest.getDob())
                 .build();
+        log.info("Preparing profile creation::");
         profileClient.create(profileCreationRequest);
+        log.info("Profile creation::");
 //        notificationEventPublisher.publishWelcomeEmailEvent(
 //                user.getUsername(),
 //                userRequest.getEmail()

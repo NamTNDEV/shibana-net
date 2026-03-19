@@ -15,6 +15,8 @@ public enum ErrorCode {
     INVALID_AVATAR(4000108, "profile-service:: Invalid avatar (Avatar must be an image file)", HttpStatus.BAD_REQUEST),
     INVALID_UPDATE_PRIVACY_LEVEL(4000109, "profile-service:: Invalid update privacy level", HttpStatus.BAD_REQUEST),
     INVALID_UPDATE_PROFILE_FIELD(4000110, "profile-service:: Invalid update profile field", HttpStatus.BAD_REQUEST),
+    INVALID_FOLLOW_BODY(4000111, "profile-service:: FolloweeId is not valid", HttpStatus.BAD_REQUEST),
+    CANNOT_FOLLOW_YOUSEFT(4000112, "profile-service:: Cannot follow yourself", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 

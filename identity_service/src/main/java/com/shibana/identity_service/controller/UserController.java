@@ -68,7 +68,7 @@ public class UserController {
         UserResponse userResponse = userMapper.toUserResponse(result);
         ApiResponse<UserResponse> response = new ApiResponse<>();
         response.setData(userResponse);
-//        response.setMessage("User created successfully.");
+        response.setMessage("User created successfully.");
         response.setCode(201);
         return response;
     }

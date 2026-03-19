@@ -7,7 +7,6 @@ import com.shibana.social_service.enums.ProfileField;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.repo.jpa.FieldPrivacyRepo;
-import com.shibana.social_service.repo.jpa.PrivacyRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,9 +35,8 @@ public class FieldPrivacyService {
                 .getByProfileIdAndProfileField(profileId, fieldKey)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_PRIVACY_NOT_FOUND));
 
-        if (fp.getPrivacy().getName() == privacyLevel) return;
-        var updatePrivacy = privacyService.getPrivacyByLevel(privacyLevel);
-        fp.setPrivacy(updatePrivacy);
+        if (fp.getPrivacy() == privacyLevel) return;
+        fp.setPrivacy(privacyLevel);
         fieldPrivacyRepo.save(fp);
     }
 }
