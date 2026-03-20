@@ -25,14 +25,14 @@ public class FieldPrivacyService {
     PrivacyService privacyService;
     FieldPrivacyRepo  fieldPrivacyRepo;
 
-    public List<FieldPrivacyResponse> getListByProfileId(String profileId) {
-        return fieldPrivacyRepo.getListByProfileIdV2(profileId);
+    public List<FieldPrivacyResponse> getListByUserId(String userId) {
+        return fieldPrivacyRepo.getListByUserIdV2(userId);
     }
 
     @Transactional("jpaTransactionManager")
-    public void updateByProfileId(String profileId, PrivacyLevel privacyLevel, ProfileField fieldKey) {
+    public void updateByUserId(String userId, PrivacyLevel privacyLevel, ProfileField fieldKey) {
         FieldPrivacy fp = fieldPrivacyRepo
-                .getByProfileIdAndProfileField(profileId, fieldKey)
+                .getByUserIdAndProfileField(userId, fieldKey)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_PRIVACY_NOT_FOUND));
 
         if (fp.getPrivacy() == privacyLevel) return;

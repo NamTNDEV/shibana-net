@@ -20,9 +20,6 @@ import java.time.LocalDate;
 @Node("user_profiles")
 public class Profile {
     @Id
-    @GeneratedValue(generatorClass = UUIDStringGenerator.class)
-    String id;
-
     String userId;
 
     String username;

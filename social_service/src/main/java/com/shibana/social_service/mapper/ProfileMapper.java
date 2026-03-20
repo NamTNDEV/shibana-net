@@ -1,6 +1,7 @@
 package com.shibana.social_service.mapper;
 
 import com.shibana.social_service.dto.PrivacyContext;
+import com.shibana.social_service.dto.ViewerContext;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.*;
@@ -41,10 +42,11 @@ public abstract class ProfileMapper {
     @Mapping(target = "address", ignore = true)
     @Mapping(target = "phoneNumber", ignore = true)
     @Mapping(target = "email",  ignore = true)
+    @Mapping(target = "viewerContext", ignore = true)
     public abstract ProfileDetailResponse toProfileDetailResponse(
             Profile profile,
             @Context List<FieldPrivacyResponse> fieldPrivacyList,
-            @Context PrivacyContext privacyContext
+            @Context ViewerContext context
     );
 
     // --- After Mapping
@@ -53,7 +55,7 @@ public abstract class ProfileMapper {
             Profile profile,
             @MappingTarget ProfileDetailResponse response,
             @Context List<FieldPrivacyResponse> fieldPrivacyList,
-            @Context PrivacyContext privacyContext
+            @Context ViewerContext context
     ) {
         Map<ProfileField, PrivacyLevel> fieldPrivacyMap = fieldPrivacyList
                 .stream()
@@ -64,11 +66,15 @@ public abstract class ProfileMapper {
                                 (oldValue, newValue) -> oldValue
                         )
                 );
-        response.setBio(wrapField(profile.getBio(), ProfileField.BIO, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
-        response.setDob(wrapField(profile.getDob(), ProfileField.DOB, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
-        response.setEmail(wrapField(profile.getEmail(), ProfileField.EMAIL, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
-        response.setAddress(wrapField(profile.getAddress(), ProfileField.ADDRESS, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
-        response.setPhoneNumber(wrapField(profile.getPhoneNumber(), ProfileField.PHONE, fieldPrivacyMap, privacyContext.isOwner(), privacyContext.isFriends()));
+        boolean isOwner = context.isOwner();
+        boolean isFriended = context.relationshipContext().isFriended();
+
+        response.setViewerContext(context);
+        response.setBio(wrapField(profile.getBio(), ProfileField.BIO, fieldPrivacyMap, isOwner, isFriended));
+        response.setDob(wrapField(profile.getDob(), ProfileField.DOB, fieldPrivacyMap, isOwner, isFriended));
+        response.setEmail(wrapField(profile.getEmail(), ProfileField.EMAIL, fieldPrivacyMap, isOwner, isFriended));
+        response.setAddress(wrapField(profile.getAddress(), ProfileField.ADDRESS, fieldPrivacyMap, isOwner, isFriended));
+        response.setPhoneNumber(wrapField(profile.getPhoneNumber(), ProfileField.PHONE, fieldPrivacyMap, isOwner, isFriended));
     }
 
     // --- Helper Functions ---
@@ -84,10 +90,9 @@ public abstract class ProfileMapper {
         if (!isOwner) {
             if (privacyLevel == PrivacyLevel.PRIVATE) {
                 maskedValue = null;
+            } else if (privacyLevel == PrivacyLevel.FRIENDS && !isFriend) {
+                maskedValue = null;
             }
-//            else if (privacyLevel == PrivacyLevel.FRIENDS && !isFriend) {
-//                maskedValue = null;
-//            }
         }
         return new ProfileFieldWithPrivacyResponse<>(maskedValue, privacyLevel);
     }

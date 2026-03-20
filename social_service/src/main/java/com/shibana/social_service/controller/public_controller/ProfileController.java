@@ -27,24 +27,6 @@ import java.util.List;
 public class ProfileController {
     ProfileService profileService;
 
-    @GetMapping("/test")
-    public ApiResponse<Void> test() {
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Success")
-                .build();
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("")
-    public ApiResponse<List<ProfileResponse>> getAll() {
-        return ApiResponse.<List<ProfileResponse>>builder()
-                .code(200)
-                .message("Profiles retrieved successfully")
-                .data(profileService.getAll())
-                .build();
-    }
-
     @GetMapping("/{username}")
     public ApiResponse<ProfileDetailResponse> getProfileByUsername(
             @PathVariable String username

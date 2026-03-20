@@ -27,13 +27,13 @@ public class PrivacyService {
     }
 
     @Transactional("jpaTransactionManager")
-    public void initDefaultFieldsPrivacyForProfile(String profileId) {
+    public void initDefaultFieldsPrivacyForProfile(String userId) {
         List<FieldPrivacy> defaultProfileFieldPrivacyList = Arrays.stream(ProfileField.values())
                 .map(field -> {
                             var defaultPrivacy = field == ProfileField.EMAIL ? PrivacyLevel.PRIVATE : PrivacyLevel.PUBLIC;
                             return FieldPrivacy.builder()
                                     .privacy(defaultPrivacy)
-                                    .profileId(profileId)
+                                    .userId(userId)
                                     .profileField(field)
                                     .build();
                         }

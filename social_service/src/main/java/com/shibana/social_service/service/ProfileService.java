@@ -1,6 +1,7 @@
 package com.shibana.social_service.service;
 
-import com.shibana.social_service.dto.PrivacyContext;
+import com.shibana.social_service.dto.RelationshipContext;
+import com.shibana.social_service.dto.ViewerContext;
 import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.CoverUpdateRequest;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
@@ -21,10 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
@@ -35,6 +32,7 @@ public class ProfileService {
     ProfileMapper profileMapper;
     PrivacyService privacyService;
     FieldPrivacyService fieldPrivacyService;
+    ConnectionsService connectionsService;
 
     private Profile findByUserId(String userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
@@ -48,20 +46,29 @@ public class ProfileService {
         );
     }
 
-    private boolean checkIsContentChanged(String oldContent, String newContent) {
-        return !Objects.equals(oldContent, newContent);
-    }
-
     public ProfileDetailResponse getProfileByUsername(String username) {
         Profile targetProfile = profileRepo.findByUsername(username).orElseThrow(
                 () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
         );
-        var fpList = fieldPrivacyService.getListByProfileId(targetProfile.getId());
+        var fpList = fieldPrivacyService.getListByUserId(targetProfile.getUserId());
         var currentViewerId = SecurityUtils.getCurrentUserId();
         boolean isOwner = targetProfile.getUserId().equals(currentViewerId);
-        boolean isFriend = false;
-        PrivacyContext privacyContext = new PrivacyContext(isOwner, isFriend);
-        return profileMapper.toProfileDetailResponse(targetProfile, fpList, privacyContext);
+
+        boolean isFriended = false;
+        boolean isFollowing = false;
+        boolean hasSentFriendRequest = false;
+
+        if (!isOwner) {
+            var connectionStatuses = connectionsService.getConnectStatuses(currentViewerId, targetProfile.getUserId());
+            isFriended = connectionStatuses.isFriended();
+            isFollowing = connectionStatuses.isFollowing();
+            hasSentFriendRequest = connectionStatuses.hasSentFriendRequest();
+        }
+
+        RelationshipContext relationshipContext = new RelationshipContext(isFriended, isFollowing, hasSentFriendRequest);
+        ViewerContext viewerContext = new ViewerContext(isOwner, relationshipContext);
+
+        return profileMapper.toProfileDetailResponse(targetProfile, fpList, viewerContext);
     }
 
     @Transactional("neo4jTransactionManager")
@@ -69,31 +76,14 @@ public class ProfileService {
         Profile profileRequest = profileMapper.toProfileEntity(request);
         Profile savedProfile = profileRepo.save(profileRequest);
         try {
-            privacyService.initDefaultFieldsPrivacyForProfile(savedProfile.getId());
+            privacyService.initDefaultFieldsPrivacyForProfile(savedProfile.getUserId());
         } catch (Exception e) {
-            log.error("Failed to init privacy for profile {}, rolling back Neo4j", savedProfile.getId());
+            log.error("Failed to init privacy for profile {}, rolling back Neo4j", savedProfile.getUserId());
             profileRepo.delete(savedProfile);
             throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         return profileMapper.toProfileResponse(savedProfile);
-    }
-
-    public List<ProfileResponse> getAll() {
-        List<Profile> profiles = profileRepo.findAll();
-        return profiles.stream()
-                .map(profileMapper::toProfileResponse)
-                .toList();
-    }
-
-    public ProfileResponse getProfileById(String id) {
-        Profile profile = profileRepo.findById(id).orElseThrow(
-                () -> {
-                    log.error("Profile with id {} not found", id);
-                    return new RuntimeException("Profile not found");
-                }
-        );
-        return profileMapper.toProfileResponse(profile);
     }
 
     public ProfileMetadataResponse getMetadataByUserId(String userId) {
@@ -113,9 +103,10 @@ public class ProfileService {
         // Level 0: Chưa tối ưu
         if (isModified) profileRepo.save(targetProfile);
 
-        fieldPrivacyService.updateByProfileId(targetProfile.getId(), request.getPrivacyLevel(), fieldKey);
+        fieldPrivacyService.updateByUserId(targetProfile.getUserId(), request.getPrivacyLevel(), fieldKey);
     }
 
+    @Transactional("neo4jTransactionManager")
     public void updateAvatar(String userId, AvatarUpdateRequest request) {
         if (request.getAvatarMediaName() == null) {
             throw new AppException(ErrorCode.INVALID_AVATAR);
@@ -136,6 +127,7 @@ public class ProfileService {
         }
     }
 
+    @Transactional("neo4jTransactionManager")
     public void updateCover(String userId, CoverUpdateRequest request) {
         Profile existingProfile = findByUserId(userId);
         String oldCoverMediaName = null;
@@ -151,7 +143,4 @@ public class ProfileService {
         }
     }
 
-    public void deleteProfile(String id) {
-        profileRepo.deleteById(id);
-    }
 }

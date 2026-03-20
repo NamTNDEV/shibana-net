@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileMetadataResponse {
-    String id;
     String firstName;
     String lastName;
     String avatar;

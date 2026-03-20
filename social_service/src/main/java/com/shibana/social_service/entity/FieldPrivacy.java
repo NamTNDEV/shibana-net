@@ -17,10 +17,10 @@ import jakarta.persistence.*;
 @Table(
         name = "field_privacy",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"profile_id", "profile_field"})
+                @UniqueConstraint(columnNames = {"user_id", "profile_field"})
         },
         indexes = {
-                @Index(name = "idx_field_privacy_profile_id", columnList = "profile_id"),
+                @Index(name = "idx_field_privacy_user_id", columnList = "user_id"),
         }
 )
 public class FieldPrivacy {
@@ -28,8 +28,8 @@ public class FieldPrivacy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "profile_id", nullable = false)
-    String profileId;
+    @Column(name = "user_id", nullable = false)
+    String userId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "profile_field",  nullable = false)

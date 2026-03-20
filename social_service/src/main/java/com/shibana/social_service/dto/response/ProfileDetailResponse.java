@@ -1,5 +1,6 @@
 package com.shibana.social_service.dto.response;
 
+import com.shibana.social_service.dto.ViewerContext;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -7,7 +8,6 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-//@Builder
 @AllArgsConstructor
 @ToString
 @NoArgsConstructor
@@ -28,4 +28,6 @@ public class ProfileDetailResponse {
     ProfileFieldWithPrivacyResponse<String> address;
     ProfileFieldWithPrivacyResponse<String> phoneNumber;
     ProfileFieldWithPrivacyResponse<String> email;
+
+    ViewerContext viewerContext;
 }

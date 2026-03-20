@@ -15,14 +15,14 @@ import java.util.Optional;
 public interface FieldPrivacyRepo extends JpaRepository<FieldPrivacy, Long> {
 
     // Level 1
-    @Query("SELECT fp FROM FieldPrivacy fp JOIN FETCH fp.privacy WHERE fp.profileId = :profileId")
-    List<FieldPrivacy> getListByProfileIdV1(@Param("profileId") String profileId);
+    @Query("SELECT fp FROM FieldPrivacy fp JOIN FETCH fp.privacy WHERE fp.userId = :userId")
+    List<FieldPrivacy> getListByUserIdV1(@Param("userId") String userId);
 
     @Query("SELECT new com.shibana.social_service.dto.response.FieldPrivacyResponse(fp.profileField, fp.privacy) " +
             "FROM FieldPrivacy fp " +
-            "WHERE fp.profileId = :profileId")
-    List<FieldPrivacyResponse> getListByProfileIdV2(@Param("profileId") String profileId);
+            "WHERE fp.userId = :userId")
+    List<FieldPrivacyResponse> getListByUserIdV2(@Param("userId") String userId);
 
-    @Query("SELECT fp FROM FieldPrivacy fp WHERE fp.profileId = :profileId AND fp.profileField = :profileField")
-    Optional<FieldPrivacy> getByProfileIdAndProfileField(@Param("profileId") String profileId, @Param("profileField") ProfileField profileField);
+    @Query("SELECT fp FROM FieldPrivacy fp WHERE fp.userId = :userId AND fp.profileField = :profileField")
+    Optional<FieldPrivacy> getByUserIdAndProfileField(@Param("userId") String userId, @Param("profileField") ProfileField profileField);
 }
