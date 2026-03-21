@@ -17,6 +17,13 @@ public enum ErrorCode {
     INVALID_UPDATE_PROFILE_FIELD(4000110, "profile-service:: Invalid update profile field", HttpStatus.BAD_REQUEST),
     INVALID_FOLLOW_BODY(4000111, "profile-service:: FolloweeId is not valid", HttpStatus.BAD_REQUEST),
     CANNOT_FOLLOW_YOUSEFT(4000112, "profile-service:: Cannot follow yourself", HttpStatus.BAD_REQUEST),
+    CANNOT_BE_FRIEND_YOURSEFT(4000113, "profile-service:: Cannot be friend with yourself", HttpStatus.BAD_REQUEST),
+    CANNOT_ACCEPT_YOURSEFT(4000114, "profile-service:: Cannot accept yourself", HttpStatus.BAD_REQUEST),
+    ALREADY_FRIENDS(4000114, "profile-service:: You are already friends with this user", HttpStatus.BAD_REQUEST),
+    NO_SEND_REQUEST(4000115, "profile-service:: There is not request to accept", HttpStatus.BAD_REQUEST),
+    CANNOT_CANCEL_YOURSEFT(4000116, "profile-service:: Cannot cancel friend request to yourself", HttpStatus.BAD_REQUEST),
+    CANNOT_UNFRIEND_YOURSEFT(4000117, "profile-service:: Cannot unfriend yourself", HttpStatus.BAD_REQUEST),
+    NOT_FRIENDS(4000118, "profile-service:: You are not friends with this user", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 

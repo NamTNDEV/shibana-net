@@ -1,6 +1,6 @@
-package com.shibana.social_service.dto;
+package com.shibana.social_service.dto.response;
 
-public record ConnectionStatus(
+public record ConnectionStatusResponse(
         boolean isFollowing,
         boolean isFriended,
         boolean hasSentFriendRequest) {
