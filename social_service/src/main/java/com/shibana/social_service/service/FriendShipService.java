@@ -40,6 +40,10 @@ public class FriendShipService {
         switch (status) {
             case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
             case SENT_REQUEST -> log.warn("User {} has already sent a friend request to user {}", senderId, recieverId);
+            case RECEIVED_REQUEST -> {
+                log.warn("Cross-request detected! Auto-accepting friendship between {} and {}", senderId, recieverId);
+                connectionRepo.acceptFriendRequest(senderId, recieverId);
+            }
             case BE_REJECTED -> throw new AppException(ErrorCode.FRIEND_REQUEST_COOLDOWN);
             case FRIENDED -> throw new AppException(ErrorCode.ALREADY_FRIENDS);
             case READY -> connectionRepo.sendFriendRequest(senderId, recieverId);
@@ -84,6 +88,21 @@ public class FriendShipService {
             case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
             case NOT_FRIENDED -> throw new AppException(ErrorCode.NOT_FRIENDS);
             case FRIENDED -> connectionRepo.unfriend(unfrienderId, unfriendeeId);
+            default -> throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional("neo4jTransactionManager")
+    public void revokeFriendRequest(String revokeeId) {
+        String revokerId = SecurityUtils.getCurrentUserId();
+        if (revokeeId.equals(revokerId)) {
+            throw new AppException(ErrorCode.CANNOT_UNFRIEND_YOURSEFT);
+        }
+        var status = connectionRepo.checkRevokeFriendResponseEligibility(revokerId, revokeeId);
+        switch (status) {
+            case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
+            case NO_SEND_REQUEST -> throw new AppException(ErrorCode.NO_SEND_REQUEST);
+            case READY -> connectionRepo.revokeRequest(revokerId, revokeeId);
             default -> throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }

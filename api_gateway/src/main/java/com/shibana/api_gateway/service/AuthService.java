@@ -19,7 +19,6 @@ public class AuthService {
     IdentityClient identityClient;
 
     public Mono<ApiResponse<IntrospectResponse>> introspectToken(String request) {
-        log.info("Token is being introspected...");
         return identityClient.introspectToken(
                 IntrospectRequest.builder()
                         .token(request)
