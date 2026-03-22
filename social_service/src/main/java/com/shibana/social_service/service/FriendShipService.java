@@ -40,6 +40,7 @@ public class FriendShipService {
         switch (status) {
             case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
             case SENT_REQUEST -> log.warn("User {} has already sent a friend request to user {}", senderId, recieverId);
+            case BE_REJECTED -> throw new AppException(ErrorCode.FRIEND_REQUEST_COOLDOWN);
             case FRIENDED -> throw new AppException(ErrorCode.ALREADY_FRIENDS);
             case READY -> connectionRepo.sendFriendRequest(senderId, recieverId);
             default -> throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);

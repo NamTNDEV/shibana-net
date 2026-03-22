@@ -11,6 +11,7 @@ import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
@@ -54,18 +55,16 @@ public class ProfileService {
         var currentViewerId = SecurityUtils.getCurrentUserId();
         boolean isOwner = targetProfile.getUserId().equals(currentViewerId);
 
-        boolean isFriended = false;
+        FriendshipStatus friendshipStatus = FriendshipStatus.NONE;
         boolean isFollowing = false;
-        boolean hasSentFriendRequest = false;
 
         if (!isOwner) {
             var connectionStatuses = connectionsService.getConnectStatuses(currentViewerId, targetProfile.getUserId());
-            isFriended = connectionStatuses.isFriended();
+            friendshipStatus = connectionStatuses.friendshipStatus();
             isFollowing = connectionStatuses.isFollowing();
-            hasSentFriendRequest = connectionStatuses.hasSentFriendRequest();
         }
 
-        RelationshipContext relationshipContext = new RelationshipContext(isFriended, isFollowing, hasSentFriendRequest);
+        RelationshipContext relationshipContext = new RelationshipContext(isFollowing, friendshipStatus);
         ViewerContext viewerContext = new ViewerContext(isOwner, relationshipContext);
 
         return profileMapper.toProfileDetailResponse(targetProfile, fpList, viewerContext);

@@ -8,6 +8,7 @@ import com.shibana.social_service.dto.response.*;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.enums.PrivacyLevel;
 import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +68,7 @@ public abstract class ProfileMapper {
                         )
                 );
         boolean isOwner = context.isOwner();
-        boolean isFriended = context.relationshipContext().isFriended();
+        boolean isFriended = (context.relationshipContext().friendshipStatus() == FriendshipStatus.FRIENDED);
 
         response.setViewerContext(context);
         response.setBio(wrapField(profile.getBio(), ProfileField.BIO, fieldPrivacyMap, isOwner, isFriended));

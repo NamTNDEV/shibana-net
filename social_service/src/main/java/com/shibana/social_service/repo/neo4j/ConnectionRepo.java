@@ -35,6 +35,10 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
               CASE
                 WHEN reciever IS NULL THEN "PROFILE_NOT_FOUND"
                 WHEN EXISTS((sender)-[:REQUESTS_FRIEND]->(reciever)) THEN "SENT_REQUEST"
+                WHEN EXISTS {
+                      MATCH (reciever)-[rej:REJECTS]->(sender)
+                      WHERE rej.createdAt > datetime() - duration('P30D')
+                    } THEN 'BE_REJECTED'
                 WHEN EXISTS((sender)-[:FRIENDS]->(reciever)) THEN "FRIENDED"
                 ELSE "READY"
               END;""")
@@ -110,11 +114,27 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
     void unfriend(@Param("unfrienderId") String unfrienderId, @Param("unfriendeeId") String unfriendeeId);
 
     // --- Other ---
-    @Query("MATCH (target:user_profiles{userId:$targetId}) " +
-            "OPTIONAL MATCH (viewer:user_profiles{userId:$viewerId}) " +
-            "RETURN " +
-            "EXISTS ((viewer)-[:FOLLOWS]->(target)) AS isFollowing, " +
-            "EXISTS ((viewer)-[:FRIENDS]->(target)) AS isFriended, " +
-            "EXISTS ((viewer)-[:REQUESTS_FRIEND]->(target)) AS hasSentFriendRequest;")
+    @Query("""
+            MATCH (targeter:user_profiles{userId:$targetId})
+            OPTIONAL MATCH (viewer:user_profiles{userId:$viewerId})
+            RETURN
+                CASE
+                  WHEN viewer IS NULL THEN 'NONE'
+                  WHEN EXISTS((viewer)-[:FRIENDS]-(targeter)) THEN 'FRIENDED'
+                  WHEN EXISTS((viewer)-[:REQUESTS_FRIEND]->(targeter)) THEN 'SENT_REQUEST'
+                  WHEN EXISTS((targeter)-[:REQUESTS_FRIEND]->(viewer)) THEN 'RECEIVED_REQUEST'
+                  WHEN EXISTS {
+                    MATCH (reciever)-[rej:REJECTS]->(sender)
+                    WHERE rej.createdAt > datetime() - duration('P30D')
+                    } THEN 'BE_REJECTED'
+                  ELSE 'NONE'
+                END AS friendshipStatus,
+            
+                CASE
+                  WHEN viewer IS NULL THEN false
+                  WHEN EXISTS((viewer)-[:FOLLOWS]->(targeter)) THEN true
+                  ELSE false
+                END AS isFollowing
+            """)
     ConnectionStatusResponse getConnectionStatus(@Param("viewerId") String viewerId, @Param("targetId") String targetId);
 }

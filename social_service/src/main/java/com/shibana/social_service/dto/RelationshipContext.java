@@ -1,8 +1,9 @@
 package com.shibana.social_service.dto;
 
+import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
+
 public record RelationshipContext(
-    boolean isFriended,
     boolean isFollowing,
-    boolean hasSentFriendRequest
+    FriendshipStatus friendshipStatus
 ) {
 }
