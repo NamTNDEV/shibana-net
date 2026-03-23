@@ -12,8 +12,19 @@ import java.util.Optional;
 public interface ProfileRepo extends Neo4jRepository<Profile, String> {
     Optional<Profile> findByUserId(String userId);
 
-    @Query("MATCH (p:user_profiles) WHERE p.username = $username RETURN p")
-    Optional<Profile> findByUsername(@Param("username") String username);
+    @Query("""
+            MATCH (target:user_profiles{username:$username})
+            OPTIONAL MATCH (viewer:user_profiles{userId:$viewerId})
+            
+            WITH target, viewer
+            
+            WHERE viewer IS NULL
+            OR viewer = target
+            OR NOT EXISTS((viewer)-[:BLOCKS]-(target))
+            
+            RETURN target;
+            """)
+    Optional<Profile> findByUsername(@Param("username") String username, @Param("viewerId") String viewerId);
 
     @Query("MATCH (p:user_profiles) WHERE p.userId = $userId " +
             "RETURN p.id as id, " +

@@ -41,7 +41,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/social/profiles/.*",
             "/social/privacies/.*",
             "/social/follows/.*",
-            "/social/friendships/.*"
+            "/social/friendships/.*",
+            "/social/blocks/.*"
     };
 
     @Override

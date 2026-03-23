@@ -25,6 +25,9 @@ public enum ErrorCode {
     CANNOT_UNFRIEND_YOURSEFT(4000117, "profile-service:: Cannot unfriend yourself", HttpStatus.BAD_REQUEST),
     NOT_FRIENDS(4000118, "profile-service:: You are not friends with this user", HttpStatus.BAD_REQUEST),
     FRIEND_REQUEST_COOLDOWN(4000119, "profile-service:: You must wait before sending another friend request to this user in 30 days", HttpStatus.BAD_REQUEST),
+    CANNOT_BLOCK_YOURSEFT(40001120, "profile-service:: Cannot block yourself", HttpStatus.BAD_REQUEST),
+    ALREADY_BLOCKED(40001121, "profile-service:: You have already blocked this user", HttpStatus.BAD_REQUEST),
+    BE_BLOCKED(40001122, "profile-service:: You have been blocked by this user", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010105, "profile-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 

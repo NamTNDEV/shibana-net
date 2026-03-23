@@ -48,11 +48,12 @@ public class ProfileService {
     }
 
     public ProfileDetailResponse getProfileByUsername(String username) {
-        Profile targetProfile = profileRepo.findByUsername(username).orElseThrow(
+        var currentViewerId = SecurityUtils.getCurrentUserId();
+
+        Profile targetProfile = profileRepo.findByUsername(username, currentViewerId).orElseThrow(
                 () -> new AppException(ErrorCode.PROFILE_NOT_FOUND)
         );
-        var fpList = fieldPrivacyService.getListByUserId(targetProfile.getUserId());
-        var currentViewerId = SecurityUtils.getCurrentUserId();
+
         boolean isOwner = targetProfile.getUserId().equals(currentViewerId);
 
         FriendshipStatus friendshipStatus = FriendshipStatus.NONE;
@@ -63,6 +64,8 @@ public class ProfileService {
             friendshipStatus = connectionStatuses.friendshipStatus();
             isFollowing = connectionStatuses.isFollowing();
         }
+
+        var fpList = fieldPrivacyService.getListByUserId(targetProfile.getUserId());
 
         RelationshipContext relationshipContext = new RelationshipContext(isFollowing, friendshipStatus);
         ViewerContext viewerContext = new ViewerContext(isOwner, relationshipContext);

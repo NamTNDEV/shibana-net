@@ -39,6 +39,7 @@ public class FriendShipService {
         var status = connectionRepo.checkFriendRequestEligibility(senderId, recieverId);
         switch (status) {
             case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
+            case BE_BLOCKED -> throw new AppException(ErrorCode.BE_BLOCKED);
             case SENT_REQUEST -> log.warn("User {} has already sent a friend request to user {}", senderId, recieverId);
             case RECEIVED_REQUEST -> {
                 log.warn("Cross-request detected! Auto-accepting friendship between {} and {}", senderId, recieverId);
@@ -83,13 +84,7 @@ public class FriendShipService {
         if (unfriendeeId.equals(unfrienderId)) {
             throw new AppException(ErrorCode.CANNOT_UNFRIEND_YOURSEFT);
         }
-        var status = connectionRepo.checkUnfriendEligibility(unfrienderId, unfriendeeId);
-        switch (status) {
-            case PROFILE_NOT_FOUND -> throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
-            case NOT_FRIENDED -> throw new AppException(ErrorCode.NOT_FRIENDS);
-            case FRIENDED -> connectionRepo.unfriend(unfrienderId, unfriendeeId);
-            default -> throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+        connectionRepo.unfriend(unfrienderId, unfriendeeId);
     }
 
     @Transactional("neo4jTransactionManager")
