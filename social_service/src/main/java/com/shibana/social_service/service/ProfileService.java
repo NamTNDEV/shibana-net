@@ -6,6 +6,7 @@ import com.shibana.social_service.dto.request.AvatarUpdateRequest;
 import com.shibana.social_service.dto.request.CoverUpdateRequest;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.request.ProfileUpdateRequest;
+import com.shibana.social_service.dto.response.AuthorProfileResponse;
 import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.dto.response.ProfileDetailResponse;
@@ -145,4 +146,9 @@ public class ProfileService {
         }
     }
 
+    @Transactional("neo4jTransactionManager")
+    public AuthorProfileResponse getAuthorProfileByUserId(String userId) {
+        Profile profile = findByUserId(userId);
+        return profileMapper.toAuthorProfileResponse(profile);
+    }
 }

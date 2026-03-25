@@ -1,11 +1,12 @@
 package com.shibana.post_service.exception;
 
-import com.shibana.post_service.dto.response.ApiResponse;
+import com.shibana.post_service.model.dto.response.ApiResponse;
 import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -82,15 +83,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(exception.status()).body(response);
     }
 
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleInvalidFormatException(HttpMessageNotReadableException ex) {
+        ErrorCode errorCode = ErrorCode.INVALID_DATA_FORMAT_OR_ENUM_VALUE;
+        ApiResponse<ErrorCode> response = ApiResponse.<ErrorCode>builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
+
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
     private String mappingAttributesToString(String oldMessage, Map<String, Object> attributes) {
-        if(attributes == null || attributes.isEmpty()) {
+        if (attributes == null || attributes.isEmpty()) {
             return oldMessage;
         }
 
         String newMessage = oldMessage;
         for (var entry : attributes.entrySet()) {
             String key = entry.getKey();
-            if(key.equals("message") || key.equals("groups") || key.equals("payload")) {
+            if (key.equals("message") || key.equals("groups") || key.equals("payload")) {
                 continue;
             }
             String value = entry.getValue().toString();

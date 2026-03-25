@@ -30,19 +30,27 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     String apiPrefix;
 
     String[] excludedPaths = {
+            // --- Identity service ---
             "/identity/auth/login",
             "/identity/auth/register",
             "/identity/auth/refresh-token",
             "/identity/users/hello-world",
             "/identity/roles/.*",
             "/identity/permissions/.*",
+
+            // --- Media Service
             "/media/static/.*",
+
+            // --- Social Service
             "/social/me/.*",
             "/social/profiles/.*",
             "/social/privacies/.*",
             "/social/follows/.*",
             "/social/friendships/.*",
-            "/social/blocks/.*"
+            "/social/blocks/.*",
+
+            // --- Post Service
+            "/posts/.*",
     };
 
     @Override

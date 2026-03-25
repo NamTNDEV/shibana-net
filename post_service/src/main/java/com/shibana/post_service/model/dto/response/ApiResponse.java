@@ -1,4 +1,4 @@
-package com.shibana.post_service.dto.response;
+package com.shibana.post_service.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

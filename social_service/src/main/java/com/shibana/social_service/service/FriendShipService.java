@@ -1,5 +1,6 @@
 package com.shibana.social_service.service;
 
+import com.shibana.social_service.enums.friendship_status.FriendRequestEligibilityStatus;
 import com.shibana.social_service.enums.friendship_status.FriendResponseEligibilityStatus;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
@@ -100,5 +101,9 @@ public class FriendShipService {
             case READY -> connectionRepo.revokeRequest(revokerId, revokeeId);
             default -> throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public boolean checkIsFriend(String viewerId, String authorId) {
+        return connectionRepo.checkFriendRequestEligibility(viewerId, authorId) == FriendRequestEligibilityStatus.FRIENDED;
     }
 }

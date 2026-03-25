@@ -1,111 +1,92 @@
 package com.shibana.post_service.controller;
 
-import com.shibana.post_service.dto.response.ApiResponse;
-import com.shibana.post_service.dto.response.PageResponse;
-import com.shibana.post_service.dto.response.PostResponse;
-import com.shibana.post_service.dto.resquest.PostCreationRequest;
+import com.shibana.post_service.model.dto.response.ApiResponse;
+import com.shibana.post_service.model.dto.response.external.PostResponse;
+import com.shibana.post_service.model.dto.resquest.PostCreationRequestBody;
 import com.shibana.post_service.service.PostService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RestController
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class PostController {
     PostService postService;
 
-    @GetMapping("/test")
-    public ApiResponse<?> test() {
-        postService.test();
-        return ApiResponse.<String>builder()
-                .code(200)
-                .message("Test Controller is working...")
+    @PostMapping("")
+    public ApiResponse<PostResponse> createPost(
+            @Validated @RequestBody PostCreationRequestBody body,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Create Post Controller ::");
+        String authorId = jwt.getClaim("user_id");
+        return ApiResponse.<PostResponse>builder()
+                .code(201)
+                .data(postService.createPost(body, authorId))
+                .message("Post created successfully")
                 .build();
     }
 
-    @GetMapping("/")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<PostResponse>> getAllPostsByAdmin() {
-        log.info("Get All Posts Request...");
+    @GetMapping("/feed")
+    public ApiResponse<List<PostResponse>> getNewsfeed() {
+        log.info(":: Get Newsfeed Controller ::");
         return ApiResponse.<List<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getAllPosts())
+                .data(null)
                 .build();
     }
 
     @GetMapping("/{postId}")
-    @PreAuthorize("@postPolicy.canViewPost(#postId, authentication)")
-    public ApiResponse<PostResponse> getPostById(@PathVariable String postId) {
-        log.info("Get Post By Id Request...");
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Post retrieved successfully")
-                .data(postService.getPostById(postId))
-                .build();
-    }
-
-    @GetMapping("/my-posts")
-    public ApiResponse<PageResponse<PostResponse>> getAllMyPosts(
-            @PageableDefault(page = 0, size = 1, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable,
+    public ApiResponse<PostResponse> getPostById(
+            @PathVariable String postId,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        log.info("Get My Posts Request...");
-        String authorId = jwt.getClaimAsString("user_id");
-        Slice<PostResponse> postSlice = postService.getPostsByAuthorId(authorId, pageable);
-        return ApiResponse.<PageResponse<PostResponse>>builder()
+        log.info(":: Get Post By Id Controller ::");
+        String authorId = jwt.getClaim("user_id");
+        return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(
-                        PageResponse.<PostResponse>builder()
-                                .payload(postSlice.getContent())
-                                .page(pageable.getPageNumber())
-                                .size(pageable.getPageSize())
-                                .hasNext(postSlice.hasNext())
-//                                .totalElements(-1)
-//                                .totalPages(-1)
-                                .build()
-                )
-                .build();
-    }
-
-    @PostMapping("/")
-    public ApiResponse<PostResponse> createPost(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody PostCreationRequest postCreationRequest
-    ) {
-        log.info("Post Creation Request...");
-        String authorId = jwt.getClaimAsString("user_id");
-        return ApiResponse.<PostResponse>builder()
-                .code(201)
-                .message("Post created successfully")
-                .data(postService.createPost(postCreationRequest, authorId))
+                .data(postService.getPostById(postId, authorId))
                 .build();
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("@postPolicy.canViewPost(#postId, authentication)")
-    public ApiResponse<?> deletePost(@PathVariable String postId) {
-        log.info("Post Deletion Request...");
-        postService.deletePostById(postId);
-        return ApiResponse.builder()
+    public ApiResponse<Void> getAllPosts(@PathVariable String postId) {
+        log.info(":: Delete Post Controller ::");
+        return ApiResponse.<Void>builder()
                 .code(200)
-                .message("Post deleted successfully")
+                .message("Posts retrieved successfully")
+                .build();
+    }
+
+    @GetMapping("/users/{authorId}")
+    public ApiResponse<List<PostResponse>> getFeedByAuthorId(@PathVariable String authorId) {
+        log.info(":: Get Posts By Author Id Controller ::");
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Posts retrieved successfully")
+                .data(new ArrayList<>())
+                .build();
+    }
+
+    @GetMapping("/hashtags/{tag}")
+    public ApiResponse<List<PostResponse>> getFeedByHashtag(@PathVariable String tag) {
+        log.info(":: Get Posts By Hashtag Controller ::");
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Posts retrieved successfully")
+                .data(new ArrayList<>())
                 .build();
     }
 

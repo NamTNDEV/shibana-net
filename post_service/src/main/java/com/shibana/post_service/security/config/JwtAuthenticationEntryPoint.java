@@ -1,7 +1,7 @@
 package com.shibana.post_service.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shibana.post_service.dto.response.ApiResponse;
+import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

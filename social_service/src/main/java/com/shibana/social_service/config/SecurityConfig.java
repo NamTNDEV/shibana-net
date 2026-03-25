@@ -40,7 +40,6 @@ public class SecurityConfig {
     String[] PUBLIC_URLS = {
             "/internal/**",
             "/profiles/{username}",
-            "/profiles/test",
     };
 
     @Bean

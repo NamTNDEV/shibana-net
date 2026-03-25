@@ -26,7 +26,8 @@ public abstract class ProfileMapper {
     // --- Common mappers ---
     public abstract Profile toProfileEntity(ProfileCreationRequest request);
 
-//    public abstract void updateProfileFromRequest(@MappingTarget Profile entity, ProfileUpdateRequest request);
+    @Mapping(target = "displayName", source = "profile", qualifiedByName = "deriveDisplayName")
+    public abstract AuthorProfileResponse toAuthorProfileResponse(Profile profile);
 
     // --- Complex Mappers ---
     @Mapping(target = "avatar", source = "avatarMediaName", qualifiedByName = "toFullUrl")
@@ -104,5 +105,15 @@ public abstract class ProfileMapper {
             return null;
         }
         return mediaStaticUrl + mediaName;
+    }
+
+    @Named("deriveDisplayName")
+    protected String deriveDisplayName(Profile profile) {
+        if (profile.getFirstName() != null && !profile.getFirstName().isBlank()
+        && profile.getLastName() != null && !profile.getLastName().isBlank()) {
+            return profile.getLastName() + " " + profile.getFirstName();
+        } else {
+            return "Anonymous";
+        }
     }
 }

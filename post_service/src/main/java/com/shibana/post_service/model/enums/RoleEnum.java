@@ -1,4 +1,4 @@
-package com.shibana.post_service.enums;
+package com.shibana.post_service.model.enums;
 
 public enum RoleEnum {
     USER,

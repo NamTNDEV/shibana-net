@@ -42,7 +42,7 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                       MATCH (reciever)-[rej:REJECTS]->(sender)
                       WHERE rej.createdAt > datetime() - duration('P30D')
                     } THEN 'BE_REJECTED'
-                WHEN EXISTS((sender)-[:FRIENDS]->(reciever)) THEN "FRIENDED"
+                WHEN EXISTS((sender)-[:FRIENDS]-(reciever)) THEN "FRIENDED"
                 ELSE "READY"
               END;
             """)

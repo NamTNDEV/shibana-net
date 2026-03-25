@@ -2,6 +2,7 @@ package com.shibana.social_service.controller.internal_controller;
 
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.response.ApiResponse;
+import com.shibana.social_service.dto.response.AuthorProfileResponse;
 import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.service.ProfileService;
@@ -33,6 +34,15 @@ public class InternalProfileController {
                 .code(200)
                 .message("Profile retrieved successfully")
                 .data(profileService.getMetadataByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/{userId}/author-profile")
+    public ApiResponse<AuthorProfileResponse> getAuthorProfile(@PathVariable String userId) {
+        return ApiResponse.<AuthorProfileResponse>builder()
+                .code(200)
+                .message("Author profile retrieved successfully")
+                .data(profileService.getAuthorProfileByUserId(userId))
                 .build();
     }
 }

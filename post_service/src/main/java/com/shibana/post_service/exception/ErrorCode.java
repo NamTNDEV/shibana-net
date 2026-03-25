@@ -11,11 +11,14 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     CONTENT_REQUIRED(4000104, "post-service:: Bad request", HttpStatus.BAD_REQUEST),
     INVALID_CONTENT_LENGTH(4000204, "post-service:: Content length is not valid", HttpStatus.BAD_REQUEST),
+    INVALID_PRIVACY(4000304, "post-service:: Privacy is not valid", HttpStatus.BAD_REQUEST),
+    INVALID_DATA_FORMAT_OR_ENUM_VALUE(4000404, "post-service:: Invalid data format or enum value", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
     FORBIDDEN(4030104, "post-service:: You do not have permission", HttpStatus.FORBIDDEN),
     FORBIDDEN_OPERATION(4030204, "post-service:: You do not have permission to perform this operation", HttpStatus.FORBIDDEN),
+    POST_ACCESS_DENIED(4030304, "post-service:: You do not have permission to access this post", HttpStatus.FORBIDDEN),
 
     POST_NOT_FOUND(4040104, "post-service:: Post not found", HttpStatus.NOT_FOUND),
 

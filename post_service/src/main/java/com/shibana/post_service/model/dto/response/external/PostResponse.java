@@ -1,12 +1,11 @@
-package com.shibana.post_service.dto.response;
+package com.shibana.post_service.model.dto.response.external;
 
+import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -14,9 +13,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PostResponse {
-    String id;
-    String authorId;
     String content;
-    Instant createdAt;
-    Instant updatedAt;
+    PostPrivacyEnum privacy;
 }

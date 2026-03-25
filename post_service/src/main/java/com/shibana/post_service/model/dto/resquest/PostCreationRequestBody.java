@@ -1,7 +1,8 @@
-package com.shibana.post_service.dto.resquest;
+package com.shibana.post_service.model.dto.resquest;
 
-import com.shibana.post_service.exception.ErrorCode;
+import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +15,11 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class PostCreationRequest {
+public class PostCreationRequestBody {
     @NotBlank(message = "CONTENT_REQUIRED")
-    @Size(max = 5000, min = 1, message = "INVALID_CONTENT_LENGTH")
+    @Size(max = 1000, min = 1, message = "INVALID_CONTENT_LENGTH")
     String content;
+
+    @NotNull(message = "INVALID_PRIVACY")
+    PostPrivacyEnum privacy;
 }
