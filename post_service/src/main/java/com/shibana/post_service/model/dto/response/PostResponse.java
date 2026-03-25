@@ -1,4 +1,4 @@
-package com.shibana.post_service.model.dto.response.external;
+package com.shibana.post_service.model.dto.response;
 
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import lombok.AllArgsConstructor;

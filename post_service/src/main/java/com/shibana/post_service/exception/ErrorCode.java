@@ -19,6 +19,8 @@ public enum ErrorCode {
     FORBIDDEN(4030104, "post-service:: You do not have permission", HttpStatus.FORBIDDEN),
     FORBIDDEN_OPERATION(4030204, "post-service:: You do not have permission to perform this operation", HttpStatus.FORBIDDEN),
     POST_ACCESS_DENIED(4030304, "post-service:: You do not have permission to access this post", HttpStatus.FORBIDDEN),
+    POST_UPDATE_DENIED(4030404, "post-service:: You do not have permission to update this post", HttpStatus.FORBIDDEN),
+    POST_DELETE_DENIED(4030504, "post-service:: You do not have permission to delete this post", HttpStatus.FORBIDDEN),
 
     POST_NOT_FOUND(4040104, "post-service:: Post not found", HttpStatus.NOT_FOUND),
 
