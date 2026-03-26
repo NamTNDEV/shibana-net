@@ -1,6 +1,7 @@
 package com.shibana.post_service.http_client;
 
 import com.shibana.post_service.model.dto.response.ApiResponse;
+import com.shibana.post_service.model.dto.response.NewsfeedTargetResponse;
 import com.shibana.post_service.model.embedded.Author;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,12 @@ public interface SocialClient {
     @GetMapping("/profiles/{userId}/author-profile")
     ApiResponse<Author> getAuthorProfileByUserId(@PathVariable String userId);
 
-    @GetMapping("/friendships/check")
+    @GetMapping("/connections/check")
     ApiResponse<Boolean> checkFriendship(
             @RequestParam String viewerId,
             @RequestParam String authorId
     );
+
+    @GetMapping("/connections/newsfeed-targeters/{requesterId}")
+    ApiResponse<NewsfeedTargetResponse> getNewsfeedTargertersId(@PathVariable String requesterId);
 }

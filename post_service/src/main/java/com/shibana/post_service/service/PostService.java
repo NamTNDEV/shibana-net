@@ -24,7 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -45,6 +49,7 @@ public class PostService {
         Post post = Post.builder()
                 .content(content)
                 .author(author)
+                .hashtags(extractHashtagsFromContent(content))
                 .privacy(privacy)
                 .build();
         Post createdPost = postRepo.save(post);
@@ -146,7 +151,7 @@ public class PostService {
     }
 
     public PageResponse<PostResponse> getFeedByHashtag(String tag, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Slice<Post> feed = postRepo.getPostByHashtagAndPrivacy(tag, PostPrivacyEnum.PUBLIC, pageable);
         List<PostResponse> postResponses = feed.getContent().stream()
@@ -159,5 +164,74 @@ public class PostService {
                 .hasNext(feed.hasNext())
                 .payload(postResponses)
                 .build();
+    }
+
+
+    public PageResponse<PostResponse> getNewsfeed(String requesterId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        var targetData = socialClient.getNewsfeedTargertersId(requesterId).getData();
+        Set<String> friendIds = targetData.friendIds() != null ? targetData.friendIds() : Set.of();
+        Set<String> followingIds = targetData.followingIds() != null ? targetData.followingIds() : Set.of();
+
+        List<PostPrivacyEnum> allowedFriendPrivacies = List.of(PostPrivacyEnum.FRIENDS,  PostPrivacyEnum.PUBLIC);
+        List<PostPrivacyEnum> allowedFollowingPrivacies = List.of(PostPrivacyEnum.PUBLIC);
+
+        Slice<Post> posts = postRepo.getNewsfeed(
+                requesterId,
+                friendIds, allowedFriendPrivacies,
+                followingIds, allowedFollowingPrivacies,
+                pageable
+        );
+
+        List<Post> finalPosts = new ArrayList<>(posts.getContent());
+
+        if (page == 0 && finalPosts.size() < size) {
+            var fallbackPosts = getFallbackPosts(size, finalPosts);
+            finalPosts.addAll(fallbackPosts);
+        }
+
+        var feed = finalPosts.stream()
+                .map(postMapper::toPostResponse)
+                .toList();
+
+        return PageResponse.<PostResponse>builder()
+                .payload(feed)
+                .page(page)
+                .size(size)
+                .hasNext(posts.hasNext())
+                .build();
+    }
+
+    private List<Post> getFallbackPosts(int size, List<Post> finalPosts) {
+        int missingAmount = size - finalPosts.size();
+        Pageable fallbackPageable = PageRequest.of(0, missingAmount, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        List<String> existingPostIds = finalPosts.stream()
+                .map(Post::getId)
+                .toList();
+
+        List<PostPrivacyEnum> fallbackAllowedPrivacies = new ArrayList<>();
+        fallbackAllowedPrivacies.add(PostPrivacyEnum.PUBLIC);
+
+        Slice<Post> fallbackPosts = postRepo.getFallbackNewsfeed(existingPostIds, fallbackAllowedPrivacies, fallbackPageable);
+        return fallbackPosts.getContent();
+    }
+
+    private List<String> extractHashtagsFromContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<String> hashtags = new HashSet<>();
+        Pattern hashtagPattern = Pattern.compile("(?U)#\\w+");
+        Matcher hashtagMatcher = hashtagPattern.matcher(content);
+
+        while (hashtagMatcher.find()) {
+            String hashtag = hashtagMatcher.group().substring(1).toLowerCase();
+            hashtags.add(hashtag);
+        }
+
+        return new ArrayList<>(hashtags);
     }
 }

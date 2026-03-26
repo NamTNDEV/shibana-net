@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface PostRepo extends MongoRepository<Post, String> {
@@ -18,6 +19,36 @@ public interface PostRepo extends MongoRepository<Post, String> {
 
     // --- Feed ---
     Slice<Post> getPostsByAuthorUserIdAndPrivacyIn(String authorId, List<PostPrivacyEnum> allowedPrivacies, Pageable pageable);
+
+    @Query("""
+            {
+                "$or": [
+                    { "author.userId": ?0 },
+                    { "author.userId": { '$in': ?1 }, "privacy": { '$in': ?2 } },
+                    { "author.userId": { '$in': ?3 }, "privacy": { '$in': ?4 } }
+                ]
+            }
+            """)
+    Slice<Post> getNewsfeed(
+            String requesterId,
+            Set<String> friendIds,
+            List<PostPrivacyEnum> friendAllowedPrivacies,
+            Set<String> followingIds,
+            List<PostPrivacyEnum> followingAllowedPrivacies,
+            Pageable pageable
+    );
+
+    @Query("""
+            {
+                "_id": { '$nin': ?0 },
+                "privacy": { '$in': ?1 }
+            }
+           """)
+    Slice<Post> getFallbackNewsfeed(
+            List<String> existingPostIds,
+            List<PostPrivacyEnum> postPrivacyEnumList,
+            Pageable pageable
+    );
 
     // --- Hashtag ---
     @Query("{ 'hashtags': ?0, 'privacy': ?1 }")

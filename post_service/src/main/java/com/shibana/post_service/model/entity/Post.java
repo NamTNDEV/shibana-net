@@ -37,7 +37,6 @@ public class Post {
     String content;
     PostPrivacyEnum privacy;
 
-    @Indexed
     @Builder.Default
     List<String> hashtags = new ArrayList<>();
 
@@ -53,7 +52,6 @@ public class Post {
     @Builder.Default
     Integer commentCount = 0;
 
-    @Indexed(direction = IndexDirection.DESCENDING)
     @CreatedDate
     Instant createdAt;
 

@@ -1,6 +1,7 @@
 package com.shibana.social_service.repo.neo4j;
 
 import com.shibana.social_service.dto.response.ConnectionStatusResponse;
+import com.shibana.social_service.dto.response.NewsfeedTargetResponse;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.enums.block_status.BlockEligibilityStatus;
 import com.shibana.social_service.enums.friendship_status.FriendResponseEligibilityStatus;
@@ -184,4 +185,12 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                 END AS isFollowing
             """)
     ConnectionStatusResponse getConnectionStatus(@Param("viewerId") String viewerId, @Param("targetId") String targetId);
+
+    @Query("""
+            MATCH (me:user_profiles{userId:$requesterId})
+            WITH me, [(me)-[:FRIENDS]-(f) | f.userId] as friendIds
+            RETURN friendIds,
+            [(me)-[:FOLLOWS]->(fl) WHERE NOT (me)-[:FRIENDS]-(fl) | fl.userId] AS followingIds;
+            """)
+    NewsfeedTargetResponse getNewsfeedTargeters(@Param("requesterId") String requesterId);
 }

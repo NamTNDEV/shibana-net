@@ -82,12 +82,17 @@ public class PostController {
     }
 
     @GetMapping("/newsfeed")
-    public ApiResponse<List<PostResponse>> getNewsfeed() {
+    public ApiResponse<PageResponse<PostResponse>> getNewsfeed(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         log.info(":: Get Newsfeed Controller ::");
-        return ApiResponse.<List<PostResponse>>builder()
+        String requesterId = jwt.getClaim("user_id");
+        return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(null)
+                .data(postService.getNewsfeed(requesterId, page, size))
                 .build();
     }
 
@@ -117,7 +122,7 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getFeedByHashtag(tag, 0, 10))
+                .data(postService.getFeedByHashtag(tag, page, size))
                 .build();
     }
 
