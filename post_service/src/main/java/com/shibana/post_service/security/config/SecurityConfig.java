@@ -36,7 +36,9 @@ public class SecurityConfig {
     @Value("${jwt.access.secret-key}")
     String ACCESS_SECRET_KEY;
 
-    String[] PUBLIC_ENDPOINTS = new String[]{};
+    String[] PUBLIC_ENDPOINTS = new String[]{
+            "/{postId}/comments",
+    };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

@@ -10,8 +10,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.IndexDirection;
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -22,11 +22,11 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-//@CompoundIndexes({
-//        @CompoundIndex(name = "author_created_privacy_idx", def = "{'author.id': 1, 'createdAt': -1, 'privacy': 1}"),
-//        @CompoundIndex(name = "privacy_created_idx", def = "{'privacy': 1, 'createdAt': -1}"),
-//        @CompoundIndex(name = "hashtag_created_privacy_idx", def = "{'hashtags': 1, 'createdAt': -1, 'privacy': 1}"),
-//})
+@CompoundIndexes({
+        @CompoundIndex(name = "author_created_privacy_idx", def = "{'author.id': 1, 'createdAt': -1, 'privacy': 1}"),
+        @CompoundIndex(name = "privacy_created_idx", def = "{'privacy': 1, 'createdAt': -1}"),
+        @CompoundIndex(name = "hashtag_created_privacy_idx", def = "{'hashtags': 1, 'createdAt': -1, 'privacy': 1}"),
+})
 @Document(collection = "posts")
 public class Post {
     @Id

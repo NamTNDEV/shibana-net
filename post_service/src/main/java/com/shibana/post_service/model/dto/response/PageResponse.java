@@ -11,7 +11,7 @@ public record PageResponse<T>(
         int page,
         int size,
         Boolean hasNext,
-        Long totalElements,
+        int totalElements,
         Integer totalPages,
         List<T> payload
 ) {

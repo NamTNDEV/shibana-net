@@ -11,6 +11,7 @@ import com.shibana.post_service.model.dto.resquest.PostUpdateRequestBody;
 import com.shibana.post_service.model.embedded.Author;
 import com.shibana.post_service.model.entity.Post;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
+import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
 import com.shibana.post_service.repo.PostRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,11 +42,11 @@ public class PostService {
     SocialClient socialClient;
 
     @Transactional
-    public PostResponse createPost(PostCreationRequestBody body, String authorId) {
-        String content = body.getContent();
-        var privacy = body.getPrivacy();
+    public PostResponse createPost(PostCreationCommand  postCreationCommand) {
+        String content = postCreationCommand.content();
+        var privacy = postCreationCommand.privacy();
 
-        Author author = socialClient.getAuthorProfileByUserId(authorId).getData();
+        Author author = socialClient.getAuthorProfileByUserId(postCreationCommand.authorId()).getData();
         Post post = Post.builder()
                 .content(content)
                 .author(author)
@@ -56,7 +57,11 @@ public class PostService {
         return postMapper.toPostResponse(createdPost);
     }
 
-    public PostResponse getPostById(String postId, String authorId) {
+    public Post getPostById(String postId) {
+        return postRepo.getPostById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    public PostResponse getPostByIdFromViewer(String postId, String authorId) {
         Post post = postRepo.getPostById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
         if (post.getAuthor().getUserId().equals(authorId)) {
@@ -166,6 +171,9 @@ public class PostService {
                 .build();
     }
 
+    public boolean checkPostIsExist(String postId) {
+        return postRepo.getPostById(postId).isPresent();
+    }
 
     public PageResponse<PostResponse> getNewsfeed(String requesterId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));

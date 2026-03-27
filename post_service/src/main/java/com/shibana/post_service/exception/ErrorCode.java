@@ -13,6 +13,8 @@ public enum ErrorCode {
     INVALID_CONTENT_LENGTH(4000204, "post-service:: Content length is not valid", HttpStatus.BAD_REQUEST),
     INVALID_PRIVACY(4000304, "post-service:: Privacy is not valid", HttpStatus.BAD_REQUEST),
     INVALID_DATA_FORMAT_OR_ENUM_VALUE(4000404, "post-service:: Invalid data format or enum value", HttpStatus.BAD_REQUEST),
+    POST_ID_REQUIRED(4000504, "post-service:: Post id is required", HttpStatus.BAD_REQUEST),
+    INVALID_CONTENT_LENGHT(4000604, "post-service:: Content length must be between 1 and 300 characters", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
@@ -23,6 +25,7 @@ public enum ErrorCode {
     POST_DELETE_DENIED(4030504, "post-service:: You do not have permission to delete this post", HttpStatus.FORBIDDEN),
 
     POST_NOT_FOUND(4040104, "post-service:: Post not found", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND(4040204, "post-service:: Comment not found", HttpStatus.NOT_FOUND),
 
     INTERNAL_SERVER_ERROR(5000104, "post-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000204, "post-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),

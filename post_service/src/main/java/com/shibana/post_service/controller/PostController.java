@@ -5,6 +5,7 @@ import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.dto.resquest.PostCreationRequestBody;
 import com.shibana.post_service.model.dto.resquest.PostUpdateRequestBody;
+import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
 import com.shibana.post_service.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,11 +15,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Slf4j
 @RestController
-@RequestMapping("/posts")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class PostController {
@@ -31,9 +29,14 @@ public class PostController {
     ) {
         log.info(":: Create Post Controller ::");
         String authorId = jwt.getClaim("user_id");
+        var command = new PostCreationCommand(
+                body.getContent(),
+                authorId,
+                body.getPrivacy()
+        );
         return ApiResponse.<PostResponse>builder()
                 .code(201)
-                .data(postService.createPost(body, authorId))
+                .data(postService.createPost(command))
                 .message("Created post successfully")
                 .build();
     }
@@ -48,7 +51,7 @@ public class PostController {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Post retrieved successfully")
-                .data(postService.getPostById(postId, authorId))
+                .data(postService.getPostByIdFromViewer(postId, authorId))
                 .build();
     }
 

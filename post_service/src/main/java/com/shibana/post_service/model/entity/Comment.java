@@ -7,7 +7,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -19,7 +21,13 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Document(collection = "comments")
-//@CompoundIndex(name = "post_parent_created_idx", def = "{'postId': 1, 'parentCommentId': 1, createdAt: 1}")
+@CompoundIndexes({
+        // Get Parent comments, sorted by new to old
+        @CompoundIndex(name = "postId_path_createdAt_idx", def = "{'postId': 1, 'path': 1, 'createdAt': -1}"),
+
+        // Get Children comments, from old to new
+        @CompoundIndex(name = "postId_createdAt_path_idx", def = "{'postId': 1, 'createdAt': 1, 'path': 1}")
+})
 public class Comment {
     @Id
     @Builder.Default
@@ -28,20 +36,26 @@ public class Comment {
     String postId;
     Author author;
     String content;
-    String parentCommentId;
+    String path;
 
     @Builder.Default
-    List<Media> media =  new ArrayList<>();
+    Media media = null;
 
     @Builder.Default
-    Map<String, Integer> reactionStatus = new HashMap<>();
+    Map<String, Integer> reactionStats = new HashMap<>();
 
     @Builder.Default
     Integer replyCount = 0;
+
+    @Builder.Default
+    Integer level = 0;
 
     @CreatedDate
     Instant createdAt;
 
     @LastModifiedDate
     Instant updatedAt;
+
+    @Version
+    Integer version;
 }
