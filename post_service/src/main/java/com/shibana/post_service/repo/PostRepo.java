@@ -19,8 +19,8 @@ public interface PostRepo extends MongoRepository<Post, String> {
     Optional<Post> getPostById(String postId);
 
     @Query("{ '_id': ?0 }")
-    @Update("{ '$inc': { 'commentCount': 1 } }")
-    void incCommentCount(String postId);
+    @Update("{ '$inc': { 'commentCount': ?1 } }")
+    void adjustCommentCount(String postId, int commentCount);
 
     // --- Feed ---
     Slice<Post> getPostsByAuthorUserIdAndPrivacyIn(String authorId, List<PostPrivacyEnum> allowedPrivacies, Pageable pageable);

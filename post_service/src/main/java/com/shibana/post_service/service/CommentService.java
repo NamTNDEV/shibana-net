@@ -10,6 +10,7 @@ import com.shibana.post_service.model.embedded.Author;
 import com.shibana.post_service.model.entity.Comment;
 import com.shibana.post_service.model.entity.Post;
 import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
+import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
 import com.shibana.post_service.repo.CommentRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,7 +44,7 @@ public class CommentService {
             throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
 
-        Comment parentComment = getParentComment(command.parentId());
+        Comment parentComment = getCommentById(command.parentId());
 
         Author author = socialClient.getAuthorProfileByUserId(command.commnentorId()).getData();
 
@@ -60,6 +61,42 @@ public class CommentService {
 
         commentRepo.save(comment);
         syncCounts(comment);
+    }
+
+    @Transactional
+    public void deleteComment(String authorId, String commentId) {
+        Comment targetComment = safetyGetModifiedComment(commentId, authorId);
+
+        if(Boolean.TRUE.equals(targetComment.getIsDeleted())) {
+            throw new AppException(ErrorCode.COMMENT_DELETE_FAILED);
+        }
+
+        String basePath = targetComment.getPath() == null ? "," : targetComment.getPath();
+        String regexDescendants = "^" + basePath + targetComment.getId() + ",";
+
+        int deletedDescendantsCount = commentRepo.softDeleteDescendants(targetComment.getPostId(), regexDescendants);
+        
+        targetComment.setIsDeleted(true);
+        commentRepo.save(targetComment);
+
+        int delta = deletedDescendantsCount + 1;
+        postService.adjustCommentCount(targetComment.getPostId(), -delta);
+
+        if(targetComment.getPath() != null) {
+            List<String> ancestorIds = getAncestorIds(targetComment.getPath());
+            commentRepo.adjustReplyCountForAncestors(ancestorIds, -delta);
+        }
+    }
+
+    @Transactional
+    public void updateComment(CommentUpdateCommand command) {
+        String commentId = command.commentId();
+        String updaterId = command.updaterId();
+        Comment existedComment = safetyGetModifiedComment(commentId, updaterId);
+
+        existedComment.setIsEdited(true);
+        existedComment.setContent(command.content());
+        commentRepo.save(existedComment);
     }
 
     public PageResponse<CommentResponse> getRootCommentsByPostId(String postId, int page, int size) {
@@ -92,7 +129,7 @@ public class CommentService {
         if (parentCommentId == null || parentCommentId.isBlank()) {
             throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
         }
-        var parent = getParentComment(parentCommentId);
+        var parent = getCommentById(parentCommentId);
 
         String exactPath = generateCommentPath(parent);
         Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
@@ -120,22 +157,34 @@ public class CommentService {
         return parentComment.getPath() + parentComment.getId() + ",";
     }
 
-    Comment getParentComment(String parentId) {
-        Comment parentComment = null;
+    Comment getCommentById(String parentId) {
+        Comment comment = null;
         if (parentId != null && !parentId.isBlank()) {
-            parentComment = commentRepo.findById(parentId)
+            comment = commentRepo.findById(parentId)
                     .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
         }
-        return parentComment;
+        return comment;
     }
 
     void syncCounts(Comment comment) {
-        postService.increaseCommentCount(comment.getPostId());
+        postService.adjustCommentCount(comment.getPostId(), 1);
 
         if (comment.getPath() == null) return;
 
-        String clearPath = comment.getPath().substring(1, comment.getPath().length() - 1);
-        List<String> ancestorIds = Arrays.asList(clearPath.split(","));
+        List<String> ancestorIds = getAncestorIds(comment.getPath());
         commentRepo.incrementReplyCountForAncestors(ancestorIds);
+    }
+
+    Comment safetyGetModifiedComment (String commentId, String modifierId) {
+        Comment comment = getCommentById(commentId);
+        if (!comment.getAuthor().getUserId().equals(modifierId)) {
+            throw new AppException(ErrorCode.COMMENT_UPDATE_DENIED);
+        }
+        return comment;
+    }
+
+    List<String> getAncestorIds(String commentPath) {
+        String clearPath = commentPath.substring(1, commentPath.length() - 1);
+        return Arrays.asList(clearPath.split(","));
     }
 }

@@ -4,7 +4,9 @@ import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.dto.resquest.CommentCreationRequestBody;
+import com.shibana.post_service.model.dto.resquest.CommentUpdateRequestBody;
 import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
+import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
 import com.shibana.post_service.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -68,6 +70,41 @@ public class CommentController {
                 .code(200)
                 .message("Retrieve replies successfully")
                 .data(commentService.getRepliesByCommentId(postId, commentId, page, size))
+                .build();
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ApiResponse<Void> updateComment(
+            @PathVariable String commentId,
+            @RequestBody CommentUpdateRequestBody body,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Update comment controller ::");
+        String authorId = jwt.getClaim("user_id").toString();
+        CommentUpdateCommand command = new CommentUpdateCommand(
+                authorId,
+                commentId,
+                body.getContent()
+        );
+
+        commentService.updateComment(command);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Update comment successfully")
+                .build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ApiResponse<Void> deleteComment(
+            @PathVariable String commentId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Delete comment controller ::");
+        String authorId = jwt.getClaim("user_id").toString();
+        commentService.deleteComment(authorId, commentId);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Delete comment successfully")
                 .build();
     }
 }

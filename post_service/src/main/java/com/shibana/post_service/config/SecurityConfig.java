@@ -1,4 +1,4 @@
-package com.shibana.post_service.security.config;
+package com.shibana.post_service.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +39,7 @@ public class SecurityConfig {
     String[] PUBLIC_ENDPOINTS = new String[]{
             "/{postId}/comments",
             "/{postId}/comments/{commentId}/replies",
+            "/comments/{commentId}",
     };
 
     @Bean

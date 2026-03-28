@@ -44,6 +44,12 @@ public class Comment {
     @Builder.Default
     Integer level = 0;
 
+    @Builder.Default
+    Boolean isEdited = false;
+
+    @Builder.Default
+    Boolean isDeleted = false;
+
     @CreatedDate
     Instant createdAt;
 

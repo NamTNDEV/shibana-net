@@ -3,11 +3,13 @@ package com.shibana.post_service.repo;
 import com.shibana.post_service.model.entity.Comment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.mongodb.repository.DeleteQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -21,4 +23,15 @@ public interface CommentRepo extends MongoRepository<Comment, String> {
 
     @Query("{ 'postId': ?0, 'path': ?1 }")
     Slice<Comment> findDirectReplies(String postId, String exactPath, Pageable pageable);
+
+    @Query("{ 'postId': ?0, 'path': { '$regex': ?1 } }")
+    @Update("{ '$set': { 'isDeleted': true } }")
+    int softDeleteDescendants(String postId, String regexPath);
+
+    @Query("{ '_id': { '$in': ?0 } }")
+    @Update("{ '$inc': { 'replyCount': ?1 } }")
+    void adjustReplyCountForAncestors(List<String> ancestorIds, int delta);
+
+    @DeleteQuery("{ 'isDeleted': true, 'updatedAt': { '$lt': ?0 } }")
+    int hardDeleteOldDeletedComment(Instant cutoffTime);
 }

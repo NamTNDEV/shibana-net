@@ -175,8 +175,8 @@ public class PostService {
         return postRepo.getPostById(postId).isPresent();
     }
 
-    public void increaseCommentCount(String postId) {
-        postRepo.incCommentCount(postId);
+    public void adjustCommentCount(String postId, int delta) {
+        postRepo.adjustCommentCount(postId,  delta);
     }
 
     public PageResponse<PostResponse> getNewsfeed(String requesterId, int page, int size) {
