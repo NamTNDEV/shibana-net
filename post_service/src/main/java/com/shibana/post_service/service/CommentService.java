@@ -20,6 +20,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -41,11 +43,7 @@ public class CommentService {
             throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
 
-        Comment parentComment = null;
-        if (command.parentId() != null && !command.parentId().isBlank()) {
-            parentComment = commentRepo.findById(command.parentId())
-                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-        }
+        Comment parentComment = getParentComment(command.parentId());
 
         Author author = socialClient.getAuthorProfileByUserId(command.commnentorId()).getData();
 
@@ -61,10 +59,7 @@ public class CommentService {
                 .build();
 
         commentRepo.save(comment);
-
-        if (parentComment != null && parentComment.getId() != null) {
-            commentRepo.incReplyCount(parentComment.getId());
-        }
+        syncCounts(comment);
     }
 
     public PageResponse<CommentResponse> getRootCommentsByPostId(String postId, int page, int size) {
@@ -96,5 +91,24 @@ public class CommentService {
         }
 
         return parentComment.getPath() + parentComment.getId() + ",";
+    }
+
+    Comment getParentComment(String parentId) {
+        Comment parentComment = null;
+        if (parentId != null && !parentId.isBlank()) {
+            parentComment = commentRepo.findById(parentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+        }
+        return parentComment;
+    }
+
+    void syncCounts(Comment comment) {
+        postService.increaseCommentCount(comment.getPostId());
+
+        if(comment.getPath() == null) return;
+
+        String clearPath = comment.getPath().substring(1, comment.getPath().length() - 1);
+        List<String> ancestorIds = Arrays.asList(clearPath.split(","));
+        commentRepo.incrementReplyCountForAncestors(ancestorIds);
     }
 }

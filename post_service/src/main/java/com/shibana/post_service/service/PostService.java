@@ -175,6 +175,10 @@ public class PostService {
         return postRepo.getPostById(postId).isPresent();
     }
 
+    public void increaseCommentCount(String postId) {
+        postRepo.incCommentCount(postId);
+    }
+
     public PageResponse<PostResponse> getNewsfeed(String requesterId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 

@@ -8,11 +8,13 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CommentRepo extends MongoRepository<Comment, String> {
-    @Query("{ '_id': ?0 }")
+    @Query("{ '_id': { '$in': ?0 } }")
     @Update("{ '$inc': { 'replyCount': 1 } }")
-    void incReplyCount(String commentId);
+    void incrementReplyCountForAncestors(List<String> ancestorIds);
 
     @Query("{ 'postId': ?0, 'path': null }")
     Slice<Comment> findRootCommentsByPostId(String postId, Pageable  pageable);

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +17,10 @@ import java.util.Set;
 public interface PostRepo extends MongoRepository<Post, String> {
     // --- Post ---
     Optional<Post> getPostById(String postId);
+
+    @Query("{ '_id': ?0 }")
+    @Update("{ '$inc': { 'commentCount': 1 } }")
+    void incCommentCount(String postId);
 
     // --- Feed ---
     Slice<Post> getPostsByAuthorUserIdAndPrivacyIn(String authorId, List<PostPrivacyEnum> allowedPrivacies, Pageable pageable);
