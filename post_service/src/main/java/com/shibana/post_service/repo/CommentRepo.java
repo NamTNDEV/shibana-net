@@ -18,4 +18,7 @@ public interface CommentRepo extends MongoRepository<Comment, String> {
 
     @Query("{ 'postId': ?0, 'path': null }")
     Slice<Comment> findRootCommentsByPostId(String postId, Pageable  pageable);
+
+    @Query("{ 'postId': ?0, 'path': ?1 }")
+    Slice<Comment> findDirectReplies(String postId, String exactPath, Pageable pageable);
 }

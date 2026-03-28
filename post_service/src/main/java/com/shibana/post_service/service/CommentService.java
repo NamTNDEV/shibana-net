@@ -15,12 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -83,6 +83,33 @@ public class CommentService {
                 .build();
     }
 
+    public PageResponse<CommentResponse> getRepliesByCommentId(String postId, String parentCommentId, int page, int size) {
+        if (postId == null || postId.isBlank()) {
+            throw new AppException(ErrorCode.POST_NOT_FOUND);
+        }
+        Post post = postService.getPostById(postId);
+
+        if (parentCommentId == null || parentCommentId.isBlank()) {
+            throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+        var parent = getParentComment(parentCommentId);
+
+        String exactPath = generateCommentPath(parent);
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+        Slice<Comment> replies = commentRepo.findDirectReplies(post.getId(), exactPath, pageRequest);
+        List<CommentResponse> commentResponses = replies.getContent().stream()
+                .map(commentMapper::toCommentResponse)
+                .toList();
+
+        return PageResponse.<CommentResponse>builder()
+                .hasNext(replies.hasNext())
+                .page(page)
+                .size(size)
+                .payload(commentResponses)
+                .build();
+    }
+
+    // --- Helpers ---
     String generateCommentPath(Comment parentComment) {
         if (parentComment == null) {
             return null;
@@ -105,7 +132,7 @@ public class CommentService {
     void syncCounts(Comment comment) {
         postService.increaseCommentCount(comment.getPostId());
 
-        if(comment.getPath() == null) return;
+        if (comment.getPath() == null) return;
 
         String clearPath = comment.getPath().substring(1, comment.getPath().length() - 1);
         List<String> ancestorIds = Arrays.asList(clearPath.split(","));

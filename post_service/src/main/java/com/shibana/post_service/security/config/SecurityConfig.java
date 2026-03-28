@@ -38,6 +38,7 @@ public class SecurityConfig {
 
     String[] PUBLIC_ENDPOINTS = new String[]{
             "/{postId}/comments",
+            "/{postId}/comments/{commentId}/replies",
     };
 
     @Bean

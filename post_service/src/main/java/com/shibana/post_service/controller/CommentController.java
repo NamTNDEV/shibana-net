@@ -49,7 +49,6 @@ public class CommentController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info(":: Get comments controller ::");
-
         return ApiResponse.<PageResponse<CommentResponse>>builder()
                 .code(200)
                 .message("Retrieve comments successfully")
@@ -57,4 +56,18 @@ public class CommentController {
                 .build();
     }
 
+    @GetMapping("/{postId}/comments/{commentId}/replies")
+    public ApiResponse<PageResponse<CommentResponse>> getReplies(
+            @PathVariable String postId,
+            @PathVariable String commentId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info(":: Get replies controller ::");
+        return ApiResponse.<PageResponse<CommentResponse>>builder()
+                .code(200)
+                .message("Retrieve replies successfully")
+                .data(commentService.getRepliesByCommentId(postId, commentId, page, size))
+                .build();
+    }
 }

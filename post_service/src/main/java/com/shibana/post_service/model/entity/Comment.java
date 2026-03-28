@@ -21,13 +21,7 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Document(collection = "comments")
-@CompoundIndexes({
-        // Get Parent comments, sorted by new to old
-        @CompoundIndex(name = "postId_path_createdAt_idx", def = "{'postId': 1, 'path': 1, 'createdAt': -1}"),
-
-        // Get Children comments, from old to new
-        @CompoundIndex(name = "postId_createdAt_path_idx", def = "{'postId': 1, 'createdAt': 1, 'path': 1}")
-})
+@CompoundIndex(name = "postId_path_createdAt_idx", def = "{'postId': 1, 'path': 1, 'createdAt': -1}")
 public class Comment {
     @Id
     @Builder.Default
