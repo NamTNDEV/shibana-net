@@ -1,37 +1,40 @@
-name: kafka_cluster
-
 services:
   kafka:
-    image: apache/kafka:latest
-    container_name: kafka
-    hostname: kafka
+    # 1. Hàng chính chủ, có version đàng hoàng
+    image: apache/kafka:3.7.0
+    container_name: shibana-kafka
+
+    # 1.1 BÙA CHÚ VƯỢT QUYỀN: Ép chạy bằng quyền Root để sửa lỗi AccessDenied
+    user: "root"
+
+    # 2. Mở đúng 1 cửa cho máy Host (IntelliJ, DataGrip) chọc vào
     ports:
-      - "9094:9094"
+      - "9092:9092"
+
+    # 3. Gắn ổ cứng ảo bảo vệ data
+    volumes:
+      - kafka_data:/tmp/kafka-logs
+
     environment:
-      # ===== KRaft (no Zookeeper) =====
-      KAFKA_NODE_ID: 0
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-
-      # ===== listeners: internal + controller + external =====
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
-
-      # ===== dev single-broker must-have (tránh lỗi/warn) =====
+      # --- CỤM 1: CĂN CƯỚC & KRAFT (Không cần Zookeeper) ---
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+      
+      # --- CỤM 2: MẠNG LƯỚI TỐI GIẢN (Chỉ tiếp khách từ máy Host) ---
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENERS: 'BROKER://:9092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'BROKER://localhost:9092'
+      # Vì chỉ có 1 broker, nó tự dùng kênh BROKER để giao tiếp nội bộ luôn
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'BROKER'
+      
+      # --- CỤM 3: BÙA CHÚ TỐI ƯU LOCAL (Chống báo lỗi & Hack tốc độ) ---
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "8089:8080"
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-    depends_on:
-      - kafka
+# Khai báo Volume
+volumes:
+  kafka_data:
