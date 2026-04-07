@@ -21,7 +21,10 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Document(collection = "comments")
-@CompoundIndex(name = "postId_path_createdAt_idx", def = "{'postId': 1, 'path': 1, 'createdAt': -1}")
+@CompoundIndexes({
+        @CompoundIndex(name = "author_idx", def = "{'author.userId': 1}"),
+        @CompoundIndex(name = "postId_path_createdAt_idx", def = "{'postId': 1, 'path': 1, 'createdAt': -1}"),
+})
 public class Comment {
     @Id
     @Builder.Default

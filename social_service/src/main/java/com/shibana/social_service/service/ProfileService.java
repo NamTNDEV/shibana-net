@@ -11,16 +11,20 @@ import com.shibana.social_service.dto.response.ProfileMetadataResponse;
 import com.shibana.social_service.dto.response.ProfileResponse;
 import com.shibana.social_service.dto.response.ProfileDetailResponse;
 import com.shibana.social_service.entity.Profile;
-import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
+import com.shibana.social_service.messaging.dto.payloads.AvatarUpdatedPayload;
+import com.shibana.social_service.messaging.event.AvatarUpdatedLocalEvent;
+import com.shibana.social_service.messaging.publisher.ProfileMessagePublisher;
 import com.shibana.social_service.repo.neo4j.ProfileRepo;
 import com.shibana.social_service.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,7 @@ public class ProfileService {
     PrivacyService privacyService;
     FieldPrivacyService fieldPrivacyService;
     ConnectionsService connectionsService;
+    ApplicationEventPublisher eventPublisher;
 
     private Profile findByUserId(String userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
@@ -128,6 +133,17 @@ public class ProfileService {
         if (oldAvatarName != null) {
             log.info("Deleted old avatar media with id {}", oldAvatarName);
         }
+
+        AvatarUpdatedPayload avatarUpdatedPayload = AvatarUpdatedPayload.builder()
+                .userId(userId)
+                .avatarMediaName(newAvatarName)
+                .avatarPositionX(request.getAvatarPositionX())
+                .avatarPositionY(request.getAvatarPositionY())
+                .avatarScale(request.getAvatarScale())
+                .build();
+
+
+        eventPublisher.publishEvent(new AvatarUpdatedLocalEvent(avatarUpdatedPayload));
     }
 
     @Transactional("neo4jTransactionManager")

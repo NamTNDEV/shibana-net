@@ -23,7 +23,7 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @CompoundIndexes({
-        @CompoundIndex(name = "author_created_privacy_idx", def = "{'author.id': 1, 'createdAt': -1, 'privacy': 1}"),
+        @CompoundIndex(name = "author_created_privacy_idx", def = "{'author.userId': 1, 'createdAt': -1, 'privacy': 1}"),
         @CompoundIndex(name = "privacy_created_idx", def = "{'privacy': 1, 'createdAt': -1}"),
         @CompoundIndex(name = "hashtag_created_privacy_idx", def = "{'hashtags': 1, 'createdAt': -1, 'privacy': 1}"),
 })

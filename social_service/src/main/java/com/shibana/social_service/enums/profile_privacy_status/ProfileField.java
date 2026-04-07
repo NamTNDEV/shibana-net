@@ -1,4 +1,4 @@
-package com.shibana.social_service.enums;
+package com.shibana.social_service.enums.profile_privacy_status;
 
 import com.shibana.social_service.entity.Profile;
 import lombok.extern.slf4j.Slf4j;

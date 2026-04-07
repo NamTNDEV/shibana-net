@@ -1,8 +1,8 @@
 package com.shibana.social_service.service;
 
 import com.shibana.social_service.entity.FieldPrivacy;
-import com.shibana.social_service.enums.PrivacyLevel;
-import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
+import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import com.shibana.social_service.repo.jpa.FieldPrivacyRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

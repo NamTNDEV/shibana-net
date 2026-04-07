@@ -2,7 +2,7 @@ package com.shibana.social_service.repo.jpa;
 
 import com.shibana.social_service.dto.response.FieldPrivacyResponse;
 import com.shibana.social_service.entity.FieldPrivacy;
-import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

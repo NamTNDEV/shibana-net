@@ -1,7 +1,7 @@
 package com.shibana.social_service.controller.public_controller;
 
 import com.shibana.social_service.dto.response.ApiResponse;
-import com.shibana.social_service.enums.PrivacyLevel;
+import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
 import com.shibana.social_service.service.PrivacyService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

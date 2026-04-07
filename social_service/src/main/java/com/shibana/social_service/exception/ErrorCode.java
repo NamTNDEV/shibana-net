@@ -39,6 +39,8 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(5000105, "profile-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000106, "profile-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_JSON_PARSING(5000107, "profile-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
+    SERIALIZATION_ERROR(5000108, "profile-service:: Serialization error", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     int code;

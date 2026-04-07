@@ -1,7 +1,7 @@
 package com.shibana.social_service.entity;
 
-import com.shibana.social_service.enums.PrivacyLevel;
-import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
+import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import jakarta.persistence.*;
         import lombok.*;
         import lombok.experimental.FieldDefaults;

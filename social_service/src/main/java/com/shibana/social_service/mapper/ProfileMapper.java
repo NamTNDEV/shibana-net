@@ -1,13 +1,11 @@
 package com.shibana.social_service.mapper;
 
-import com.shibana.social_service.dto.PrivacyContext;
 import com.shibana.social_service.dto.ViewerContext;
 import com.shibana.social_service.dto.request.ProfileCreationRequest;
-import com.shibana.social_service.dto.request.ProfileUpdateRequest;
 import com.shibana.social_service.dto.response.*;
 import com.shibana.social_service.entity.Profile;
-import com.shibana.social_service.enums.PrivacyLevel;
-import com.shibana.social_service.enums.ProfileField;
+import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
+import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.*;

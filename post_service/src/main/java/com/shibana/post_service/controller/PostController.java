@@ -6,7 +6,9 @@ import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.dto.resquest.PostCreationRequestBody;
 import com.shibana.post_service.model.dto.resquest.PostUpdateRequestBody;
 import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
-import com.shibana.post_service.service.PostService;
+import com.shibana.post_service.service.NewsfeedService;
+import com.shibana.post_service.service.PostCommandService;
+import com.shibana.post_service.service.PostQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class PostController {
-    PostService postService;
+    NewsfeedService newsfeedService;
+    PostQueryService postQueryService;
+    PostCommandService  postCommandService;
 
     @PostMapping("")
     public ApiResponse<PostResponse> createPost(
@@ -36,7 +40,7 @@ public class PostController {
         );
         return ApiResponse.<PostResponse>builder()
                 .code(201)
-                .data(postService.createPost(command))
+                .data(postCommandService.createPost(command))
                 .message("Created post successfully")
                 .build();
     }
@@ -51,7 +55,7 @@ public class PostController {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Post retrieved successfully")
-                .data(postService.getPostByIdFromViewer(postId, authorId))
+                .data(postQueryService.getPostByIdFromViewer(postId, authorId))
                 .build();
     }
 
@@ -63,7 +67,7 @@ public class PostController {
     ) {
         log.info(":: Update Post Controller ::");
         String authorId = jwt.getClaim("user_id");
-        postService.updatePostById(postId, authorId, body);
+        postCommandService.updatePostById(postId, authorId, body);
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Updated post successfully")
@@ -77,7 +81,7 @@ public class PostController {
     ) {
         log.info(":: Delete Post Controller ::");
         String authorId = jwt.getClaim("user_id");
-        postService.deleteById(postId, authorId);
+        postCommandService.deleteById(postId, authorId);
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Deleted post successfully")
@@ -95,7 +99,7 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getNewsfeed(requesterId, page, size))
+                .data(newsfeedService.getNewsfeed(requesterId, page, size))
                 .build();
     }
 
@@ -111,7 +115,7 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getFeedByAuthorId(authorId, requesterId, page, size))
+                .data(postQueryService.getFeedByAuthorId(authorId, requesterId, page, size))
                 .build();
     }
 
@@ -125,7 +129,7 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(postService.getFeedByHashtag(tag, page, size))
+                .data(postQueryService.getFeedByHashtag(tag, page, size))
                 .build();
     }
 

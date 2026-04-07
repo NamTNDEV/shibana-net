@@ -48,6 +48,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/social/follows/.*",
             "/social/friendships/.*",
             "/social/blocks/.*",
+            "/social/kafka/.*",
 
             // --- Post Service
             "/posts/.*",

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,6 +22,19 @@ public interface PostRepo extends MongoRepository<Post, String> {
     @Query("{ '_id': ?0 }")
     @Update("{ '$inc': { 'commentCount': ?1 } }")
     void adjustCommentCount(String postId, int commentCount);
+
+    @Query("{ 'author.userId': ?0 }")
+    @Update("""
+                { '$set':
+                    {  'author.avatarMediaName': ?1,
+                       'author.avatarScale': ?2,
+                       'author.avatarPositionX': ?3,
+                       'author.avatarPositionY': ?4,
+                       'updatedAt': ?5
+                    }
+                }
+            """)
+    void updateAuthorAvatar(String authorId, String avatarMediaName, Double avatarScale, Double avatarPositionX, Double avatarPositionY, Instant updatedAt);
 
     // --- Feed ---
     Slice<Post> getPostsByAuthorUserIdAndPrivacyIn(String authorId, List<PostPrivacyEnum> allowedPrivacies, Pageable pageable);

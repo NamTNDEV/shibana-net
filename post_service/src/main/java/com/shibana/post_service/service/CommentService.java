@@ -32,7 +32,8 @@ import java.util.List;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CommentService {
     CommentRepo commentRepo;
-    PostService postService;
+    PostQueryService postQueryService;
+    PostCommandService postCommandService;
     SocialClient socialClient;
     CommentMapper commentMapper;
 
@@ -40,7 +41,7 @@ public class CommentService {
     public void createComment(CommentCreationCommand command) {
         log.info(":: Create comment controller ::");
 
-        if (!postService.checkPostIsExist(command.postId())) {
+        if (!postQueryService.checkPostIsExist(command.postId())) {
             throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
 
@@ -80,7 +81,7 @@ public class CommentService {
         commentRepo.save(targetComment);
 
         int delta = deletedDescendantsCount + 1;
-        postService.adjustCommentCount(targetComment.getPostId(), -delta);
+        postCommandService.adjustCommentCount(targetComment.getPostId(), -delta);
 
         if(targetComment.getPath() != null) {
             List<String> ancestorIds = getAncestorIds(targetComment.getPath());
@@ -104,7 +105,7 @@ public class CommentService {
             throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
 
-        Post post = postService.getPostById(postId);
+        Post post = postQueryService.getPostById(postId);
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Slice<Comment> commentSlice = commentRepo.findRootCommentsByPostId(post.getId(), pageRequest);
@@ -124,7 +125,7 @@ public class CommentService {
         if (postId == null || postId.isBlank()) {
             throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
-        Post post = postService.getPostById(postId);
+        Post post = postQueryService.getPostById(postId);
 
         if (parentCommentId == null || parentCommentId.isBlank()) {
             throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
@@ -167,7 +168,7 @@ public class CommentService {
     }
 
     void syncCounts(Comment comment) {
-        postService.adjustCommentCount(comment.getPostId(), 1);
+        postCommandService.adjustCommentCount(comment.getPostId(), 1);
 
         if (comment.getPath() == null) return;
 

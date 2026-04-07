@@ -16,6 +16,7 @@ public enum ErrorCode {
     POST_ID_REQUIRED(4000504, "post-service:: Post id is required", HttpStatus.BAD_REQUEST),
     INVALID_CONTENT_LENGHT(4000604, "post-service:: Content length must be between 1 and 300 characters", HttpStatus.BAD_REQUEST),
     COMMENT_DELETE_FAILED(4000704, "post-service:: Failed to delete comment", HttpStatus.BAD_REQUEST),
+    INVALID_AVATAR_UPDATED_MESSAGE_PAYLOAD(4000804, "post-service:: Invalid avatar updated message payload", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
@@ -32,6 +33,7 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(5000104, "post-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000204, "post-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_JSON_PARSING(5000404, "post-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     int code;
