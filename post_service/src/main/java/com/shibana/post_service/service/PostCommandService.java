@@ -16,7 +16,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -27,7 +26,6 @@ public class PostCommandService {
     PostRepo postRepo;
     PostMapper postMapper;
     SocialClient socialClient;
-    MongoTemplate mongoTemplate;
 
     public PostResponse createPost(PostCreationCommand postCreationCommand) {
         String content = postCreationCommand.content();
