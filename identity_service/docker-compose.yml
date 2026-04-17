@@ -1,0 +1,17 @@
+services:
+  identity-db: # Service Name (Dùng làm Hostname nội bộ)
+    image: postgres:16-alpine # Chốt bản 16 ổn định, siêu nhẹ
+    container_name: pg_shibaba_identity # Tên container dễ nhớ
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123123
+      POSTGRES_DB: identity_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pg_identity_data:/var/lib/postgresql/data
+
+volumes:
+  pg_identity_data:

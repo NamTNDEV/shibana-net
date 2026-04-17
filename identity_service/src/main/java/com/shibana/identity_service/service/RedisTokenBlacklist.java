@@ -26,7 +26,6 @@ public class RedisTokenBlacklist {
         if(ttl.isNegative() || ttl.isZero()) return;
         String key = buildKey(jti);
         stringRedisTemplate.opsForValue().set(key, "0", ttl);
-        log.info(":: Token was added to blacklist ::");
     }
 
     public boolean isBlacklisted(String jti) {

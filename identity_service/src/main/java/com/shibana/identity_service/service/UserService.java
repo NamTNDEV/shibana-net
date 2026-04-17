@@ -1,8 +1,6 @@
 package com.shibana.identity_service.service;
 
-import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
-import com.shibana.identity_service.dto.request.UserUpdateRequest;
 import com.shibana.identity_service.dto.response.MyAccountResponse;
 import com.shibana.identity_service.dto.response.ProfileMetadataResponse;
 import com.shibana.identity_service.entity.Role;
@@ -10,7 +8,6 @@ import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.exception.AppException;
 import com.shibana.identity_service.exception.ErrorCode;
 import com.shibana.identity_service.mapper.UserMapper;
-import com.shibana.identity_service.message.producer.NotificationEventPublisher;
 import com.shibana.identity_service.repository.UserRepo;
 import com.shibana.identity_service.repository.http_client.ProfileClient;
 import jakarta.transaction.Transactional;
@@ -24,8 +21,8 @@ import org.springframework.stereotype.Service;
 import com.shibana.identity_service.enums.RoleEnum;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +34,8 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
     ProfileClient profileClient;
-    NotificationEventPublisher notificationEventPublisher;
 
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
-    }
-
-    public User getUserById(String id) {
+    public User getUserById(UUID id) {
         return userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
@@ -53,11 +45,7 @@ public class UserService {
 
     @Transactional
     public User createUser(UserCreationRequest userRequest) {
-        if (userRepo.existsByEmail(userRequest.getEmail())) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-
-        if(userRepo.existsByUsername(userRequest.getUsername())) {
+        if (userRepo.existsByEmail(userRequest.getEmail()) || userRepo.existsByUsername(userRequest.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
@@ -80,44 +68,20 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
-                .userId(user.getId())
-                .username(userRequest.getUsername())
-                .email(userRequest.getEmail())
-                .firstName(userRequest.getFirstName())
-                .lastName(userRequest.getLastName())
-                .dob(userRequest.getDob())
-                .build();
+//        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
+//                .userId(user.getId())
+//                .username(userRequest.getUsername())
+//                .email(userRequest.getEmail())
+//                .firstName(userRequest.getFirstName())
+//                .lastName(userRequest.getLastName())
+//                .dob(userRequest.getDob())
+//                .build();
 
-        profileClient.create(profileCreationRequest);
-
-//        notificationEventPublisher.publishWelcomeEmailEvent(
-//                user.getUsername(),
-//                userRequest.getEmail()
-//        );
-
+//        profileClient.create(profileCreationRequest);
         return user;
     }
 
-    public User updateUser(String id, UserUpdateRequest userRequest) {
-        User user = userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        userMapper.updateUser(user, userRequest);
-        if (userRequest.getRoles() != null) {
-            Set<Role> roles = new HashSet<>(roleService.getRolesByNames(userRequest.getRoles()));
-            user.setRoles(roles);
-        }
-        return userRepo.save(user);
-    }
-
-    public void deleteUser(String id) {
-        boolean exists = userRepo.existsById(id);
-        if (!exists) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        }
-        userRepo.deleteById(id);
-    }
-
-    public MyAccountResponse getMyAccount(String userId) {
+    public MyAccountResponse getMyAccount(UUID userId) {
         User user = getUserById(userId);
         ProfileMetadataResponse metadataResponse = profileClient.getMetadataByUserId(userId).getData();
         return userMapper.toGetMeResponse(

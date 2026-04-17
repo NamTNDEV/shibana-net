@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,5 +15,5 @@ import java.util.Set;
 public class RoleRequest {
     String name;
     String description;
-    Set<String> permissions;
+    Set<UUID> permissionIds;
 }

@@ -45,7 +45,6 @@ public class UserControllerTest {
     void initData() {
         LocalDate date = LocalDate.of(2002, 1, 3);
         user = User.builder()
-                .id("user-id-123")
                 .email("namudev@gmail.com")
                 .password("password")
                 .build();

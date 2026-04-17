@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,28 +36,7 @@ public class PermissionService {
         );
     }
 
-    public PermissionResponse getByName(String name) {
-        Permission permission = permissionRepo.findByName(name)
-                .orElseThrow(() -> {
-                    return new AppException(ErrorCode.PERMISSION_NOT_FOUND);
-                });
-        return permissionMapper.toPermissionResponse(permission);
-    }
-
-    public List<PermissionResponse> getAll() {
-        var permissions = permissionRepo.findAll();
-        return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
-    }
-
-    public void deleteByName(String name) {
-        Permission permission = permissionRepo.findByName(name)
-                .orElseThrow(() -> {
-                    return new AppException(ErrorCode.PERMISSION_NOT_FOUND);
-                });
-        permissionRepo.delete(permission);
-    }
-
-    public List<Permission> getPermissionsByNames(Set<String> names) {
-        return permissionRepo.findAllById(names);
+    public List<Permission> getPermissionsByIds(Set<UUID> ids) {
+        return permissionRepo.findAllById(ids);
     }
 }

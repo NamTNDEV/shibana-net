@@ -30,32 +30,4 @@ public class PermissionController {
               )
               .build();
     };
-
-    @GetMapping
-    ApiResponse<List<PermissionResponse>> getAllPermissions(String name) {
-      return ApiResponse.<List<PermissionResponse>>builder()
-              .code(200)
-              .message("Permission fetched successfully")
-              .data(permissionService.getAll())
-              .build();
-    };
-
-    @GetMapping("/{name}")
-    ApiResponse<PermissionResponse> getPermissionByName(@PathVariable String name) {
-        PermissionResponse permissionResponse = permissionService.getByName(name);
-        return ApiResponse.<PermissionResponse>builder()
-                .code(200)
-                .data(permissionResponse)
-                .message("Permission fetched successfully.")
-                .build();
-    }
-
-    @DeleteMapping("/{name}")
-    ApiResponse<?> deletePermissionByName(@PathVariable String name) {
-        permissionService.deleteByName(name);
-        return ApiResponse.builder()
-                .code(200)
-                .message("Permission deleted successfully.")
-                .build();
-    }
 }

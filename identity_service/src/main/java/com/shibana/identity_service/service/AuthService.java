@@ -224,7 +224,10 @@ public class AuthService {
         }
         String accessToken = generateAccessToken(user);
         String refreshToken = generateRefreshToken(user);
-        return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public AuthResponse register(RegisterRequest registerRequest) {
@@ -249,7 +252,6 @@ public class AuthService {
     }
 
     public void logout(String bearerToken) {
-        log.info("::: Processing logout for token ::");
         String token = extractBearer(bearerToken);
         SignedJWT signedJWT = verifyAccessToken(token);
 
@@ -269,7 +271,6 @@ public class AuthService {
     }
 
     public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        log.info("::: Processing refresh token for token ::");
         try {
             SignedJWT signedJWT = verifyRefreshToken(refreshTokenRequest.getToken());
             String jti = signedJWT.getJWTClaimsSet().getJWTID();
@@ -286,7 +287,10 @@ public class AuthService {
             String accessToken = generateAccessToken(existedUser);
             String refreshToken = generateRefreshToken(existedUser);
 
-            return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+            return AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
         } catch (ParseException e) {
             log.error("Invalid JWT Subject: {}", e.getMessage());
             throw new AppException(ErrorCode.MALFORMED_TOKEN);
@@ -294,8 +298,6 @@ public class AuthService {
     }
 
     public AuthResponse outboundAuthenticate(String code) {
-        log.info("::: Processing outbound authentication for code :: {}", code);
-
         var response = outboundIdentityClient.exchangeToken(
                 ExchangeTokenRequest.builder()
                         .clientSecret(CLIENT_SECRET)
@@ -313,7 +315,7 @@ public class AuthService {
 
         User onBoardedUser;
 
-        if(!userService.isUserExist(userInfo.getEmail())) {
+        if (!userService.isUserExist(userInfo.getEmail())) {
             onBoardedUser = userService.createUser(
                     UserCreationRequest.builder()
                             .email(userInfo.getEmail())

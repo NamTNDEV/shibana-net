@@ -33,6 +33,5 @@ public class RegisterRequest {
     String lastName;
 
     @DobConstraint
-//    @NotNull
     LocalDate dob;
 }

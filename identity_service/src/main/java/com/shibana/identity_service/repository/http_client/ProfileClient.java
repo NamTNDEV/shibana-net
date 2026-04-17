@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.UUID;
+
 @FeignClient(
         name = "social-service",
         url = "http://localhost:8081/social/internal/profiles"
@@ -20,5 +22,5 @@ public interface ProfileClient {
     ApiResponse<ProfileResponse> create(@RequestBody ProfileCreationRequest request);
 
     @GetMapping("/{userId}/metadata")
-    ApiResponse<ProfileMetadataResponse> getMetadataByUserId(@PathVariable String userId);
+    ApiResponse<ProfileMetadataResponse> getMetadataByUserId(@PathVariable UUID userId);
 }

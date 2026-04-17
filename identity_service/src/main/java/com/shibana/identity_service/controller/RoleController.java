@@ -34,37 +34,4 @@ public class RoleController {
                 )
                 .build();
     }
-
-    @GetMapping
-    public ApiResponse<List<RoleResponse>> getListRole() {
-        return ApiResponse.<List<RoleResponse>>builder()
-                .code(200)
-                .message("Roles retrieved successfully")
-                .data(
-                        roleService.getAllRoles()
-                )
-                .build();
-    }
-
-    @DeleteMapping("/{name}")
-    public ApiResponse<Void> deleteRole(@PathVariable("name") String roleName) {
-        log.info("Delete role endpoint called for role: {}", roleName);
-        roleService.deleteRoleByName(roleName);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Role deleted successfully")
-                .build();
-    }
-
-    @PutMapping("/{name}")
-    public ApiResponse<RoleResponse> updateRole(@PathVariable("name") String roleName, @RequestBody RoleRequest roleRequest) {
-        log.info("Update role endpoint called for role: {}", roleName);
-        return ApiResponse.<RoleResponse>builder()
-                .code(200)
-                .message("Role updated successfully")
-                .data(
-                        roleService.updateRole(roleName, roleRequest)
-                )
-                .build();
-    }
 }
