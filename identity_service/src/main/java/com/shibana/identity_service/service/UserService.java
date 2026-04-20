@@ -1,5 +1,6 @@
 package com.shibana.identity_service.service;
 
+import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.response.MyAccountResponse;
 import com.shibana.identity_service.dto.response.ProfileMetadataResponse;
@@ -68,16 +69,16 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-//        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
-//                .userId(user.getId())
-//                .username(userRequest.getUsername())
-//                .email(userRequest.getEmail())
-//                .firstName(userRequest.getFirstName())
-//                .lastName(userRequest.getLastName())
-//                .dob(userRequest.getDob())
-//                .build();
+        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
+                .userId(user.getId().toString())
+                .username(userRequest.getUsername())
+                .email(userRequest.getEmail())
+                .firstName(userRequest.getFirstName())
+                .lastName(userRequest.getLastName())
+                .dob(userRequest.getDob())
+                .build();
 
-//        profileClient.create(profileCreationRequest);
+        profileClient.create(profileCreationRequest);
         return user;
     }
 
