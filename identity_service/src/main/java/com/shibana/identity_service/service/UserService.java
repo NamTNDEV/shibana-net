@@ -70,7 +70,7 @@ public class UserService {
         }
 
         ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
-                .userId(user.getId().toString())
+                .userId(user.getId())
                 .username(userRequest.getUsername())
                 .email(userRequest.getEmail())
                 .firstName(userRequest.getFirstName())
