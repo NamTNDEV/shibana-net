@@ -2,7 +2,7 @@ package com.shibana.post_service.http_client;
 
 import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.response.NewsfeedTargetResponse;
-import com.shibana.post_service.model.embedded.Author;
+import com.shibana.post_service.model.entity.Author;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

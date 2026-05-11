@@ -1,61 +1,81 @@
 package com.shibana.post_service.model.entity;
 
-import com.shibana.post_service.model.embedded.Author;
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.shibana.post_service.model.embedded.Media;
 import com.shibana.post_service.model.embedded.Mention;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.*;
 
+@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CompoundIndexes({
-        @CompoundIndex(name = "author_created_privacy_idx", def = "{'author.userId': 1, 'createdAt': -1, 'privacy': 1}"),
-        @CompoundIndex(name = "privacy_created_idx", def = "{'privacy': 1, 'createdAt': -1}"),
-        @CompoundIndex(name = "hashtag_created_privacy_idx", def = "{'hashtags': 1, 'createdAt': -1, 'privacy': 1}"),
-})
-@Document(collection = "posts")
+@Table(
+        name = "posts",
+        indexes = {
+                @Index(name = "idx_posts_author_id", columnList = "author_id"),
+        }
+)
 public class Post {
     @Id
     @Builder.Default
-    String id = UUID.randomUUID().toString();
+    UUID id = UuidCreator.getTimeOrderedEpoch();
 
-    Author author;
+    @Column(name = "author_id", nullable = false, updatable = false)
+    UUID authorId;
+
+    @Column(columnDefinition = "TEXT")
     String content;
-    PostPrivacyEnum privacy;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    PostPrivacyEnum privacy = PostPrivacyEnum.PUBLIC;
+
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(columnDefinition = "TEXT[]")
     @Builder.Default
     List<String> hashtags = new ArrayList<>();
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     @Builder.Default
     List<Mention> mentions = new ArrayList<>();
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     @Builder.Default
     private List<Media> media = new ArrayList<>();
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     @Builder.Default
     Map<String, Integer> reactionStats = new HashMap<>();
 
     @Builder.Default
     Integer commentCount = 0;
 
-    @CreatedDate
+    @Builder.Default
+    Boolean isEdited = false;
+
+    @Builder.Default
+    Boolean isDeleted = false;
+
+    @CreationTimestamp
+    @Column(updatable = false)
     Instant createdAt;
 
-    @LastModifiedDate
+    @UpdateTimestamp
     Instant updatedAt;
 
     @Version

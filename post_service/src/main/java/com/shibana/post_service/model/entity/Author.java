@@ -1,18 +1,28 @@
-package com.shibana.post_service.model.embedded;
+package com.shibana.post_service.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.UUID;
+
+@Entity
 @Data
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+@Table(name = "cached_users")
 public class Author {
-    String userId;
+    @Id
+    UUID userId;
+
+    @Column(nullable = false)
     String username;
+
     String displayName;
 
     String avatarMediaName;

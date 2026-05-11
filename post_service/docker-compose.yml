@@ -1,0 +1,17 @@
+services:
+  post-db:
+    image: postgres:16-alpine
+    container_name: pg_shibaba_post
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123123
+      POSTGRES_DB: post_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pg_post_data:/var/lib/postgresql/data
+
+volumes:
+  pg_post_data:

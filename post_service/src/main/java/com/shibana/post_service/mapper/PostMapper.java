@@ -12,7 +12,7 @@ public abstract class PostMapper {
     @Value("${service.media.static-url}")
     String mediaStaticUrl;
 
-    @Mapping(target = "author.avatarMediaName", source = "author.avatarMediaName", qualifiedByName = "toFullUrl")
+//    @Mapping(target = "author.avatarMediaName", source = "author.avatarMediaName", qualifiedByName = "toFullUrl")
     public abstract PostResponse toPostResponse(Post post);
 
     @Named("toFullUrl")

@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentCleanupJob {
-    CommentRepo commentRepo;
+//    CommentRepo commentRepo;
 
         @Scheduled(cron = "0 0 2 * * ?")
 //    @Scheduled(fixedRate = 5000)
@@ -28,8 +28,8 @@ public class CommentCleanupJob {
         try {
             Instant cutoffTime = Instant.now().minus(30, ChronoUnit.DAYS);
 //            Instant cutoffTime = Instant.now().minus(10, ChronoUnit.SECONDS);
-            int deletedCount = commentRepo.hardDeleteOldDeletedComment(cutoffTime);
-            log.info("[CRON-JOB] Dọn dẹp hoàn tất! Đã hóa vàng {} comment rác.", deletedCount);
+//            int deletedCount = commentRepo.hardDeleteOldDeletedComment(cutoffTime);
+//            log.info("[CRON-JOB] Dọn dẹp hoàn tất! Đã hóa vàng {} comment rác.", deletedCount);
         } catch (Exception e) {
             log.error("[CRON-JOB] Lỗi trong quá trình dọn dẹp rác: ", e);
         }

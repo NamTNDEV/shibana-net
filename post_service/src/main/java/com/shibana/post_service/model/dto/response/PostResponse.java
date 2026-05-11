@@ -1,6 +1,6 @@
 package com.shibana.post_service.model.dto.response;
 
-import com.shibana.post_service.model.embedded.Author;
+import com.shibana.post_service.model.entity.Author;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
