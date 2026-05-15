@@ -15,7 +15,7 @@ import org.springframework.util.backoff.FixedBackOff;
 public class KafkaConfig {
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> template) {
-        FixedBackOff fixedBackOff = new FixedBackOff(5000L, 3);
+        FixedBackOff fixedBackOff = new FixedBackOff(5000L, 3); // Thử lại sau 5 giây, tối đa 3 lần
 
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(template,
                 (consumerRecord, ex) -> {
