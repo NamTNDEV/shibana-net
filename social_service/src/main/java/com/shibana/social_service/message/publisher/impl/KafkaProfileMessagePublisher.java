@@ -1,11 +1,11 @@
-package com.shibana.social_service.messaging.publisher.impl;
+package com.shibana.social_service.message.publisher.impl;
 
-import com.shibana.social_service.messaging.helper.JsonHelper;
-import com.shibana.social_service.messaging.dto.MessageEnvelope;
-import com.shibana.social_service.messaging.dto.MessageEnvelopeMetadata;
-import com.shibana.social_service.messaging.dto.MessageType;
-import com.shibana.social_service.messaging.dto.payloads.AvatarUpdatedPayload;
-import com.shibana.social_service.messaging.publisher.ProfileMessagePublisher;
+import com.shibana.social_service.message.dto.envelope.EventEnvelope;
+import com.shibana.social_service.message.helper.JsonHelper;
+import com.shibana.social_service.message.dto.envelope.EventEnvelopeMetadata;
+import com.shibana.social_service.message.dto.EventType;
+import com.shibana.social_service.message.dto.payloads.AvatarUpdatedPayload;
+import com.shibana.social_service.message.publisher.ProfileMessagePublisher;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,24 +23,24 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KafkaProfileMessagePublisher implements ProfileMessagePublisher {
     final JsonHelper jsonHelper;
-    final KafkaTemplate<String, String> kafkaTemplate;
+    final KafkaTemplate<UUID, String> kafkaTemplate;
 
-    @Value("${infra.kafka.procedure.name}")
-    String procedureName;
+    @Value("${infra.kafka.producer.name}")
+    String producerName;
 
     @Value("${infra.kafka.topics.avatar-updated}")
     String topicProfileUpdated;
 
     @Override
     public void publishAvatarUpdatedMessage(AvatarUpdatedPayload payload) {
-        MessageEnvelopeMetadata metadata = MessageEnvelopeMetadata.builder()
-                .messageId(UUID.randomUUID().toString())
-                .source(procedureName)
-                .messageType(MessageType.AVATAR_UPDATED)
+        EventEnvelopeMetadata metadata = EventEnvelopeMetadata.builder()
+                .eventId(UUID.randomUUID().toString())
+                .source(producerName)
+                .eventType(EventType.AVATAR_UPDATED)
                 .timestamp(Instant.now().toEpochMilli())
                 .build();
 
-        MessageEnvelope<AvatarUpdatedPayload> envelope = MessageEnvelope
+        EventEnvelope<AvatarUpdatedPayload> envelope = EventEnvelope
                 .<AvatarUpdatedPayload>builder()
                 .metadata(metadata)
                 .payload(payload)

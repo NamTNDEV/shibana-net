@@ -7,11 +7,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -21,13 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class FollowController {
     FollowService followService;
 
-    @GetMapping("/test")
-    public String test() {
-        return "test";
-    }
-
     @GetMapping("/{followeeId}")
-    public ApiResponse<Boolean> checkIsFollowing(@PathVariable String followeeId) {
+    public ApiResponse<Boolean> checkIsFollowing(@PathVariable UUID followeeId) {
         return ApiResponse.<Boolean>builder()
                 .code(200)
                 .data(followService.checkIsFollowing(followeeId))
@@ -47,7 +41,7 @@ public class FollowController {
     }
 
     @DeleteMapping("/{followeeId}")
-    public ApiResponse<Void> unfollow(@PathVariable String followeeId) {
+    public ApiResponse<Void> unfollow(@PathVariable UUID followeeId) {
         followService.unfollow(followeeId);
         return ApiResponse.<Void>builder()
                 .code(200)

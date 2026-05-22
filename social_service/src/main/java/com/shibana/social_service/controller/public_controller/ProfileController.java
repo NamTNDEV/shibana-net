@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class ProfileController {
             @RequestBody AvatarUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getClaim("user_id");
+        UUID userId = UUID.fromString(jwt.getClaim("user_id"));
         profileService.updateAvatar(userId, request);
         return ApiResponse.<Void>builder()
                 .code(200)
@@ -57,7 +58,7 @@ public class ProfileController {
             @Validated @RequestBody CoverUpdateRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getClaim("user_id");
+        UUID userId = UUID.fromString(jwt.getClaim("user_id"));
         profileService.updateCover(userId, request);
         return ApiResponse.<Void>builder()
                 .code(200)
@@ -69,6 +70,7 @@ public class ProfileController {
     public ApiResponse<Void> updateMe(
             @Validated @RequestBody ProfileUpdateRequest request
     ) {
+        log.info("Profile update request content: {}", request.getContent());
         profileService.updateProfileFieldWithPrivacy(request);
         return ApiResponse.<Void>builder()
                 .code(201)

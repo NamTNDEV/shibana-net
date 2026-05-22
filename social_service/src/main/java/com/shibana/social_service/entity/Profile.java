@@ -1,14 +1,16 @@
 package com.shibana.social_service.entity;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,10 +19,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @ToString
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-@Node("user_profiles")
+@Node("profiles")
 public class Profile {
     @Id
-    String userId;
+    @Builder.Default
+    UUID userId = UuidCreator.getTimeOrderedEpoch();
 
     String username;
 
@@ -45,4 +48,19 @@ public class Profile {
 
     LocalDate dob;
     String address;
+
+    @Builder.Default
+    PrivacyLevel emailPrivacy = PrivacyLevel.PRIVATE;
+
+    @Builder.Default
+    PrivacyLevel phoneNumberPrivacy = PrivacyLevel.PUBLIC;
+
+    @Builder.Default
+    PrivacyLevel dobPrivacy = PrivacyLevel.PUBLIC;
+
+    @Builder.Default
+    PrivacyLevel addressPrivacy = PrivacyLevel.PUBLIC;
+
+    @Version
+    Long version;
 }

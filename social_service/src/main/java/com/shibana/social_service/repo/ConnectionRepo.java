@@ -1,4 +1,4 @@
-package com.shibana.social_service.repo.neo4j;
+package com.shibana.social_service.repo;
 
 import com.shibana.social_service.dto.response.ConnectionStatusResponse;
 import com.shibana.social_service.dto.response.NewsfeedTargetResponse;
@@ -12,27 +12,29 @@ import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
+public interface ConnectionRepo extends Neo4jRepository<Profile, UUID> {
     // --- Follow ---
-    @Query("MATCH (follower:user_profiles {userId: $followerId})" +
-            "MATCH (followee:user_profiles {userId: $followeeId})" +
+    @Query("MATCH (follower:profiles {userId: $followerId})" +
+            "MATCH (followee:profiles {userId: $followeeId})" +
             "MERGE (follower)-[r:FOLLOWS]->(followee)" +
             "ON CREATE SET r.createdAt = datetime()" +
             "RETURN count(r) > 0;")
-    boolean follow(@Param("followerId") String followerId, @Param("followeeId") String followeeId);
+    boolean follow(@Param("followerId") UUID followerId, @Param("followeeId") UUID followeeId);
 
-    @Query("MATCH (follower:user_profiles {userId: $followerId})-[r:FOLLOWS]->(followee:user_profiles {userId: $followeeId})" +
+    @Query("MATCH (follower:profiles {userId: $followerId})-[r:FOLLOWS]->(followee:profiles {userId: $followeeId})" +
             "DELETE r;")
-    void unfollow(@Param("followerId") String followerId, @Param("followeeId") String followeeId);
+    void unfollow(@Param("followerId") UUID followerId, @Param("followeeId") UUID followeeId);
 
-    @Query("RETURN EXISTS((:user_profiles {userId: $followerId})-[:FOLLOWS]->(:user_profiles {userId: $followeeId}))")
-    boolean checkIsFollowing(@Param("followerId") String followerId, @Param("followeeId") String followeeId);
+    @Query("RETURN EXISTS((:profiles {userId: $followerId})-[:FOLLOWS]->(:profiles {userId: $followeeId}))")
+    boolean checkIsFollowing(@Param("followerId") UUID followerId, @Param("followeeId") UUID followeeId);
 
     // --- Friendship ---
     @Query("""
-            MATCH (sender:user_profiles {userId:$senderId})
-            OPTIONAL MATCH (reciever:user_profiles {userId:$recieverId})
+            MATCH (sender:profiles {userId:$senderId})
+            OPTIONAL MATCH (reciever:profiles {userId:$recieverId})
             RETURN
               CASE
                 WHEN reciever IS NULL THEN "PROFILE_NOT_FOUND"
@@ -47,11 +49,11 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                 ELSE "READY"
               END;
             """)
-    FriendRequestEligibilityStatus checkFriendRequestEligibility(@Param("senderId") String senderId, @Param("recieverId") String recieverId);
+    FriendRequestEligibilityStatus checkFriendRequestEligibility(@Param("senderId") UUID senderId, @Param("recieverId") UUID recieverId);
 
     @Query("""
-            MATCH (acceptor:user_profiles{userId:$acceptorId})
-            OPTIONAL MATCH (requester:user_profiles{userId:$requesterId})
+            MATCH (acceptor:profiles{userId:$acceptorId})
+            OPTIONAL MATCH (requester:profiles{userId:$requesterId})
             RETURN
               CASE
                 WHEN requester IS NULL THEN 'PROFILE_NOT_FOUND'
@@ -60,11 +62,11 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                 ELSE 'NO_SEND_REQUEST'
               END
             """)
-    FriendResponseEligibilityStatus checkFriendResponseEligibility(@Param("acceptorId") String acceptorId, @Param("requesterId") String requesterId);
+    FriendResponseEligibilityStatus checkFriendResponseEligibility(@Param("acceptorId") UUID acceptorId, @Param("requesterId") UUID requesterId);
 
     @Query("""
-            MATCH (revoker:user_profiles{userId:$revokerId})
-                  OPTIONAL MATCH (revokee:user_profiles{userId:$revokeeId})
+            MATCH (revoker:profiles{userId:$revokerId})
+                  OPTIONAL MATCH (revokee:profiles{userId:$revokeeId})
                   RETURN
                     CASE
                       WHEN revokee IS NULL THEN 'PROFILE_NOT_FOUND'
@@ -72,11 +74,11 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                       ELSE 'NO_SEND_REQUEST'
                     END;
             """)
-    RevokeRequestEligibilityStatus checkRevokeFriendResponseEligibility(@Param("revokerId") String revokerId, @Param("revokeeId") String revokeeId);
+    RevokeRequestEligibilityStatus checkRevokeFriendResponseEligibility(@Param("revokerId") UUID revokerId, @Param("revokeeId") UUID revokeeId);
 
     @Query("""
-            MATCH (sender:user_profiles{userId:$senderId})
-            MATCH (reciever:user_profiles{userId:$recieverId})
+            MATCH (sender:profiles{userId:$senderId})
+            MATCH (reciever:profiles{userId:$recieverId})
             
             OPTIONAL MATCH (sender)-[rej:REJECTS]->(reciever)
             DELETE rej
@@ -87,11 +89,11 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
             MERGE (sender)-[fr:REQUESTS_FRIEND]->(reciever)
             ON CREATE SET fr.createdAt = datetime()
             """)
-    void sendFriendRequest(@Param("senderId") String senderId, @Param("recieverId") String recieverId);
+    void sendFriendRequest(@Param("senderId") UUID senderId, @Param("recieverId") UUID recieverId);
 
     @Query("""
-            MATCH (acceptor:user_profiles{userId:$acceptorId})
-            MATCH (requester:user_profiles{userId:$requesterId})
+            MATCH (acceptor:profiles{userId:$acceptorId})
+            MATCH (requester:profiles{userId:$requesterId})
             OPTIONAL MATCH (acceptor)-[rf:REQUESTS_FRIEND]-(requester)
             DELETE rf
             MERGE (acceptor)-[f:FRIENDS]->(requester)
@@ -101,11 +103,11 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
             MERGE (requester)-[fl_rev:FOLLOWS]->(acceptor)
             ON CREATE SET fl_rev.createdAt = datetime()
             """)
-    void acceptFriendRequest(@Param("acceptorId") String acceptorId, @Param("requesterId") String requesterId);
+    void acceptFriendRequest(@Param("acceptorId") UUID acceptorId, @Param("requesterId") UUID requesterId);
 
     @Query("""
-            MATCH (rejector:user_profiles{userId:$rejectorId})
-            MATCH (requester:user_profiles{userId:$requesterId})
+            MATCH (rejector:profiles{userId:$rejectorId})
+            MATCH (requester:profiles{userId:$requesterId})
             
             MATCH (requester)-[rf:REQUESTS_FRIEND]->(rejector)
             DELETE rf
@@ -113,26 +115,26 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
             MERGE (rejector)-[rj:REJECTS]->(requester)
             ON CREATE SET rj.createdAt = datetime()
             """)
-    void rejectFriendRequest(@Param("rejectorId") String rejectorId, @Param("requesterId") String requesterId);
+    void rejectFriendRequest(@Param("rejectorId") UUID rejectorId, @Param("requesterId") UUID requesterId);
 
     @Query("""
-            MATCH (:user_profiles{userId:$unfrienderId})-[r:FRIENDS|FOLLOWS|REQUESTS_FRIEND|REJECTS]-(:user_profiles{userId:$unfriendeeId})
+            MATCH (:profiles{userId:$unfrienderId})-[r:FRIENDS|FOLLOWS|REQUESTS_FRIEND|REJECTS]-(:profiles{userId:$unfriendeeId})
             DELETE r;
             """)
-    void unfriend(@Param("unfrienderId") String unfrienderId, @Param("unfriendeeId") String unfriendeeId);
+    void unfriend(@Param("unfrienderId") UUID unfrienderId, @Param("unfriendeeId") UUID unfriendeeId);
 
     @Query("""
-            MATCH (revoker:user_profiles{userId:$revokerId})
-            MATCH (revokee:user_profiles{userId:$revokeeId})
+            MATCH (revoker:profiles{userId:$revokerId})
+            MATCH (revokee:profiles{userId:$revokeeId})
             OPTIONAL MATCH (revoker)-[r:REQUESTS_FRIEND|FOLLOWS]->(revokee)
             DELETE r
             """)
-    void revokeRequest(@Param("revokerId") String revokerId, @Param("revokeeId") String revokeeId);
+    void revokeRequest(@Param("revokerId") UUID revokerId, @Param("revokeeId") UUID revokeeId);
 
     // --- Block ---
     @Query("""
-            MATCH (blocker:user_profiles{userId:$blockerId})
-            OPTIONAL MATCH (blockee:user_profiles{userId:$blockeeId})
+            MATCH (blocker:profiles{userId:$blockerId})
+            OPTIONAL MATCH (blockee:profiles{userId:$blockeeId})
             RETURN
               CASE
                 WHEN blockee IS NULL THEN 'PROFILE_NOT_FOUND'
@@ -141,29 +143,29 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                 ELSE 'READY'
               END;
             """)
-    BlockEligibilityStatus checkBlockingEligibility(@Param("blockerId") String blockerId, @Param("blockeeId") String blockeeId);
+    BlockEligibilityStatus checkBlockingEligibility(@Param("blockerId") UUID blockerId, @Param("blockeeId") UUID blockeeId);
 
     @Query("""
-            MATCH (blocker:user_profiles{userId:$blockerId})
-            MATCH (blockee:user_profiles{userId:$blockeeId})
+            MATCH (blocker:profiles{userId:$blockerId})
+            MATCH (blockee:profiles{userId:$blockeeId})
             OPTIONAL MATCH (blocker)-[r:FRIENDS|FOLLOWS|REQUESTS_FRIEND|REJECTS]-(blockee)
             DELETE r
             WITH DISTINCT blocker, blockee
             MERGE (blocker)-[rb:BLOCKS]->(blockee)
             ON CREATE SET rb.createdAt = datetime();
             """)
-    void blocks(@Param("blockerId") String blockerId, @Param("blockeeId") String blockeeId);
+    void blocks(@Param("blockerId") UUID blockerId, @Param("blockeeId") UUID blockeeId);
 
     @Query("""
-            MATCH (:user_profiles{userId:$unblockerId})-[rb:BLOCKS]->(:user_profiles{userId:$unblockeeId})
+            MATCH (:profiles{userId:$unblockerId})-[rb:BLOCKS]->(:profiles{userId:$unblockeeId})
             DELETE rb;
             """)
-    void unblocks(@Param("unblockerId") String blockerId, @Param("unblockeeId") String blockeeId);
+    void unblocks(@Param("unblockerId") UUID blockerId, @Param("unblockeeId") UUID blockeeId);
 
     // --- Other ---
     @Query("""
-            MATCH (targeter:user_profiles{userId:$targetId})
-            OPTIONAL MATCH (viewer:user_profiles{userId:$viewerId})
+            MATCH (targeter:profiles{userId:$targetId})
+            OPTIONAL MATCH (viewer:profiles{userId:$viewerId})
             RETURN
                 CASE
                   WHEN viewer IS NULL THEN 'NONE'
@@ -184,13 +186,13 @@ public interface ConnectionRepo extends Neo4jRepository<Profile, String> {
                   ELSE false
                 END AS isFollowing
             """)
-    ConnectionStatusResponse getConnectionStatus(@Param("viewerId") String viewerId, @Param("targetId") String targetId);
+    ConnectionStatusResponse getConnectionStatus(@Param("viewerId") UUID viewerId, @Param("targetId") UUID targetId);
 
     @Query("""
-            MATCH (me:user_profiles{userId:$requesterId})
+            MATCH (me:profiles{userId:$requesterId})
             WITH me, [(me)-[:FRIENDS]-(f) | f.userId] as friendIds
             RETURN friendIds,
             [(me)-[:FOLLOWS]->(fl) WHERE NOT (me)-[:FRIENDS]-(fl) | fl.userId] AS followingIds;
             """)
-    NewsfeedTargetResponse getNewsfeedTargeters(@Param("requesterId") String requesterId);
+    NewsfeedTargetResponse getNewsfeedTargeters(@Param("requesterId") UUID requesterId);
 }

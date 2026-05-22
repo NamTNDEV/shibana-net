@@ -23,6 +23,7 @@ public class ProfileDetailResponse {
     Double avatarScale;
     Double avatarPositionX;
     Double avatarPositionY;
+
     ProfileFieldWithPrivacyResponse<String> bio;
     ProfileFieldWithPrivacyResponse<LocalDate> dob;
     ProfileFieldWithPrivacyResponse<String> address;

@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/friendships")
@@ -18,7 +20,7 @@ public class FriendshipController {
     FriendShipService friendShipService;
 
     @PostMapping("/send-request/{recieverId}")
-    public ApiResponse<Void> sendRequest(@Validated @PathVariable String recieverId) {
+    public ApiResponse<Void> sendRequest(@Validated @PathVariable UUID recieverId) {
         log.info("Sending friendship request for recieverId: {}", recieverId);
         friendShipService.sendAddFriendRequest(recieverId);
         return ApiResponse.<Void>builder()
@@ -28,7 +30,7 @@ public class FriendshipController {
     }
 
     @PostMapping("/accept-request/{requesterId}")
-    public ApiResponse<Void> acceptRequest(@PathVariable String requesterId) {
+    public ApiResponse<Void> acceptRequest(@PathVariable UUID requesterId) {
         log.info("Accepting friendship request for requesterId: {}", requesterId);
         friendShipService.acceptFriendRequest(requesterId);
         return ApiResponse.<Void>builder()
@@ -38,7 +40,7 @@ public class FriendshipController {
     }
 
     @PostMapping("/reject-request/{requesterId}")
-    public ApiResponse<Void> rejectRequest(@PathVariable String requesterId) {
+    public ApiResponse<Void> rejectRequest(@PathVariable UUID requesterId) {
         log.info("Rejecting friend request from user with ID: {}", requesterId);
         friendShipService.rejectFriendRequest(requesterId);
         return ApiResponse.<Void>builder()
@@ -48,7 +50,7 @@ public class FriendshipController {
     }
 
     @DeleteMapping("/unfriend/{unfriendeeId}")
-    public ApiResponse<Void> unfriend(@PathVariable String unfriendeeId) {
+    public ApiResponse<Void> unfriend(@PathVariable UUID unfriendeeId) {
         log.info("Unfriending friendship request for unfriendeeId: {}", unfriendeeId);
         friendShipService.unfriend(unfriendeeId);
         return ApiResponse.<Void>builder()
@@ -58,7 +60,7 @@ public class FriendshipController {
     }
 
     @DeleteMapping("/revoke-request/{revokeeId}")
-    public ApiResponse<Void> revokeRequest(@PathVariable String revokeeId) {
+    public ApiResponse<Void> revokeRequest(@PathVariable UUID revokeeId) {
         log.info("Revoking friendship request for revokeeId: {}", revokeeId);
         friendShipService.revokeFriendRequest(revokeeId);
         return ApiResponse.<Void>builder()

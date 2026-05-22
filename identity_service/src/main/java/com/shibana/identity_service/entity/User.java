@@ -43,8 +43,7 @@ public class User {
     @Column(name = "is_verified")
     Boolean isVerified = true;
 
-    @Column(name = "created_at", updatable = false)
-    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
     Instant createdAt;
 
     @Column(name = "updated_at")
@@ -58,4 +57,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     Set<Role> roles;
+
+    public Object gerF() {
+        return null;
+    }
 }

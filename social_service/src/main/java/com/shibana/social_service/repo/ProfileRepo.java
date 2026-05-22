@@ -1,4 +1,4 @@
-package com.shibana.social_service.repo.neo4j;
+package com.shibana.social_service.repo;
 
 import com.shibana.social_service.entity.Profile;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -7,14 +7,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface ProfileRepo extends Neo4jRepository<Profile, String> {
-    Optional<Profile> findByUserId(String userId);
+public interface ProfileRepo extends Neo4jRepository<Profile, UUID> {
+    Optional<Profile> findByUserId(UUID userId);
 
     @Query("""
-            MATCH (target:user_profiles{username:$username})
-            OPTIONAL MATCH (viewer:user_profiles{userId:$viewerId})
+            MATCH (target:profiles{username:$username})
+            OPTIONAL MATCH (viewer:profiles{userId:$viewerId})
             
             WITH target, viewer
             
@@ -24,9 +25,9 @@ public interface ProfileRepo extends Neo4jRepository<Profile, String> {
             
             RETURN target;
             """)
-    Optional<Profile> findByUsername(@Param("username") String username, @Param("viewerId") String viewerId);
+    Optional<Profile> findByUsername(@Param("username") String username, @Param("viewerId") UUID viewerId);
 
-    @Query("MATCH (p:user_profiles) WHERE p.userId = $userId " +
+    @Query("MATCH (p:profiles) WHERE p.userId = $userId " +
             "RETURN p.id as id, " +
             "p.username as username, " +
             "p.firstName as firstName, " +
@@ -35,5 +36,5 @@ public interface ProfileRepo extends Neo4jRepository<Profile, String> {
             "p.avatarScale as avatarScale, " +
             "p.avatarPositionX as avatarPositionX, " +
             "p.avatarPositionY as avatarPositionY")
-    Optional<Profile> findProfileMetadata(@Param("userId") String userId);
+    Optional<Profile> findProfileMetadata(@Param("userId") UUID userId);
 }

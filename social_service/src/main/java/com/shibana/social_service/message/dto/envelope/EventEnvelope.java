@@ -1,4 +1,4 @@
-package com.shibana.social_service.messaging.dto;
+package com.shibana.social_service.message.dto.envelope;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class MessageEnvelope<T> {
-    MessageEnvelopeMetadata metadata;
+public class EventEnvelope<T> {
+    EventEnvelopeMetadata metadata;
     T payload;
 }

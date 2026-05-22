@@ -8,6 +8,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/blocks")
@@ -17,7 +19,7 @@ public class BlockController {
     BlockService blockService;
 
     @PostMapping("/{blockeeId}")
-    public ApiResponse<Void> block(@PathVariable String blockeeId) {
+    public ApiResponse<Void> block(@PathVariable UUID blockeeId) {
         blockService.blockUser(blockeeId);
         return ApiResponse.<Void>builder()
                 .code(200)
@@ -26,7 +28,7 @@ public class BlockController {
     }
 
     @DeleteMapping("/{blockeeId}")
-    public ApiResponse<Void> unblock(@PathVariable String blockeeId) {
+    public ApiResponse<Void> unblock(@PathVariable UUID blockeeId) {
         blockService.unblockUser(blockeeId);
         return ApiResponse.<Void>builder()
                 .code(200)

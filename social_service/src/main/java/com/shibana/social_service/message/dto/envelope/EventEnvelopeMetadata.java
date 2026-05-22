@@ -1,5 +1,6 @@
-package com.shibana.social_service.messaging.dto;
+package com.shibana.social_service.message.dto.envelope;
 
+import com.shibana.social_service.message.dto.EventType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,9 +11,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class MessageEnvelopeMetadata {
-    String messageId;
+public class EventEnvelopeMetadata {
+    String eventId;
     String source;
-    MessageType messageType;
+    EventType eventType;
     long  timestamp;
 }

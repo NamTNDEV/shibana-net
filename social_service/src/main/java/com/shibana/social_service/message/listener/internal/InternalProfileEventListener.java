@@ -1,7 +1,7 @@
-package com.shibana.social_service.messaging.listener.internal;
+package com.shibana.social_service.message.listener.internal;
 
-import com.shibana.social_service.messaging.event.AvatarUpdatedLocalEvent;
-import com.shibana.social_service.messaging.publisher.impl.KafkaProfileMessagePublisher;
+import com.shibana.social_service.message.event.AvatarUpdatedLocalEvent;
+import com.shibana.social_service.message.publisher.impl.KafkaProfileMessagePublisher;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

@@ -19,21 +19,38 @@ services:
       # --- CỤM 1: CĂN CƯỚC & KRAFT (Không cần Zookeeper) ---
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
       
       # --- CỤM 2: MẠNG LƯỚI TỐI GIẢN (Chỉ tiếp khách từ máy Host) ---
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT'
+
+      KAFKA_LISTENERS: 'EXTERNAL://:9092,CONTROLLER://:9093,INTERNAL://:29092'
+      KAFKA_ADVERTISED_LISTENERS: 'EXTERNAL://localhost:9092,INTERNAL://kafka:29092'
+
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_LISTENERS: 'BROKER://:9092,CONTROLLER://:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'BROKER://localhost:9092'
-      # Vì chỉ có 1 broker, nó tự dùng kênh BROKER để giao tiếp nội bộ luôn
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'BROKER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
       
       # --- CỤM 3: BÙA CHÚ TỐI ƯU LOCAL (Chống báo lỗi & Hack tốc độ) ---
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  kafka-ui:
+    image: kafbat/kafka-ui:latest
+    container_name: shibana-kafka-ui
+    ports:
+      - "9090:8080"
+    depends_on:
+      - kafka # Đợi Kafka chạy lên trước rồi UI mới chạy
+    environment:
+      # Cấu hình theo đúng Docs của Provectus
+      KAFKA_CLUSTERS_0_NAME: shibana-local-cluster
+      # Trỏ đúng vào tên service "kafka" và cổng INTERNAL "29092" mà ta đã mở ở trên
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      # Ẩn các topic nội bộ của hệ thống cho đỡ rối mắt
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    restart: unless-stopped
 
 # Khai báo Volume
 volumes:

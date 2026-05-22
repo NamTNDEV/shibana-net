@@ -31,6 +31,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(4040102, "identity-service:: User not found", HttpStatus.NOT_FOUND),
     PERMISSION_NOT_FOUND(4040202, "identity-service:: Permission not found", HttpStatus.NOT_FOUND),
     ROLE_NOT_FOUND(4040302, "identity-service:: Role not found", HttpStatus.NOT_FOUND),
+    OUTBOX_EVENT_NOT_FOUND(4040402, "identity-service:: Event not found", HttpStatus.NOT_FOUND),
+    TOPIC_NOT_FOUND(4040502, "identity-service:: Topic not found", HttpStatus.NOT_FOUND),
 
     USER_EXISTED(4090102, "identity-service:: Email or Username already exists", HttpStatus.CONFLICT),
     ROLE_ALREADY_EXISTS(4090202, "identity-service:: Role already exists", HttpStatus.CONFLICT),
@@ -38,6 +40,8 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(5000102, "identity-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000202, "identity-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
+    SERIALIZATION_ERROR(5000302, "identity-service:: Failed to serialize object", HttpStatus.INTERNAL_SERVER_ERROR),
+    KAFKA_PUBLISH_FAILED(5000402, "identity-service:: Failed to publish event to Kafka", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     int code;

@@ -1,7 +1,9 @@
-package com.shibana.social_service.messaging.dto.payloads;
+package com.shibana.social_service.message.dto.payloads;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -11,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AvatarUpdatedPayload {
-    String userId;
+    UUID userId;
     String avatarMediaName;
     Double avatarScale;
     Double avatarPositionX;

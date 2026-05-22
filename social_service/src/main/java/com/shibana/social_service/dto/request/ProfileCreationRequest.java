@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @ToString
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class ProfileCreationRequest {
-    String userId;
+    UUID userId;
     String firstName;
     String lastName;
     LocalDate dob;

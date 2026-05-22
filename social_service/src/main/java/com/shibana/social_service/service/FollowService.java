@@ -2,7 +2,7 @@ package com.shibana.social_service.service;
 
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
-import com.shibana.social_service.repo.neo4j.ConnectionRepo;
+import com.shibana.social_service.repo.ConnectionRepo;
 import com.shibana.social_service.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -19,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class FollowService {
     ConnectionRepo  connectionRepo;
 
-    @Transactional("neo4jTransactionManager")
-    public void follow(String followeeId) {
-        String followerId = SecurityUtils.getCurrentUserId();
+    @Transactional
+    public void follow(UUID followeeId) {
+        UUID followerId = SecurityUtils.getCurrentUserId();
         log.info("The user:: {} follows the followee:: {}",  followerId, followeeId);
 
         if (followeeId.equals(followerId)) {
@@ -35,16 +37,16 @@ public class FollowService {
         }
     }
 
-    @Transactional("neo4jTransactionManager")
-    public void unfollow(String followeeId) {
-        String followerId = SecurityUtils.getCurrentUserId();
+    @Transactional
+    public void unfollow(UUID followeeId) {
+        UUID followerId = SecurityUtils.getCurrentUserId();
         log.info("The user:: {} unfollows the followee:: {}",  followerId, followeeId);
         if (followeeId.equals(followerId)) return;
         connectionRepo.unfollow(followerId, followeeId);
     }
 
-    public boolean checkIsFollowing(String followeeId) {
-        String followerId = SecurityUtils.getCurrentUserId();
+    public boolean checkIsFollowing(UUID followeeId) {
+        UUID followerId = SecurityUtils.getCurrentUserId();
         if (followeeId.equals(followerId)) return false;
         return connectionRepo.checkIsFollowing(followerId, followeeId);
     }

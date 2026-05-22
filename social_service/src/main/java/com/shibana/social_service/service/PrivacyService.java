@@ -1,9 +1,6 @@
 package com.shibana.social_service.service;
 
-import com.shibana.social_service.entity.FieldPrivacy;
 import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
-import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
-import com.shibana.social_service.repo.jpa.FieldPrivacyRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,24 +17,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class PrivacyService {
-    FieldPrivacyRepo fieldPrivacyRepo;
-
     public List<PrivacyLevel> getPrivacyList() {
         return  Arrays.stream(PrivacyLevel.values()).toList();
-    }
-
-    @Transactional("jpaTransactionManager")
-    public void initDefaultFieldsPrivacyForProfile(String userId) {
-        List<FieldPrivacy> defaultProfileFieldPrivacyList = Arrays.stream(ProfileField.values())
-                .map(field -> {
-                            var defaultPrivacy = field == ProfileField.EMAIL ? PrivacyLevel.PRIVATE : PrivacyLevel.PUBLIC;
-                            return FieldPrivacy.builder()
-                                    .privacy(defaultPrivacy)
-                                    .userId(userId)
-                                    .profileField(field)
-                                    .build();
-                        }
-                ).toList();
-        fieldPrivacyRepo.saveAll(defaultProfileFieldPrivacyList);
     }
 }

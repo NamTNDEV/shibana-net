@@ -2,13 +2,15 @@ package com.shibana.social_service.service;
 
 import com.shibana.social_service.dto.response.ConnectionStatusResponse;
 import com.shibana.social_service.dto.response.NewsfeedTargetResponse;
-import com.shibana.social_service.repo.neo4j.ConnectionRepo;
+import com.shibana.social_service.repo.ConnectionRepo;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -18,11 +20,11 @@ import org.springframework.stereotype.Service;
 public class ConnectionsService {
     ConnectionRepo connectionRepo;
 
-    public ConnectionStatusResponse getConnectStatuses(String viewerId, String targetId) {
+    public ConnectionStatusResponse getConnectStatuses(UUID viewerId, UUID targetId) {
         return connectionRepo.getConnectionStatus(viewerId, targetId);
     }
 
-    public NewsfeedTargetResponse getNewsfeedTargeters(String requesterId) {
+    public NewsfeedTargetResponse getNewsfeedTargeters(UUID requesterId) {
         return connectionRepo.getNewsfeedTargeters(requesterId);
     }
 }

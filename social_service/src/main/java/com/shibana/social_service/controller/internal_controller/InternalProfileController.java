@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
@@ -29,7 +31,7 @@ public class InternalProfileController {
     }
 
     @GetMapping("/{userId}/metadata")
-    public ApiResponse<ProfileMetadataResponse> getInternalMetadata(@PathVariable String userId) {
+    public ApiResponse<ProfileMetadataResponse> getInternalMetadata(@PathVariable UUID userId) {
         return ApiResponse.<ProfileMetadataResponse>builder()
                 .code(200)
                 .message("Profile retrieved successfully")
@@ -38,7 +40,7 @@ public class InternalProfileController {
     }
 
     @GetMapping("/{userId}/author-profile")
-    public ApiResponse<AuthorProfileResponse> getAuthorProfile(@PathVariable String userId) {
+    public ApiResponse<AuthorProfileResponse> getAuthorProfile(@PathVariable UUID userId) {
         return ApiResponse.<AuthorProfileResponse>builder()
                 .code(200)
                 .message("Author profile retrieved successfully")

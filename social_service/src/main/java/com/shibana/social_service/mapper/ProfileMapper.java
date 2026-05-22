@@ -5,15 +5,10 @@ import com.shibana.social_service.dto.request.ProfileCreationRequest;
 import com.shibana.social_service.dto.response.*;
 import com.shibana.social_service.entity.Profile;
 import com.shibana.social_service.enums.profile_privacy_status.PrivacyLevel;
-import com.shibana.social_service.enums.profile_privacy_status.ProfileField;
 import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Mapper(componentModel = "spring")
@@ -45,7 +40,6 @@ public abstract class ProfileMapper {
     @Mapping(target = "viewerContext", ignore = true)
     public abstract ProfileDetailResponse toProfileDetailResponse(
             Profile profile,
-            @Context List<FieldPrivacyResponse> fieldPrivacyList,
             @Context ViewerContext context
     );
 
@@ -54,39 +48,36 @@ public abstract class ProfileMapper {
     protected void mapPrivacyToProfileFields(
             Profile profile,
             @MappingTarget ProfileDetailResponse response,
-            @Context List<FieldPrivacyResponse> fieldPrivacyList,
             @Context ViewerContext context
     ) {
-        Map<ProfileField, PrivacyLevel> fieldPrivacyMap = fieldPrivacyList
-                .stream()
-                .collect(
-                        Collectors.toMap(
-                                FieldPrivacyResponse::getFieldKey,
-                                FieldPrivacyResponse::getPrivacyLevel,
-                                (oldValue, newValue) -> oldValue
-                        )
-                );
+
         boolean isOwner = context.isOwner();
         boolean isFriended = (context.relationshipContext().friendshipStatus() == FriendshipStatus.FRIENDED);
 
         response.setViewerContext(context);
-        response.setBio(wrapField(profile.getBio(), ProfileField.BIO, fieldPrivacyMap, isOwner, isFriended));
-        response.setDob(wrapField(profile.getDob(), ProfileField.DOB, fieldPrivacyMap, isOwner, isFriended));
-        response.setEmail(wrapField(profile.getEmail(), ProfileField.EMAIL, fieldPrivacyMap, isOwner, isFriended));
-        response.setAddress(wrapField(profile.getAddress(), ProfileField.ADDRESS, fieldPrivacyMap, isOwner, isFriended));
-        response.setPhoneNumber(wrapField(profile.getPhoneNumber(), ProfileField.PHONE, fieldPrivacyMap, isOwner, isFriended));
+        response.setDob(wrapField(profile.getDob(), profile.getDobPrivacy(), isOwner, isFriended));
+        response.setEmail(wrapField(profile.getEmail(), profile.getEmailPrivacy(), isOwner, isFriended));
+        response.setAddress(wrapField(profile.getAddress(), profile.getAddressPrivacy(), isOwner, isFriended));
+        response.setPhoneNumber(wrapField(profile.getPhoneNumber(), profile.getPhoneNumberPrivacy(), isOwner, isFriended));
+
+        response.setBio(
+                new ProfileFieldWithPrivacyResponse<>(profile.getBio(), PrivacyLevel.PUBLIC)
+        );
     }
 
     // --- Helper Functions ---
     protected <T> ProfileFieldWithPrivacyResponse<T> wrapField(
             T fieldValue,
-            ProfileField pf,
-            Map<ProfileField, PrivacyLevel> fieldPrivacyMap,
+            PrivacyLevel privacyLevel,
             boolean isOwner,
             boolean isFriend
     ) {
-        PrivacyLevel privacyLevel = fieldPrivacyMap.getOrDefault(pf, PrivacyLevel.PUBLIC);
+        if (privacyLevel == null) {
+            privacyLevel = PrivacyLevel.PUBLIC;
+        }
+
         T maskedValue = fieldValue;
+
         if (!isOwner) {
             if (privacyLevel == PrivacyLevel.PRIVATE) {
                 maskedValue = null;

@@ -1,8 +1,11 @@
 package com.shibana.social_service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -11,6 +14,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FollowRequestBody {
-    @NotBlank(message = "INVALID_FOLLOW_BODY")
-    String followeeId;
+    @NotNull(message = "INVALID_FOLLOW_BODY")
+    UUID followeeId;
 }

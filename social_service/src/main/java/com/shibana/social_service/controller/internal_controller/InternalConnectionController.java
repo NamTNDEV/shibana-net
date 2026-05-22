@@ -9,6 +9,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/internal/connections")
@@ -20,8 +22,8 @@ public class InternalConnectionController {
 
     @GetMapping("/check")
     ApiResponse<Boolean> checkFriendship(
-            @RequestParam String viewerId,
-            @RequestParam String authorId
+            @RequestParam UUID viewerId,
+            @RequestParam UUID authorId
     ) {
         return ApiResponse.<Boolean>builder()
                 .code(200)
@@ -32,7 +34,7 @@ public class InternalConnectionController {
 
     @GetMapping("/newsfeed-targeters/{requesterId}")
     ApiResponse<NewsfeedTargetResponse> getNewsfeedTargertersId(
-            @PathVariable String requesterId
+            @PathVariable UUID requesterId
     ) {
         log.info(":: Get news feed targeters for user {} ::", requesterId);
         return ApiResponse.<NewsfeedTargetResponse>builder()

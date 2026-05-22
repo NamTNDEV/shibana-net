@@ -1,6 +1,5 @@
 package com.shibana.identity_service.service;
 
-import com.shibana.identity_service.dto.request.ProfileCreationRequest;
 import com.shibana.identity_service.dto.request.UserCreationRequest;
 import com.shibana.identity_service.dto.response.MyAccountResponse;
 import com.shibana.identity_service.dto.response.ProfileMetadataResponse;
@@ -9,9 +8,13 @@ import com.shibana.identity_service.entity.User;
 import com.shibana.identity_service.exception.AppException;
 import com.shibana.identity_service.exception.ErrorCode;
 import com.shibana.identity_service.mapper.UserMapper;
+import com.shibana.identity_service.message.dto.EventType;
+import com.shibana.identity_service.message.dto.payload.UserRegisteredEventPayload;
+import com.shibana.identity_service.message.outbox.dto.OutboxCreationRequest;
+import com.shibana.identity_service.message.outbox.service.OutboxService;
+import com.shibana.identity_service.message.outbox.enums.AggregateType;
 import com.shibana.identity_service.repository.UserRepo;
 import com.shibana.identity_service.repository.http_client.ProfileClient;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +23,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.shibana.identity_service.enums.RoleEnum;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +36,7 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     RoleService roleService;
+    OutboxService  outboxService;
     UserRepo userRepo;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
@@ -50,6 +56,7 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        Instant now = Instant.now();
         User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -61,6 +68,7 @@ public class UserService {
             roles.add(roleService.getRoleByName(RoleEnum.USER.name()));
         }
         user.setRoles(roles);
+        user.setCreatedAt(now);
 
         try {
             user = userRepo.saveAndFlush(user);
@@ -69,16 +77,27 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        ProfileCreationRequest profileCreationRequest = ProfileCreationRequest.builder()
-                .userId(user.getId())
-                .username(userRequest.getUsername())
-                .email(userRequest.getEmail())
-                .firstName(userRequest.getFirstName())
-                .lastName(userRequest.getLastName())
-                .dob(userRequest.getDob())
+        var eventPayload = new UserRegisteredEventPayload(
+                user.getId(),
+                userRequest.getFirstName(),
+                userRequest.getLastName(),
+                userRequest.getDob(),
+                user.getUsername(),
+                user.getEmail(),
+                now
+        );
+
+        var requestPayload = OutboxCreationRequest.builder()
+                .aggregateId(user.getId().toString())
+                .aggregateType(AggregateType.USER.name())
+                .eventType(EventType.USER_REGISTERED)
+                .eventVersion(0)
+                .eventPayload(eventPayload)
+                .createdAt(now)
                 .build();
 
-        profileClient.create(profileCreationRequest);
+        outboxService.creatAndPublishOutboxEvent(requestPayload);
+
         return user;
     }
 
