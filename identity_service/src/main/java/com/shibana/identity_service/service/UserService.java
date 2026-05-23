@@ -97,7 +97,6 @@ public class UserService {
                 .build();
 
         outboxService.creatAndPublishOutboxEvent(requestPayload);
-
         return user;
     }
 

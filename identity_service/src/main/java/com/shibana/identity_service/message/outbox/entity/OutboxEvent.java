@@ -19,12 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-@Table(
-        name = "outbox_events",
-        indexes = {
-                @Index(name = "idx_outbox_events_scheduler", columnList = "status, created_at"),
-        }
-)
+@Table(name = "outbox_events")
 public class OutboxEvent {
     @Id
     @Builder.Default

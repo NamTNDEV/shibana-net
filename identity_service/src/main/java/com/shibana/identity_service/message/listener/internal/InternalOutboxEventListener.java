@@ -24,8 +24,6 @@ public class InternalOutboxEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOutboxCreatedEvent(OutboxCreatedLocalEvent localEvent) {
-        log.info("Received OutboxCreatedLocalEvent for OutboxEvent with ID:: {}", localEvent.getOutboxEventId());
-
         OutboxEvent outboxEvent;
         try {
             outboxEvent = outboxService.getPendingEvent(localEvent.getOutboxEventId());
@@ -37,10 +35,9 @@ public class InternalOutboxEventListener {
         try {
             publisher.publish(outboxEvent);
             outboxService.markEventAsPublished(outboxEvent);
-            log.info("OutboxEvent with ID:: {} has been published successfully.", outboxEvent.getId());
         } catch (AppException e) {
             log.error("Gửi Kafka thất bại. Chuẩn bị tăng Retry...", e);
-            outboxService.markEventAsFaild(outboxEvent);
+            outboxService.markEventAsFaild(outboxEvent, 4);
         }
     }
 }

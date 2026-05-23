@@ -36,7 +36,6 @@ public class KafkaEventPublisher implements EventPublisher {
         try {
             kafkaTemplate.send(topic, outboxEvent.getAggregateId(), outboxEvent.getPayload())
                     .get(5, TimeUnit.SECONDS);
-            log.info("Đã bắn Kafka thành công Event ID: {} lên topic: {}", outboxEvent.getId(), topic);
         } catch (Exception e) {
             log.error("Lỗi khi bắn Kafka Event ID: {}", outboxEvent.getId(), e);
             throw new AppException(ErrorCode.KAFKA_PUBLISH_FAILED);
