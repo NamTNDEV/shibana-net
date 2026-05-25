@@ -6,6 +6,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -30,4 +31,11 @@ public interface OutboxRepo extends Neo4jRepository<OutboxEvent, UUID> {
             ORDER BY e.createdAt ASC;
             """)
     List<OutboxEvent> findPendingEvents(@Param("pendingTimeout") Instant pendingTimeout, Pageable pageable);
+
+    @Query("""
+            MATCH (e:outbox_events)
+            WHERE e.status = 'COMPLETED'
+            AND e.createdAt < $threshold DETACH DELETE e
+            """)
+    void deleteOldCompletedEvents(@Param("threshold") Instant threshold);
 }
