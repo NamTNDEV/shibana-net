@@ -35,12 +35,14 @@ public enum ErrorCode {
     PROFILE_NOT_FOUND(4040105, "profile-service:: Profile not found", HttpStatus.NOT_FOUND),
     FIELD_PRIVACY_NOT_FOUND(4040106, "profile-service:: Field not found", HttpStatus.NOT_FOUND),
     PRIVACY_NOT_FOUND(4040107, "profile-service:: Privacy level not found", HttpStatus.NOT_FOUND),
+    OUTBOX_EVENT_NOT_FOUND(4040108, "profile-service:: Event not found", HttpStatus.NOT_FOUND),
 
     INTERNAL_SERVER_ERROR(5000105, "profile-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000106, "profile-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_JSON_PARSING(5000107, "profile-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
     SERIALIZATION_ERROR(5000108, "profile-service:: Serialization error", HttpStatus.INTERNAL_SERVER_ERROR),
-    OPTIMISTIC_LOCKING_FAILURE(5000109, "profile-service:: Optimistic locking failure", HttpStatus.INTERNAL_SERVER_ERROR, true)
+    TOPIC_NOT_FOUND(5000110, "profile-service:: Topic not found for aggregate type", HttpStatus.INTERNAL_SERVER_ERROR),
+    KAFKA_PUBLISH_FAILED(5000111, "profile-service:: Failed to publish event to Kafka", HttpStatus.INTERNAL_SERVER_ERROR, true)
     ;
 
     int code;

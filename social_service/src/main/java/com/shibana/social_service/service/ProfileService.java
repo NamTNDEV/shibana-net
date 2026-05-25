@@ -15,18 +15,20 @@ import com.shibana.social_service.enums.friendship_status.FriendshipStatus;
 import com.shibana.social_service.exception.AppException;
 import com.shibana.social_service.exception.ErrorCode;
 import com.shibana.social_service.mapper.ProfileMapper;
+import com.shibana.social_service.message.dto.EventType;
 import com.shibana.social_service.message.dto.payloads.AvatarUpdatedPayload;
-import com.shibana.social_service.message.event.AvatarUpdatedLocalEvent;
+import com.shibana.social_service.message.outbox.dto.OutboxCreationRequest;
+import com.shibana.social_service.message.outbox.enums.AggregateType;
+import com.shibana.social_service.message.outbox.service.OutboxService;
 import com.shibana.social_service.repo.ProfileRepo;
 import com.shibana.social_service.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -38,7 +40,7 @@ public class ProfileService {
     ProfileRepo profileRepo;
     ProfileMapper profileMapper;
     ConnectionsService connectionsService;
-    ApplicationEventPublisher eventPublisher;
+    OutboxService outboxService;
 
     private Profile findByUserId(UUID userId) {
         return profileRepo.findByUserId(userId).orElseThrow(
@@ -106,22 +108,31 @@ public class ProfileService {
         if (request.getAvatarMediaName() == null) {
             throw new AppException(ErrorCode.INVALID_AVATAR);
         }
+
         Profile existingProfile = findByUserId(userId);
+
         String oldAvatarName = null;
         String newAvatarName = request.getAvatarMediaName();
+
         if (!newAvatarName.equals(existingProfile.getAvatarMediaName())) {
             oldAvatarName = existingProfile.getAvatarMediaName();
             existingProfile.setAvatarMediaName(request.getAvatarMediaName());
         }
+
+        Instant now = Instant.now();
+
         existingProfile.setAvatarScale(request.getAvatarScale());
         existingProfile.setAvatarPositionX(request.getAvatarPositionX());
         existingProfile.setAvatarPositionY(request.getAvatarPositionY());
+        existingProfile.setUpdatedAt(now);
+
         profileRepo.save(existingProfile);
+
         if (oldAvatarName != null) {
             log.info("Deleted old avatar media with id {}", oldAvatarName);
         }
 
-        AvatarUpdatedPayload avatarUpdatedPayload = AvatarUpdatedPayload.builder()
+        AvatarUpdatedPayload payload = AvatarUpdatedPayload.builder()
                 .userId(userId)
                 .avatarMediaName(newAvatarName)
                 .avatarPositionX(request.getAvatarPositionX())
@@ -129,7 +140,15 @@ public class ProfileService {
                 .avatarScale(request.getAvatarScale())
                 .build();
 
-        eventPublisher.publishEvent(new AvatarUpdatedLocalEvent(avatarUpdatedPayload));
+        var outboxCreationRequest = OutboxCreationRequest.builder()
+                .aggregateId(userId.toString())
+                .aggregateType(AggregateType.PROFILE.name())
+                .eventType(EventType.AVATAR_UPDATED)
+                .eventPayload(payload)
+                .createdAt(now)
+                .build();
+
+        outboxService.creatAndPublishOutboxEvent(outboxCreationRequest);
     }
 
     @Transactional

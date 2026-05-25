@@ -4,6 +4,9 @@ import com.shibana.social_service.message.dto.EventType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Setter
 @Getter
 @ToString
@@ -12,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class EventEnvelopeMetadata {
-    String eventId;
+    UUID eventId;
     String source;
     EventType eventType;
-    long  timestamp;
+    Instant timestamp;
 }

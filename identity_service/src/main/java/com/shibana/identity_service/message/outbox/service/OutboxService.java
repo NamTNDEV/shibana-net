@@ -68,7 +68,6 @@ public class OutboxService {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public <T> void creatAndPublishOutboxEvent(OutboxCreationRequest<T> outboxCreationRequest) {
-
         UUID eventId = UuidCreator.getTimeOrderedEpoch();
         var envelopeMetadata = new EventEnvelopeMetadata(
                 eventId,
@@ -82,14 +81,15 @@ public class OutboxService {
                 envelopeMetadata,
                 outboxCreationRequest.getEventPayload()
         );
-
-        String deserializedPayload = jsonHelper.serialize(eventEnvelope);
+        log.info("1::");
+        String serializedPayload = jsonHelper.serialize(eventEnvelope);
+        log.info("2::");
 
         var outboxEvent = OutboxEvent.builder()
                 .aggregateType(outboxCreationRequest.getAggregateType())
                 .aggregateId(outboxCreationRequest.getAggregateId())
                 .eventType(outboxCreationRequest.getEventType())
-                .payload(deserializedPayload)
+                .payload(serializedPayload)
                 .build();
 
         outboxRepo.save(outboxEvent);
