@@ -11,7 +11,6 @@ import org.springframework.util.backoff.FixedBackOff;
 
 @Slf4j
 @Configuration
-
 public class KafkaConfig {
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> template) {

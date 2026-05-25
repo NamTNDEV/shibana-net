@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -60,6 +61,9 @@ public class Profile {
 
     @Builder.Default
     PrivacyLevel addressPrivacy = PrivacyLevel.PUBLIC;
+
+    Instant createdAt;
+    Instant updatedAt;
 
     @Version
     Long version;

@@ -28,7 +28,7 @@ public class KafkaProfileMessagePublisher implements ProfileMessagePublisher {
     @Value("${infra.kafka.producer.name}")
     String producerName;
 
-    @Value("${infra.kafka.topics.avatar-updated}")
+    @Value("${infra.kafka.topics.profile-event.name}")
     String topicProfileUpdated;
 
     @Override

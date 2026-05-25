@@ -10,14 +10,20 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class KafkaTopicConfig {
-    @Value("${infra.kafka.topics.avatar-updated}")
-    String avatarUpdatedTopic;
+    @Value("${infra.kafka.replication-factor-default}")
+    int replicationFactorDefault;
+
+    @Value("${infra.kafka.topics.profile-event.name}")
+    String profileEventsTopic;
+
+    @Value("${infra.kafka.topics.profile-event.partitions}")
+    int profileEventsTopicPartitions;
 
     @Bean
-    public NewTopic avatarUpdatedTopic() {
-        return TopicBuilder.name(avatarUpdatedTopic)
-                .partitions(3)
-                .replicas(1)
+    public NewTopic profileEventsTopic() {
+        return TopicBuilder.name(profileEventsTopic)
+                .partitions(profileEventsTopicPartitions)
+                .replicas(replicationFactorDefault)
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.shibana.social_service.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -20,4 +21,5 @@ public class ProfileCreationRequest {
     LocalDate dob;
     String username;
     String email;
+    Instant  createdAt;
 }

@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     INVALID_BIO_LENGTH(4000105, "profile-service:: Bio length is not valid", HttpStatus.BAD_REQUEST),
@@ -40,10 +39,26 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(5000105, "profile-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000106, "profile-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_JSON_PARSING(5000107, "profile-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
-    SERIALIZATION_ERROR(5000108, "profile-service:: Serialization error", HttpStatus.INTERNAL_SERVER_ERROR)
+    SERIALIZATION_ERROR(5000108, "profile-service:: Serialization error", HttpStatus.INTERNAL_SERVER_ERROR),
+    OPTIMISTIC_LOCKING_FAILURE(5000109, "profile-service:: Optimistic locking failure", HttpStatus.INTERNAL_SERVER_ERROR, true)
     ;
 
     int code;
     String message;
     HttpStatus httpStatus;
+    boolean retryable;
+
+    ErrorCode(int code, String message, HttpStatus httpStatus) {
+        this.code = code;
+        this.message = message;
+        this.httpStatus = httpStatus;
+        this.retryable = false;
+    }
+
+    ErrorCode(int code, String message, HttpStatus httpStatus,  boolean retryable) {
+        this.code = code;
+        this.message = message;
+        this.httpStatus = httpStatus;
+        this.retryable = retryable;
+    }
 }
