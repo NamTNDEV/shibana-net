@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -26,17 +27,20 @@ public class UserEventListener {
     )
     public void handleUserRegisteredEvent(ConsumerRecord<String, String> rawJson) {
         EventType eventType = jsonHelper.extractEventType(rawJson.value());
-        switch (eventType) {
-            case USER_REGISTERED -> {
-                log.info("Received USER REGISTERED event");
-                ProfileCreationRequest requestPayload = jsonHelper.parsePayload(rawJson.value(), ProfileCreationRequest.class);
-                profileService.createProfile(requestPayload);
+        try {
+            switch (eventType) {
+                case USER_REGISTERED -> {
+                    log.info("Received USER REGISTERED event");
+                    ProfileCreationRequest requestPayload = jsonHelper.parsePayload(rawJson.value(), ProfileCreationRequest.class);
+                    profileService.createProfile(requestPayload);
+                }
+                case AVATAR_UPDATED -> {
+                    log.info("Received AVATAR UPDATED event");
+                }
+                default -> log.warn("Received unsupported event type: {}", eventType);
             }
-            case AVATAR_UPDATED -> {
-                log.info("Received AVATAR UPDATED event");
-            }
-            default -> log.warn("Received unsupported event type: {}", eventType);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("🚨 Phát hiện event trùng lặp hoặc vi phạm constraint dữ liệu. Đã an toàn bỏ qua! Payload: {}", rawJson.value());
         }
     }
-
 }
