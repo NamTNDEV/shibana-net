@@ -40,7 +40,7 @@ public class InternalOutboxEventListener {
             outboxService.markEventAsCompleted(outboxEvent);
         } catch (AppException e) {
             log.error("Gửi Kafka thất bại. Chuẩn bị tăng Retry...", e);
-            outboxService.markEventAsFaild(outboxEvent, 4);
+            outboxService.markEventAsFaild(outboxEvent, 3);
         }
     }
 }

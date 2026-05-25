@@ -13,9 +13,9 @@ import java.util.UUID;
 
 @Repository
 public interface OutboxRepo extends JpaRepository<OutboxEvent, UUID> {
-    @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'FAILED' AND e.retryCount < :maxRetries ORDER BY e.createdAt ASC")
+    @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'FAILED' AND e.retryCount <= :maxRetries ORDER BY e.createdAt ASC")
     List<OutboxEvent> findFailedEvents(@Param("maxRetries") int maxRetries, Pageable pageable);
 
-    @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'PENDING' AND e.createdAt < :timeout ORDER BY e.createdAt ASC")
+    @Query("SELECT e FROM OutboxEvent e WHERE e.status = 'PENDING' AND e.createdAt <= :timeout ORDER BY e.createdAt ASC")
     List<OutboxEvent> findStuckPendingEvent(@Param("timeout") Instant timeout, Pageable pageable);
 }

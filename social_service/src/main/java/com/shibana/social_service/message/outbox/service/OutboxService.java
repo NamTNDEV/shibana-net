@@ -49,7 +49,7 @@ public class OutboxService {
     public void markEventAsFaild(OutboxEvent outboxEvent, int maxRetries) {
         outboxEvent.setRetryCount(outboxEvent.getRetryCount() + 1);
 
-        if (outboxEvent.getRetryCount() >= maxRetries) {
+        if (outboxEvent.getRetryCount() > maxRetries) {
             outboxEvent.setStatus(OutboxStatus.DEAD);
             log.error("CẢNH BÁO ĐỎ! Event {} đã DEAD sau {} lần thử", outboxEvent.getId(), maxRetries);
         } else {
@@ -82,6 +82,7 @@ public class OutboxService {
                 .aggregateId(request.getAggregateId())
                 .eventType(request.getEventType())
                 .eventPayload(serializedPayoad)
+                .createdAt(Instant.now())
                 .build();
 
         var outbox = outboxRepo.save(outboxEvent);
