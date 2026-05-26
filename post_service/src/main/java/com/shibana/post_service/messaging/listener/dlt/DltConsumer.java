@@ -1,5 +1,7 @@
 package com.shibana.post_service.messaging.listener.dlt;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -8,27 +10,27 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
 @Slf4j
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DltConsumer {
     @KafkaListener(
-            topics = "identity.user.events.DLT",
+            topics = "#{'${infra.kafka.dlt_topics}'.split(', ')}",
             groupId = "post-service-dlt-group"
     )
-    public void handleDltMessage(
+    public void handleUserDltMessage(
             ConsumerRecord<String, String> record,
             @Header(value = KafkaHeaders.DLT_EXCEPTION_MESSAGE, required = false) byte[] errorMessageBytes,
 //            @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE, required = false) byte[ stackTraceBytes,
             @Header(value = KafkaHeaders.DLT_ORIGINAL_TOPIC, required = false) byte[] originalTopicBytes
     ) {
-        String errorMessage = byteToString(errorMessageBytes);
         String originalTopic = byteToString(originalTopicBytes);
+        String errorMessage = byteToString(errorMessageBytes);
+        String serializedDltMessage = cleanErrorMessage(errorMessage);
 
-        log.error("🚨 [BÁO ĐỘNG ĐỎ] Nhận gói tin xịt từ Topic gốc: {}", originalTopic);
-        log.error("🔑 Key: {}", record.key());
-        log.error("📦 Payload xịt: {}", record.value());
-        log.error("💥 Nguyên nhân cái chết: {}", cleanErrorMessage(errorMessage));
+        processLogs(originalTopic, record, serializedDltMessage);
     }
 
     private String cleanErrorMessage(String rawMessage) {
@@ -41,5 +43,41 @@ public class DltConsumer {
 
     private String byteToString(byte[] bytes) {
         return bytes != null ? new String(bytes, StandardCharsets.UTF_8) : "N/A";
+    }
+
+    private String maskSensitiveFields(String payload) {
+        if (payload == null) return "null";
+        return payload
+                .replaceAll("\"password\"\\s*:\\s*\"[^\"]*\"", "\"password\":\"***\"")
+                .replaceAll("\"token\"\\s*:\\s*\"[^\"]*\"", "\"token\":\"***\"");
+    }
+
+    private void processLogs(String originalTopic, ConsumerRecord<String, String> record, String errorMessage) {
+        log.error("""
+                        \n
+                        ╔══════════════════════════════════════════╗
+                        ║           DEAD LETTER TOPIC ALERT        ║
+                        ╚══════════════════════════════════════════╝
+                        📍 Original Topic : {}
+                        🔑 Key             : {}
+                        📋 Partition       : {}
+                        📦 Offset          : {}
+                        ⏰ Timestamp       : {}
+                        ─────────────────────────────────────────
+                        📄 Payload:
+                        {}
+                        ─────────────────────────────────────────
+                        💥 Error:
+                        {}
+                        ══════════════════════════════════════════
+                        """,
+                originalTopic,
+                record.key(),
+                record.partition(),
+                record.offset(),
+                Instant.ofEpochMilli(record.timestamp()),
+                maskSensitiveFields(record.value()),
+                errorMessage
+        );
     }
 }

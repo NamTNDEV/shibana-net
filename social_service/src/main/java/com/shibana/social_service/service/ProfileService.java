@@ -111,15 +111,7 @@ public class ProfileService {
         }
 
         Profile existingProfile = findByUserId(userId);
-
-        String oldAvatarName = null;
         String newAvatarName = request.getAvatarMediaName();
-
-        if (!newAvatarName.equals(existingProfile.getAvatarMediaName())) {
-            oldAvatarName = existingProfile.getAvatarMediaName();
-            existingProfile.setAvatarMediaName(request.getAvatarMediaName());
-        }
-
         Instant now = Instant.now();
 
         existingProfile.setAvatarScale(request.getAvatarScale());
@@ -128,10 +120,6 @@ public class ProfileService {
         existingProfile.setUpdatedAt(now);
 
         profileRepo.save(existingProfile);
-
-        if (oldAvatarName != null) {
-            log.info("Deleted old avatar media with id {}", oldAvatarName);
-        }
 
         AvatarUpdatedPayload payload = AvatarUpdatedPayload.builder()
                 .userId(userId)

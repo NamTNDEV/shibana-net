@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_CONTENT_LENGHT(4000604, "post-service:: Content length must be between 1 and 300 characters", HttpStatus.BAD_REQUEST),
     COMMENT_DELETE_FAILED(4000704, "post-service:: Failed to delete comment", HttpStatus.BAD_REQUEST),
     INVALID_AVATAR_UPDATED_MESSAGE_PAYLOAD(4000804, "post-service:: Invalid avatar updated message payload", HttpStatus.BAD_REQUEST),
+    INVALID_AVATAR_MEDIA_NAME(4000904, "post-service:: Invalid avatar media name", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 
@@ -30,6 +31,7 @@ public enum ErrorCode {
 
     POST_NOT_FOUND(4040104, "post-service:: Post not found", HttpStatus.NOT_FOUND),
     COMMENT_NOT_FOUND(4040204, "post-service:: Comment not found", HttpStatus.NOT_FOUND),
+    AUTHOR_NOT_FOUND(4040104, "post-service:: Author not found", HttpStatus.NOT_FOUND),
 
     INTERNAL_SERVER_ERROR(5000104, "post-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000204, "post-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
