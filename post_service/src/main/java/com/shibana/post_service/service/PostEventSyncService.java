@@ -1,6 +1,6 @@
 package com.shibana.post_service.service;
 
-import com.shibana.post_service.messaging.dto.payloads.AuthorUpdatedEventPayload;
+import com.shibana.post_service.model.dto.resquest.AvatarUpdateRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class PostEventSyncService {
 //    MongoTemplate mongoTemplate;
 
-    public void syncAuthorAvatar(List<AuthorUpdatedEventPayload> payloads) {
+    public void syncAuthorAvatar(List<AvatarUpdateRequest> payloads) {
         CompletableFuture<Void> postFuture = CompletableFuture.runAsync(() -> syncAvatarToPosts(payloads));
         CompletableFuture<Void> commentFuture = CompletableFuture.runAsync(() -> syncAvatarToComments(payloads));
         try {
@@ -28,7 +28,7 @@ public class PostEventSyncService {
         }
     }
 
-    private void syncAvatarToPosts(List<AuthorUpdatedEventPayload> payloads) {
+    private void syncAvatarToPosts(List<AvatarUpdateRequest> payloads) {
 //        BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Post.class);
 //        Instant now = Instant.now();
 //        for (AvatarUpdatedPayload payload : payloads) {
@@ -53,7 +53,7 @@ public class PostEventSyncService {
 //        }
     }
 
-    private void syncAvatarToComments(List<AuthorUpdatedEventPayload> payloads) {
+    private void syncAvatarToComments(List<AvatarUpdateRequest> payloads) {
 //        BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Comment.class);
 //        Instant now = Instant.now();
 //        for (AvatarUpdatedPayload payload : payloads) {

@@ -1,9 +1,6 @@
 package com.shibana.post_service.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -26,8 +23,11 @@ public class Author {
     @Column(nullable = false)
     String username;
 
-    @Column(name = "display_name")
-    String displayName;
+    @Column(name = "first_name")
+    String firstName;
+
+    @Column(name = "last_name")
+    String lastName;
 
     @Column(name = "avatar_media_name")
     String avatarMediaName;
@@ -47,4 +47,7 @@ public class Author {
     @Column(name = "updated_at")
     @UpdateTimestamp
     Instant updatedAt;
+
+    @Version
+    Integer version;
 }

@@ -31,7 +31,6 @@ public class UserEventListener {
         try {
             switch (eventType) {
                 case USER_REGISTERED -> {
-                    log.info("Received USER REGISTERED event");
                     ProfileCreationRequest requestPayload = jsonHelper.parsePayload(rawJson.value(), ProfileCreationRequest.class);
                     profileService.createProfile(requestPayload);
                 }

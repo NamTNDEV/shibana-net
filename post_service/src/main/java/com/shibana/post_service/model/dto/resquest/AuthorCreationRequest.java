@@ -1,11 +1,10 @@
-package com.shibana.post_service.messaging.dto.payloads;
+package com.shibana.post_service.model.dto.resquest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -16,7 +15,7 @@ import java.util.UUID;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class CachedUserRegisteredPayload {
+public class AuthorCreationRequest {
     UUID userId;
     String firstName;
     String lastName;

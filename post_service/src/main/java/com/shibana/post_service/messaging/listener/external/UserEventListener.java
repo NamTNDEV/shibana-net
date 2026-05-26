@@ -1,8 +1,9 @@
 package com.shibana.post_service.messaging.listener.external;
 
 import com.shibana.post_service.messaging.dto.EventType;
-import com.shibana.post_service.messaging.dto.payloads.CachedUserRegisteredPayload;
+import com.shibana.post_service.model.dto.resquest.AuthorCreationRequest;
 import com.shibana.post_service.messaging.helper.JsonHelper;
+import com.shibana.post_service.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class UserEventListener {
     JsonHelper jsonHelper;
+    AuthorService authorService;
 
     @KafkaListener(
             topics = "${infra.kafka.topics.user-event}",
@@ -27,8 +29,8 @@ public class UserEventListener {
         try {
             switch (eventType) {
                 case USER_REGISTERED -> {
-                    var payload = jsonHelper.parsePayload(rawJsonEvent.value(), CachedUserRegisteredPayload.class);
-                    log.info("Received USER REGISTERED event");
+                    var payload = jsonHelper.parsePayload(rawJsonEvent.value(), AuthorCreationRequest.class);
+                        authorService.createAuthor(payload);
                 }
                 default -> log.warn("⚠\uFE0F Received unsupported event type: {}", eventType);
             }

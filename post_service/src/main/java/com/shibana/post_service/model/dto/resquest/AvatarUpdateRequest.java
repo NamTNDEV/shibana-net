@@ -1,4 +1,4 @@
-package com.shibana.post_service.messaging.dto.payloads;
+package com.shibana.post_service.model.dto.resquest;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthorUpdatedEventPayload {
+public class AvatarUpdateRequest {
     UUID userId;
     String avatarMediaName;
     Double avatarScale;
