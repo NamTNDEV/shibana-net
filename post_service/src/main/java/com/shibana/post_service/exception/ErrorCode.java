@@ -38,5 +38,13 @@ public enum ErrorCode {
 
     int code;
     String message;
+    boolean isRetryable;
     HttpStatus httpStatus;
+
+    ErrorCode(int code, String message, HttpStatus httpStatus) {
+        this.code = code;
+        this.message = message;
+        this.httpStatus = httpStatus;
+        this.isRetryable = false;
+    }
 }

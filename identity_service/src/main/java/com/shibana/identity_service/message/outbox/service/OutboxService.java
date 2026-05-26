@@ -81,9 +81,7 @@ public class OutboxService {
                 envelopeMetadata,
                 outboxCreationRequest.getEventPayload()
         );
-        log.info("1::");
         String serializedPayload = jsonHelper.serialize(eventEnvelope);
-        log.info("2::");
 
         var outboxEvent = OutboxEvent.builder()
                 .aggregateType(outboxCreationRequest.getAggregateType())

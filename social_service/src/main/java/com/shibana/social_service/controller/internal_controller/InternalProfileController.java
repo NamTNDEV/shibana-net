@@ -26,7 +26,7 @@ public class InternalProfileController {
         return ApiResponse.<ProfileResponse>builder()
                 .code(201)
                 .message("Profile created successfully")
-                .data(profileService.createProfile(request))
+                .data(null)
                 .build();
     }
 

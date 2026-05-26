@@ -25,6 +25,8 @@ import com.shibana.social_service.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,10 +81,9 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileResponse createProfile(ProfileCreationRequest request) {
+    public void createProfile(ProfileCreationRequest request) {
         Profile profileRequest = profileMapper.toProfileEntity(request);
-        Profile savedProfile = profileRepo.save(profileRequest);
-        return profileMapper.toProfileResponse(savedProfile);
+        profileRepo.save(profileRequest);
     }
 
     public ProfileMetadataResponse getMetadataByUserId(UUID userId) {

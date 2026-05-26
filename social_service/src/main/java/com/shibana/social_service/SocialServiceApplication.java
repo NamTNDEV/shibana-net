@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableAsync
+@EnableScheduling
 @EnableFeignClients
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableScheduling
 public class SocialServiceApplication {
 
     public static void main(String[] args) {

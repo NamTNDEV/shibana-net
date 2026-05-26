@@ -18,5 +18,4 @@ public class AvatarUpdatedPayload {
     Double avatarScale;
     Double avatarPositionX;
     Double avatarPositionY;
-
 }

@@ -23,8 +23,7 @@ import java.util.UUID;
 @Node("profiles")
 public class Profile {
     @Id
-    @Builder.Default
-    UUID userId = UuidCreator.getTimeOrderedEpoch();
+    UUID userId;
 
     String username;
 

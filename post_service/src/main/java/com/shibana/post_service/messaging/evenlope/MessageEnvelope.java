@@ -1,4 +1,4 @@
-package com.shibana.post_service.messaging.dto;
+package com.shibana.post_service.messaging.evenlope;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,8 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MessageEnvelopeMetadata {
-    String messageId;
-    MessageType messageType;
-    long  timestamp;
+public class MessageEnvelope<T> {
+    MessageEnvelopeMetadata metadata;
+    T payload;
 }

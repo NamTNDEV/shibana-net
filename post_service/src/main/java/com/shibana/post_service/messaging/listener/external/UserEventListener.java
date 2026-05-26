@@ -1,10 +1,8 @@
-package com.shibana.social_service.message.listener.external;
+package com.shibana.post_service.messaging.listener.external;
 
-import com.shibana.social_service.dto.request.ProfileCreationRequest;
-import com.shibana.social_service.message.dto.EventType;
-import com.shibana.social_service.message.helper.JsonHelper;
-import com.shibana.social_service.service.ProfileService;
-import lombok.AccessLevel;
+import com.shibana.post_service.messaging.dto.EventType;
+import com.shibana.post_service.messaging.dto.payloads.CachedUserRegisteredPayload;
+import com.shibana.post_service.messaging.helper.JsonHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -14,28 +12,25 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class UserEventListener {
-    ProfileService profileService;
     JsonHelper jsonHelper;
 
     @KafkaListener(
             topics = "${infra.kafka.topics.user-event}",
-            groupId = "${spring.kafka.consumer.group-id}"
-    )
-    public void handleUserEvents(ConsumerRecord<String, String> rawJson) {
-        EventType eventType = jsonHelper.extractEventType(rawJson.value());
+            groupId = "${spring.kafka.consumer.group-id}")
+    public void handleUserEvents(ConsumerRecord<String, String> rawJsonEvent) {
+        EventType eventType = jsonHelper.extractEventType(rawJsonEvent.value());
         try {
             switch (eventType) {
                 case USER_REGISTERED -> {
+                    var payload = jsonHelper.parsePayload(rawJsonEvent.value(), CachedUserRegisteredPayload.class);
                     log.info("Received USER REGISTERED event");
-                    ProfileCreationRequest requestPayload = jsonHelper.parsePayload(rawJson.value(), ProfileCreationRequest.class);
-                    profileService.createProfile(requestPayload);
                 }
-                default -> log.warn("Received unsupported event type: {}", eventType);
+                default -> log.warn("⚠\uFE0F Received unsupported event type: {}", eventType);
             }
         } catch (DataIntegrityViolationException | OptimisticLockingFailureException e) {
             log.warn("🚨 Phát hiện event trùng lặp hoặc vi phạm constraint dữ liệu. Đã an toàn bỏ qua!");

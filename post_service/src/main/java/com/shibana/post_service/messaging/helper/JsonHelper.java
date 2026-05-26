@@ -1,11 +1,10 @@
 package com.shibana.post_service.messaging.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shibana.post_service.exception.AppException;
 import com.shibana.post_service.exception.ErrorCode;
-import com.shibana.post_service.messaging.dto.MessageType;
+import com.shibana.post_service.messaging.dto.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -18,25 +17,25 @@ import org.springframework.stereotype.Component;
 public class JsonHelper {
     ObjectMapper mapper;
 
-    public MessageType extractEventType(String jsonMessage) {
+    public EventType extractEventType(String rawJsonEvent) {
         try {
-            JsonNode root = mapper.readTree(jsonMessage);
-            if (root.has("metadata") && root.get("metadata").has("messageType")) {
-                return MessageType.valueOf(root.get("metadata").get("messageType").asText());
+            var root = mapper.readTree(rawJsonEvent);
+            if (root.has("metadata") && root.get("metadata").has("eventType")) {
+                return EventType.valueOf(root.get("metadata").get("eventType").asText());
             }
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse JSON message: {}", jsonMessage, e);
+            return EventType.UNKNOWN;
+        } catch (IllegalArgumentException | JsonProcessingException e) {
+            log.error("Failed to parse JSON event to EventType! Reason: {}", e.getMessage());
             throw new AppException(ErrorCode.INVALID_JSON_PARSING);
         }
-        return MessageType.UNKNOWN;
     }
 
-    public <T> T parsePayload(String jsonMessage, Class<T> targetClass) {
+    public <T> T parsePayload(String rawJsonEvent, Class<T> targetClass) {
         try {
-            JsonNode root = mapper.readTree(jsonMessage);
+            var root = mapper.readTree(rawJsonEvent);
             return mapper.treeToValue(root.get("payload"), targetClass);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse JSON message: {}", jsonMessage, e);
+        } catch (IllegalArgumentException | JsonProcessingException e) {
+            log.error("Failed to parse JSON event payload to {}! Reason: {}", targetClass.getSimpleName(), e.getMessage());
             throw new AppException(ErrorCode.INVALID_JSON_PARSING);
         }
     }

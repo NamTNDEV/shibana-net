@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     INVALID_BIO_LENGTH(4000105, "profile-service:: Bio length is not valid", HttpStatus.BAD_REQUEST),
@@ -37,12 +38,14 @@ public enum ErrorCode {
     PRIVACY_NOT_FOUND(4040107, "profile-service:: Privacy level not found", HttpStatus.NOT_FOUND),
     OUTBOX_EVENT_NOT_FOUND(4040108, "profile-service:: Event not found", HttpStatus.NOT_FOUND),
 
+    OPTIMISTIC_LOCK_FAILURE(4090105, "profile-service:: Concurrent modification detected. Please retry.", HttpStatus.CONFLICT, true),
+
     INTERNAL_SERVER_ERROR(5000105, "profile-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000106, "profile-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_JSON_PARSING(5000107, "profile-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
     SERIALIZATION_ERROR(5000108, "profile-service:: Serialization error", HttpStatus.INTERNAL_SERVER_ERROR),
     TOPIC_NOT_FOUND(5000110, "profile-service:: Topic not found for aggregate type", HttpStatus.INTERNAL_SERVER_ERROR),
-    KAFKA_PUBLISH_FAILED(5000111, "profile-service:: Failed to publish event to Kafka", HttpStatus.INTERNAL_SERVER_ERROR, true)
+    KAFKA_PUBLISH_FAILED(5000111, "profile-service:: Failed to publish event to Kafka", HttpStatus.INTERNAL_SERVER_ERROR, true),
     ;
 
     int code;
@@ -55,12 +58,5 @@ public enum ErrorCode {
         this.message = message;
         this.httpStatus = httpStatus;
         this.retryable = false;
-    }
-
-    ErrorCode(int code, String message, HttpStatus httpStatus,  boolean retryable) {
-        this.code = code;
-        this.message = message;
-        this.httpStatus = httpStatus;
-        this.retryable = retryable;
     }
 }
