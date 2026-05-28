@@ -30,5 +30,6 @@ public interface UserMapper {
     @Mapping(target = "avatarScale", source = "profileResponse.avatarScale")
     @Mapping(target = "avatarPositionX", source = "profileResponse.avatarPositionX")
     @Mapping(target = "avatarPositionY", source = "profileResponse.avatarPositionY")
-    MyAccountResponse toGetMeResponse(User user, ProfileMetadataResponse profileResponse);
+    @Mapping(target = "isProfileReady", source = "isProfileReady")
+    MyAccountResponse toGetMeResponse(User user, ProfileMetadataResponse profileResponse, boolean isProfileReady);
 }

@@ -103,22 +103,19 @@ public class UserService {
     public MyAccountResponse getMyAccount(UUID userId) {
         User user = getUserById(userId);
         ProfileMetadataResponse metadataResponse = null;
+        boolean isProfileReady = false;
 
         try{
             var res = profileClient.getMetadataByUserId(userId);
             if (res != null && res.getData() != null) {
                 metadataResponse = res.getData();
+                isProfileReady = true;
             }
         } catch (Exception e) {
             log.error("Failed to fetch profile metadata for user {}: {}", userId, e.getMessage());
-            metadataResponse = ProfileMetadataResponse.builder()
-                    .firstName("Anonymous")
-                    .lastName("User")
-                    .avatar(null)
-                    .build();
         }
 
-        return userMapper.toGetMeResponse(user, metadataResponse);
+        return userMapper.toGetMeResponse(user, metadataResponse, isProfileReady);
     }
 
     public boolean isUserExist(String email) {

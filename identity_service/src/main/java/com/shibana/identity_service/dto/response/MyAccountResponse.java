@@ -24,4 +24,5 @@ public class MyAccountResponse {
     Double avatarScale;
     Double avatarPositionX;
     Double avatarPositionY;
+    boolean isProfileReady;
 }
