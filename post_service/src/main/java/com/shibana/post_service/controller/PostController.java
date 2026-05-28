@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class PostController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         log.info(":: Create Post Controller ::");
-        String authorId = jwt.getClaim("user_id");
+        UUID authorId = UUID.fromString(jwt.getClaim("user_id"));
         var command = new PostCreationCommand(
                 body.getContent(),
                 authorId,

@@ -58,26 +58,33 @@ public class Post {
     private List<Media> media = new ArrayList<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "reaction_stats", columnDefinition = "jsonb")
     @Builder.Default
     Map<String, Integer> reactionStats = new HashMap<>();
 
     @Builder.Default
-    Integer commentCount = 0;
+    @Column(name = "comment_counts")
+    Integer commentCounts = 0;
 
     @Builder.Default
+    @Column(name = "is_edited")
     Boolean isEdited = false;
 
     @Builder.Default
+    @Column(name = "is_deleted")
     Boolean isDeleted = false;
 
-    @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     Instant createdAt;
 
-    @UpdateTimestamp
+    @Column(name = "updated_at")
     Instant updatedAt;
 
     @Version
     Integer version;
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 }

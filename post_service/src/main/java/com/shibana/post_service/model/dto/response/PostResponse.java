@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,10 +17,10 @@ import java.time.Instant;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PostResponse {
-    String id;
+    UUID id;
     String content;
-    Author author;
+    UUID authorId;
     PostPrivacyEnum privacy;
     Instant createdAt;
-    Integer commentCount;
+    Integer commentCounts;
 }

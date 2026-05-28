@@ -4,37 +4,51 @@ import com.shibana.post_service.http_client.SocialClient;
 import com.shibana.post_service.mapper.PostMapper;
 import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.dto.resquest.PostUpdateRequestBody;
+import com.shibana.post_service.model.entity.Author;
+import com.shibana.post_service.model.entity.Post;
 import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
+import com.shibana.post_service.repo.AuthorRepo;
+import com.shibana.post_service.repo.PostRepo;
+import com.shibana.post_service.utils.HashtagUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostCommandService {
-//    PostRepo postRepo;
+    PostRepo postRepo;
+
     PostMapper postMapper;
-    SocialClient socialClient;
+
+    AuthorService authorService;
     PostQueryService  postQueryService;
 
+    @Transactional
     public PostResponse createPost(PostCreationCommand postCreationCommand) {
-//        String content = postCreationCommand.content();
-//        var privacy = postCreationCommand.privacy();
+        String content = postCreationCommand.content();
+        var privacy = postCreationCommand.privacy();
 
-//        Author author = socialClient.getAuthorProfileByUserId(postCreationCommand.authorId()).getData();
-//        Post post = Post.builder()
-//                .content(content)
-//                .author(author)
-//                .hashtags(HashtagUtils.extractFromContent(content))
-//                .privacy(privacy)
-//                .build();
-//        Post createdPost = postRepo.save(post);
-//        return postMapper.toPostResponse(createdPost);
-        return null;
+        Author author = authorService.findExistedAuthor(postCreationCommand.authorId());
+
+        Post post = Post.builder()
+                .content(content)
+                .authorId(author.getUserId())
+                .hashtags(HashtagUtils.extractFromContent(content))
+                .privacy(privacy)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+
+        Post createdPost = postRepo.save(post);
+        return postMapper.toPostResponse(createdPost);
     }
 
     public void updatePostById(String postId, String authorId, PostUpdateRequestBody body) {

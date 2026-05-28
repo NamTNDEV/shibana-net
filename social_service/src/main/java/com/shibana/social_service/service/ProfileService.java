@@ -114,6 +114,7 @@ public class ProfileService {
         String newAvatarName = request.getAvatarMediaName();
         Instant now = Instant.now();
 
+        existingProfile.setAvatarMediaName(newAvatarName);
         existingProfile.setAvatarScale(request.getAvatarScale());
         existingProfile.setAvatarPositionX(request.getAvatarPositionX());
         existingProfile.setAvatarPositionY(request.getAvatarPositionY());
