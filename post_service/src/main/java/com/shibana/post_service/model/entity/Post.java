@@ -24,7 +24,7 @@ import java.util.*;
 @Table(
         name = "posts",
         indexes = {
-                @Index(name = "idx_posts_author_id", columnList = "author_id"),
+                @Index(name = "idx_newsfeed", columnList = "author_id, privacy, id DESC"),
         }
 )
 public class Post {

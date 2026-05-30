@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -28,6 +30,10 @@ public class AuthorService {
                 .orElseThrow(
                         () -> new AppException(ErrorCode.AUTHOR_NOT_FOUND)
                 );
+    }
+
+    List<Author> findAllAuthors(Set<UUID> authorIds) {
+        return authorRepo.findAllById(authorIds);
     }
 
     @Transactional

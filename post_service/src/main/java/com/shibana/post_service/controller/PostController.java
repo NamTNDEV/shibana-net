@@ -1,6 +1,7 @@
 package com.shibana.post_service.controller;
 
 import com.shibana.post_service.model.dto.response.ApiResponse;
+import com.shibana.post_service.model.dto.response.CursorResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.dto.resquest.PostCreationRequestBody;
@@ -91,17 +92,19 @@ public class PostController {
     }
 
     @GetMapping("/newsfeed")
-    public ApiResponse<PageResponse<PostResponse>> getNewsfeed(
+    public ApiResponse<CursorResponse<PostResponse>> getNewsfeed(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info(":: Get Newsfeed Controller ::");
-        String requesterId = jwt.getClaim("user_id");
-        return ApiResponse.<PageResponse<PostResponse>>builder()
+        UUID requesterId = UUID.fromString(jwt.getClaim("user_id"));
+        UUID cursorId = (cursor != null) ? UUID.fromString(cursor) : null;
+
+        return ApiResponse.<CursorResponse<PostResponse>>builder()
                 .code(200)
                 .message("Posts retrieved successfully")
-                .data(newsfeedService.getNewsfeed(requesterId, page, size))
+                .data(newsfeedService.getNewsfeed(requesterId, cursorId, size))
                 .build();
     }
 

@@ -19,8 +19,9 @@ import java.util.UUID;
 public class PostResponse {
     UUID id;
     String content;
-    UUID authorId;
     PostPrivacyEnum privacy;
     Instant createdAt;
     Integer commentCounts;
+
+    AuthorResponse author;
 }
