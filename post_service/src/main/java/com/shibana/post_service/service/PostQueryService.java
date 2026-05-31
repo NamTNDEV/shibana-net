@@ -21,6 +21,10 @@ public class PostQueryService {
     PostMapper postMapper;
     SocialClient socialClient;
 
+    public long getTotalPostCount() {
+        return postRepo.findAll().size();
+    }
+
     public Post getPostById(String postId) {
 //        return postRepo.getPostById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         return null;
