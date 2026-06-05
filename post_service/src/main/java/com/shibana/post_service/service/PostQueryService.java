@@ -1,5 +1,7 @@
 package com.shibana.post_service.service;
 
+import com.shibana.post_service.exception.AppException;
+import com.shibana.post_service.exception.ErrorCode;
 import com.shibana.post_service.http_client.SocialClient;
 import com.shibana.post_service.mapper.PostMapper;
 import com.shibana.post_service.model.dto.response.PageResponse;
@@ -11,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -25,9 +30,13 @@ public class PostQueryService {
         return postRepo.findAll().size();
     }
 
-    public Post getPostById(String postId) {
-//        return postRepo.getPostById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-        return null;
+    public Post getPostById(UUID postId) {
+        return postRepo.findById(postId).orElseThrow(
+                () -> {
+                    log.error("Post with id {} not found", postId);
+                    return new AppException(ErrorCode.POST_NOT_FOUND);
+                }
+        );
     }
 
     public PostResponse getPostByIdFromViewer(String postId, String authorId) {
@@ -109,7 +118,7 @@ public class PostQueryService {
 //                .payload(postResponses)
 //                .build();
 
-            return null;
+        return null;
     }
 
     public boolean checkPostIsExist(String postId) {

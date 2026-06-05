@@ -1,6 +1,8 @@
 package com.shibana.post_service.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.shibana.post_service.exception.AppException;
+import com.shibana.post_service.exception.ErrorCode;
 import com.shibana.post_service.http_client.SocialClient;
 import com.shibana.post_service.mapper.PostMapper;
 import com.shibana.post_service.model.dto.response.CursorResponse;

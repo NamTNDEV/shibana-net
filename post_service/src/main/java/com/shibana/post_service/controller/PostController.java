@@ -7,12 +7,14 @@ import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.dto.resquest.PostCreationRequestBody;
 import com.shibana.post_service.model.dto.resquest.PostUpdateRequestBody;
 import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
+import com.shibana.post_service.security.RequirePostOwner;
 import com.shibana.post_service.service.NewsfeedService;
 import com.shibana.post_service.service.PostCommandService;
 import com.shibana.post_service.service.PostQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +29,7 @@ import java.util.UUID;
 public class PostController {
     NewsfeedService newsfeedService;
     PostQueryService postQueryService;
-    PostCommandService  postCommandService;
+    PostCommandService postCommandService;
 
     @PostMapping("")
     public ApiResponse<PostResponse> createPost(
@@ -63,14 +65,15 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
+    @RequirePostOwner
     public ApiResponse<Void> updatePost(
             @PathVariable String postId,
             @Validated @RequestBody PostUpdateRequestBody body,
             @AuthenticationPrincipal Jwt jwt
     ) {
         log.info(":: Update Post Controller ::");
-        String authorId = jwt.getClaim("user_id");
-        postCommandService.updatePostById(postId, authorId, body);
+        UUID postUUID = UUID.fromString(postId);
+        postCommandService.updatePostById(postUUID, body);
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Updated post successfully")

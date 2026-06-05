@@ -64,4 +64,6 @@ public interface PostRepo extends JpaRepository<Post, UUID> {
             @Param("cursor") UUID cursor,
             @Param("limit") int limit
     );
+
+    Post getPostById(UUID id);
 }

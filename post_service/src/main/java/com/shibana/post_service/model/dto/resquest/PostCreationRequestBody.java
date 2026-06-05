@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PostCreationRequestBody {
     @NotBlank(message = "CONTENT_REQUIRED")
-    @Size(max = 1000, min = 1, message = "INVALID_CONTENT_LENGTH")
+    @Size(min = 1, message = "INVALID_CONTENT_LENGTH")
     String content;
 
     @NotNull(message = "INVALID_PRIVACY")
