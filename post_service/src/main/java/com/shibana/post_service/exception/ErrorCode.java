@@ -33,6 +33,8 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(4040204, "post-service:: Comment not found", HttpStatus.NOT_FOUND),
     AUTHOR_NOT_FOUND(4040104, "post-service:: Author not found", HttpStatus.NOT_FOUND),
 
+    CONCURRENT_UPDATE(4090104, "post-service:: Concurrent update error", HttpStatus.CONFLICT),
+
     INTERNAL_SERVER_ERROR(5000104, "post-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000204, "post-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_JSON_PARSING(5000404, "post-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),

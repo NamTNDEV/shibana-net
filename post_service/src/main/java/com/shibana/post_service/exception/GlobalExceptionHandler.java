@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -91,6 +92,16 @@ public class GlobalExceptionHandler {
                 .message(errorCode.getMessage())
                 .build();
 
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(value = ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleOptimisticLockingFailureException(ObjectOptimisticLockingFailureException ex) {
+        ErrorCode errorCode = ErrorCode.CONCURRENT_UPDATE;
+        ApiResponse<ErrorCode> response = ApiResponse.<ErrorCode>builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
