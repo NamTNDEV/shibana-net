@@ -11,6 +11,7 @@ import com.shibana.post_service.security.RequirePostOwner;
 import com.shibana.post_service.service.NewsfeedService;
 import com.shibana.post_service.service.PostCommandService;
 import com.shibana.post_service.service.PostQueryService;
+import com.shibana.post_service.utils.UuidUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class PostController {
             @PathVariable String postId
     ) {
         log.info(":: Get Post By Id Controller ::");
-        UUID postUUID = UUID.fromString(postId);
+        UUID postUUID = UuidUtils.generateFromString(postId);
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Post retrieved successfully")

@@ -18,6 +18,7 @@ public enum ErrorCode {
     COMMENT_DELETE_FAILED(4000704, "post-service:: Failed to delete comment", HttpStatus.BAD_REQUEST),
     INVALID_AVATAR_UPDATED_MESSAGE_PAYLOAD(4000804, "post-service:: Invalid avatar updated message payload", HttpStatus.BAD_REQUEST),
     INVALID_AVATAR_MEDIA_NAME(4000904, "post-service:: Invalid avatar media name", HttpStatus.BAD_REQUEST),
+    INVAKID_POST_ID(4001004, "post-service:: Invalid post id", HttpStatus.BAD_REQUEST),
 
     UNAUTHENTICATED(4010104, "post-service:: Unauthenticated", HttpStatus.UNAUTHORIZED),
 

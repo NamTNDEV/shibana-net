@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 import java.util.Map;
 import java.util.Objects;
@@ -98,6 +99,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ApiResponse<ErrorCode>> handleOptimisticLockingFailureException(ObjectOptimisticLockingFailureException ex) {
         ErrorCode errorCode = ErrorCode.CONCURRENT_UPDATE;
+        ApiResponse<ErrorCode> response = ApiResponse.<ErrorCode>builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handleExceptionHandlerExceptionResolver(IllegalArgumentException ex) {
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         ApiResponse<ErrorCode> response = ApiResponse.<ErrorCode>builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
