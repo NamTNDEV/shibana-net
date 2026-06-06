@@ -52,15 +52,14 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> getPostById(
-            @PathVariable String postId,
-            @AuthenticationPrincipal Jwt jwt
+            @PathVariable String postId
     ) {
         log.info(":: Get Post By Id Controller ::");
-        String authorId = jwt.getClaim("user_id");
+        UUID postUUID = UUID.fromString(postId);
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Post retrieved successfully")
-                .data(postQueryService.getPostByIdFromViewer(postId, authorId))
+                .data(postQueryService.getPostByIdFromViewer(postUUID))
                 .build();
     }
 

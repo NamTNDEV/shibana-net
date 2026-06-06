@@ -37,6 +37,7 @@ public class SecurityConfig {
     String ACCESS_SECRET_KEY;
 
     String[] PUBLIC_ENDPOINTS = new String[]{
+            "/{postId}",
             "/{postId}/comments",
             "/{postId}/comments/{commentId}/replies",
             "/comments/{commentId}",
