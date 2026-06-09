@@ -3,6 +3,7 @@ package com.shibana.post_service.repo;
 import com.shibana.post_service.model.entity.Post;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -64,4 +65,8 @@ public interface PostRepo extends JpaRepository<Post, UUID> {
             @Param("cursor") UUID cursor,
             @Param("limit") int limit
     );
+
+    @Modifying
+    @Query("UPDATE Post p SET p.commentCounts = p.commentCounts + :delta WHERE p.id = :postId")
+    void adjustCommentCount(@Param("postId") UUID postId, @Param("delta") int delta);
 }

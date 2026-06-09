@@ -71,6 +71,7 @@ public class PostCommandService {
         }
     }
 
+    @Transactional
     public void deleteById(String postId, String authorId) {
 //        Post post = postQueryService.getPostById(postId);
 
@@ -82,8 +83,8 @@ public class PostCommandService {
 //        postRepo.deleteById(postId);
     }
 
+    @Transactional
     public void adjustCommentCount(UUID postId, int delta) {
-//        postRepo.adjustCommentCount(postId, delta);
+        postRepo.adjustCommentCount(postId, delta);
     }
-
 }

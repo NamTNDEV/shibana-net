@@ -1,8 +1,10 @@
 package com.shibana.post_service.model.service_command.comments;
 
+import java.util.UUID;
+
 public record CommentUpdateCommand(
-        String updaterId,
-        String commentId,
+        UUID updaterId,
+        UUID commentId,
         String content
 ) {
 }

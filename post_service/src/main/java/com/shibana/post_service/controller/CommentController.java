@@ -3,8 +3,10 @@ package com.shibana.post_service.controller;
 import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.CursorResponse;
+import com.shibana.post_service.model.dto.resquest.CommentUpdateRequestBody;
 import com.shibana.post_service.model.dto.resquest.RootCreationRequestBody;
 import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
+import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
 import com.shibana.post_service.model.service_command.comments.ReplyCommentCreationCommand;
 import com.shibana.post_service.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -114,26 +116,27 @@ public class CommentController {
                 .build();
     }
 
-//    @PutMapping("/comments/{commentId}")
-//    public ApiResponse<Void> updateComment(
-//            @PathVariable String commentId,
-//            @RequestBody CommentUpdateRequestBody body,
-//            @AuthenticationPrincipal Jwt jwt
-//    ) {
-//        log.info(":: Update comment controller ::");
-//        String authorId = jwt.getClaim("user_id").toString();
-//        CommentUpdateCommand command = new CommentUpdateCommand(
-//                authorId,
-//                commentId,
-//                body.getContent()
-//        );
-//
-//        commentService.updateComment(command);
-//        return ApiResponse.<Void>builder()
-//                .code(200)
-//                .message("Update comment successfully")
-//                .build();
-//    }
+    @PutMapping("/comments/{id}")
+    public ApiResponse<CommentResponse> updateComment(
+            @PathVariable String id,
+            @RequestBody CommentUpdateRequestBody body,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Update comment controller ::");
+        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
+        UUID commentUUID = UUID.fromString(id);
+        CommentUpdateCommand command = new CommentUpdateCommand(
+                requesterUUID,
+                commentUUID,
+                body.getNewContent()
+        );
+
+        return ApiResponse.<CommentResponse>builder()
+                .code(200)
+                .message("Update comment successfully")
+                .data(commentService.updateComment(command))
+                .build();
+    }
 //
 //    @DeleteMapping("/comments/{commentId}")
 //    public ApiResponse<Void> deleteComment(

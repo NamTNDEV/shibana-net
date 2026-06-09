@@ -68,8 +68,7 @@ public class PostController {
     @RequirePostOwner
     public ApiResponse<Void> updatePost(
             @PathVariable String postId,
-            @Validated @RequestBody PostUpdateRequestBody body,
-            @AuthenticationPrincipal Jwt jwt
+            @Validated @RequestBody PostUpdateRequestBody body
     ) {
         log.info(":: Update Post Controller ::");
         UUID postUUID = UUID.fromString(postId);

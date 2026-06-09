@@ -39,6 +39,10 @@ public class CommentService {
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
     }
 
+    /**
+     * Deffered Solution: Hàm 'postCommandService' đang không ổn khi high-concurrency,
+     * triển khai sau (gợi ý: Redis-based, Kafka-based,...)
+     */
     @Transactional
     public CommentResponse createRootComment(CommentRootCreationCommand command) {
         var targetPost = postQueryService.getPostById(command.postId());
@@ -53,10 +57,15 @@ public class CommentService {
                 .authorId(command.commnentorId())
                 .build();
         var result = commentRepo.save(comment);
+        postCommandService.adjustCommentCount(targetPost.getId(), 1);
 
         return commentMapper.toCommentResponse(result, author);
     }
 
+    /**
+     * Deffered Solution: Hàm 'postCommandService' đang không ổn khi high-concurrency,
+     * triển khai sau (gợi ý: Redis-based, Kafka-based,...)
+     */
     @Transactional
     public CommentResponse createReplyComment(ReplyCommentCreationCommand command) {
         var parentComment = getCommentById(command.parentId());
@@ -90,6 +99,7 @@ public class CommentService {
 
         var result = commentRepo.save(comment);
         commentRepo.syncReplyCountForAncestors(childPath, comment.getId(), 1);
+        postCommandService.adjustCommentCount(parentComment.getPostId(), 1);
 
         return commentMapper.toCommentResponse(result, author);
     }
@@ -122,7 +132,7 @@ public class CommentService {
         int plusOneSize = size + 1;
         UUID actualCursor = cursor == null ? null : UUID.fromString(cursor);
         List<Comment> replyCommentLists = new ArrayList<>(commentRepo.getReplyComments(parentComment.getId(), actualCursor, plusOneSize));
-        var  hasNext = replyCommentLists.size() > size;
+        var hasNext = replyCommentLists.size() > size;
         if (hasNext) {
             replyCommentLists.removeLast();
         }
@@ -163,14 +173,19 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(CommentUpdateCommand command) {
-//        String commentId = command.commentId();
-//        String updaterId = command.updaterId();
-//        Comment existedComment = safetyGetModifiedComment(commentId, updaterId);
+    public CommentResponse updateComment(CommentUpdateCommand command) {
+        var existingComment = getCommentById(command.commentId());
 
-//        existedComment.setIsEdited(true);
-//        existedComment.setContent(command.content());
-//        commentRepo.save(existedComment);
+        if (!Objects.equals(existingComment.getAuthorId(), command.updaterId())) {
+            throw new AppException(ErrorCode.COMMENT_UPDATE_DENIED);
+        }
+
+        existingComment.setContent(command.content());
+        existingComment.setIsEdited(true);
+        var result = commentRepo.save(existingComment);
+
+        Author commentor = authorService.findExistedAuthor(existingComment.getAuthorId());
+        return commentMapper.toCommentResponse(result, commentor);
     }
 
     // --- Helpers ---

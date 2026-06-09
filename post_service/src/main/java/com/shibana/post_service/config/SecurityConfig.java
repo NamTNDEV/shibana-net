@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/{postId}",
             "/{postId}/comments",
             "/{postId}/comments/{commentId}/replies",
+            "/comments/{id}",
             "/comments/{parentId}/replies",
             "/comments/{parentId}/replies"
     };
