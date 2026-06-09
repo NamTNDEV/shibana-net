@@ -6,7 +6,6 @@ import com.shibana.post_service.exception.ErrorCode;
 import com.shibana.post_service.mapper.CommentMapper;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.CursorResponse;
-import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.entity.Author;
 import com.shibana.post_service.model.entity.Comment;
 import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
@@ -95,19 +94,17 @@ public class CommentService {
         return commentMapper.toCommentResponse(result, author);
     }
 
-    public CursorResponse<CommentResponse> getRootCommentsByPostId(UUID postUuid, UUID cursor, int size) {
+    public CursorResponse<CommentResponse> getRootCommentsByPostId(UUID postUuid, String cursor, int size) {
         var post = postQueryService.getPostById(postUuid);
 
         int plusOneSize = size + 1;
-        UUID actualCursor = cursor == null ? UuidCreator.getTimeOrderedEpoch() : cursor;
-
+        UUID actualCursor = cursor == null ? null : UuidCreator.getTimeOrderedEpoch();
         List<Comment> rootCommentLists = new ArrayList<>(commentRepo.getRootComments(post.getId(), actualCursor, plusOneSize));
 
         var hasNext = rootCommentLists.size() > size;
         if (hasNext) {
             rootCommentLists.removeLast();
         }
-
         String nextCursor = rootCommentLists.isEmpty() ? null : rootCommentLists.getLast().getId().toString();
 
         List<CommentResponse> commentResponses = mappingOwnerComments(rootCommentLists);
@@ -119,32 +116,25 @@ public class CommentService {
                 .build();
     }
 
-    public PageResponse<CommentResponse> getRepliesByCommentId(String postId, String parentCommentId, int page, int size) {
-//        if (postId == null || postId.isBlank()) {
-//            throw new AppException(ErrorCode.POST_NOT_FOUND);
-//        }
-//        Post post = postQueryService.getPostById(postId);
+    public CursorResponse<CommentResponse> getRepliesByCommentId(UUID parentId, String cursor, int size) {
+        Comment parentComment = getCommentById(parentId);
 
-//        if (parentCommentId == null || parentCommentId.isBlank()) {
-//            throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
-//        }
-//        var parent = getCommentById(parentCommentId);
+        int plusOneSize = size + 1;
+        UUID actualCursor = cursor == null ? null : UUID.fromString(cursor);
+        List<Comment> replyCommentLists = new ArrayList<>(commentRepo.getReplyComments(parentComment.getId(), actualCursor, plusOneSize));
+        var  hasNext = replyCommentLists.size() > size;
+        if (hasNext) {
+            replyCommentLists.removeLast();
+        }
+        String nextCursor = replyCommentLists.isEmpty() ? null : replyCommentLists.getLast().getId().toString();
 
-//        String exactPath = generateCommentPath(parent);
-//        Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
-
-//        Slice<Comment> replies = commentRepo.findDirectReplies(post.getId(), exactPath, pageRequest);
-//        List<CommentResponse> commentResponses = replies.getContent().stream()
-//                .map(commentMapper::toCommentResponse)
-//                .toList();
-
-//        return PageResponse.<CommentResponse>builder()
-//                .hasNext(replies.hasNext())
-//                .page(page)
-//                .size(size)
-//                .payload(commentResponses)
-//                .build();
-        return null;
+        List<CommentResponse> commentResponses = mappingOwnerComments(replyCommentLists);
+        return CursorResponse.<CommentResponse>builder()
+                .payload(commentResponses)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .size(commentResponses.size())
+                .build();
     }
 
     @Transactional

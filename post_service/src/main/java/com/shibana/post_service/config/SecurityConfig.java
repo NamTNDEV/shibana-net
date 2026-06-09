@@ -40,7 +40,8 @@ public class SecurityConfig {
             "/{postId}",
             "/{postId}/comments",
             "/{postId}/comments/{commentId}/replies",
-            "/comments/{commentId}",
+            "/comments/{parentId}/replies",
+            "/comments/{parentId}/replies"
     };
 
     @Bean

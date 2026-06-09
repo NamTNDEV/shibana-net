@@ -1,5 +1,6 @@
 package com.shibana.post_service.model.dto.response;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ public record CommentResponse(
         int level,
 
         String content,
+        Instant createdAt,
 
         int replyCount,
         Map<String, Integer> reactionStats,

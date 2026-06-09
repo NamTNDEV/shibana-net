@@ -18,7 +18,7 @@ public interface CommentRepo extends JpaRepository<Comment, UUID> {
             WHERE post_id = :postId
             AND is_delete = false
             AND level = 0
-            AND id < :cursor
+            AND (:cursor IS NULL OR id < :cursor)
             ORDER BY id DESC
             LIMIT :size
             """, nativeQuery = true)
@@ -31,9 +31,9 @@ public interface CommentRepo extends JpaRepository<Comment, UUID> {
     @Query(value = """
             SELECT *
             FROM comments
-            WHERE parentId = :parentId
+            WHERE parent_id = :parentId
             AND is_delete = false
-            AND id > :cursor
+            AND (:cursor IS NULL OR id > :cursor)
             ORDER BY id
             LIMIT :size
             """, nativeQuery = true)

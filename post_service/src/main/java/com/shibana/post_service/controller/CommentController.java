@@ -87,32 +87,32 @@ public class CommentController {
     ) {
         log.info(":: Get root comments controller ::");
         UUID postUUID = UUID.fromString(postId);
-        UUID cursorUUID = UUID.fromString(cursor);
 
         return ApiResponse.<CursorResponse<CommentResponse>>builder()
                 .code(200)
                 .message("Retrieve comments successfully")
-                .data(commentService.getRootCommentsByPostId(postUUID, cursorUUID, size))
+                .data(commentService.getRootCommentsByPostId(postUUID, cursor, size))
                 .build();
     }
 
     /**
      * GET ROOT COMMENTS: GET /posts/comments/{parentId}/replies?cursor={cursor}&size={size}
      */
-//    @GetMapping("/comments/{parentId}/replies")
-//    public ApiResponse<PageResponse<CommentResponse>> getReplies(
-//            @PathVariable String postId,
-//            @PathVariable String commentId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size
-//    ) {
-//        log.info(":: Get replies controller ::");
-//        return ApiResponse.<PageResponse<CommentResponse>>builder()
-//                .code(200)
-//                .message("Retrieve replies successfully")
-//                .data(commentService.getRepliesByCommentId(postId, commentId, page, size))
-//                .build();
-//    }
+    @GetMapping("/comments/{parentId}/replies")
+    public ApiResponse<CursorResponse<CommentResponse>> getReplies(
+            @PathVariable String parentId,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info(":: Get replies controller ::");
+        UUID parentUUID = UUID.fromString(parentId);
+
+        return ApiResponse.<CursorResponse<CommentResponse>>builder()
+                .code(200)
+                .message("Retrieve replies successfully")
+                .data(commentService.getRepliesByCommentId(parentUUID, cursor, size))
+                .build();
+    }
 
 //    @PutMapping("/comments/{commentId}")
 //    public ApiResponse<Void> updateComment(

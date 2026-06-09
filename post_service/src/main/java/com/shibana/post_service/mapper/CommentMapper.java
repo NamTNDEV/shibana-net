@@ -14,6 +14,7 @@ public abstract class CommentMapper {
     @Value("${service.media.static-url}")
     String mediaStaticUrl;
 
+    @Mapping(target = "createdAt", source = "comment.createdAt")
     @Mapping(target = "author", expression = "java(toAuthorResponse(author))")
     public abstract CommentResponse toCommentResponse(Comment comment, Author author);
 
