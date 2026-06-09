@@ -14,9 +14,6 @@ public abstract class PostMapper {
     @Value("${service.media.static-url}")
     String mediaStaticUrl;
 
-    @Mapping(target = "author", ignore = true)
-    public abstract PostResponse toPostResponse(Post post);
-
     @Mapping(target = "createdAt", source = "post.createdAt")
     @Mapping(target = "author", expression = "java(toAuthorResponse(author))")
     public abstract PostResponse toPostResponse(Post post, Author author);

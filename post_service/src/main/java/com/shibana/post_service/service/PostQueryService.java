@@ -70,7 +70,7 @@ public class PostQueryService {
                 }
 
                 log.info(":: This user is friend of the author ::");
-                return postMapper.toPostResponse(post);
+                return postMapper.toPostResponse(post, author);
             }
             default -> throw new AppException(ErrorCode.POST_ACCESS_DENIED);
         }

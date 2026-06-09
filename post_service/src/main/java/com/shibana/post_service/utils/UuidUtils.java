@@ -16,4 +16,9 @@ public class UuidUtils {
             throw new AppException(ErrorCode.INVAKID_POST_ID);
         }
     }
+
+    static public String formatUuidForLTree(UUID uuid) {
+        if (uuid == null) return null;
+        return uuid.toString().replace("-", "_");
+    }
 }

@@ -5,7 +5,9 @@ import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.dto.resquest.CommentCreationRequestBody;
 import com.shibana.post_service.model.dto.resquest.CommentUpdateRequestBody;
+import com.shibana.post_service.model.dto.resquest.RootCommentCreationRequestBody;
 import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
+import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
 import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
 import com.shibana.post_service.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -23,24 +27,26 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
     CommentService commentService;
 
-    @PostMapping("/comments")
-    public ApiResponse<Void> createComment(
-            @Validated @RequestBody CommentCreationRequestBody body,
+    @PostMapping("/{postId}/comments")
+    public ApiResponse<CommentResponse> createComment(
+            @PathVariable String postId,
+            @Validated @RequestBody RootCommentCreationRequestBody body,
             @AuthenticationPrincipal Jwt jwt
     ) {
         log.info(":: Create comment controller ::");
-        String authorId = jwt.getClaim("user_id").toString();
+        UUID authorId = UUID.fromString(jwt.getClaim("user_id"));
+        UUID postUUID = UUID.fromString(postId);
 
-        var command = new CommentCreationCommand(
-                body.getPostId(),
+        var command = new CommentRootCreationCommand(
+                postUUID,
                 body.getContent(),
-                body.getParentId(),
                 authorId
         );
-        commentService.createComment(command);
-        return ApiResponse.<Void>builder()
+
+        return ApiResponse.<CommentResponse>builder()
                 .code(201)
                 .message("Comment created successfully")
+                .data(commentService.createRootComment(command))
                 .build();
     }
 

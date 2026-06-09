@@ -5,6 +5,7 @@ import com.shibana.post_service.model.embedded.Media;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,8 +23,9 @@ import java.util.*;
 @Table(
         name = "comments",
         indexes = {
-                @Index(name = "idx_comments_post_id", columnList = "post_id"),
-                @Index(name = "idx_comments_author_id", columnList = "author_id")
+                @Index(name = "idx_comments_root_query", columnList = "post_id, is_delete, level, created_at DESC"),
+                @Index(name = "idx_comments_reply_query", columnList = "parent_id, is_delete, created_at ASC"),
+//                @Index(name = "idx_comments_author_feeds", columnList = "author_id, created_at DESC")
         }
 )
 public class Comment {
@@ -41,31 +43,44 @@ public class Comment {
     String content;
 
     @Column(columnDefinition = "ltree")
+    @ColumnTransformer(write = "?::ltree")
     String path;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "parent_id")
+    UUID parentId;
+
+    @Column(nullable = false)
     @Builder.Default
-    Media media = null;
+    Integer level = 0;
+
+    @Column(name = "media_url")
+    String mediaUrl;
+
+    @Column(name = "media_type", length = 20)
+    String mediaType;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "jsonb", name = "reaction_stats")
     @Builder.Default
     Map<String, Integer> reactionStats = new HashMap<>();
 
+    @Column(name = "reply_count", nullable = false)
     @Builder.Default
     Integer replyCount = 0;
 
+    @Column(name = "is_edited", nullable = false)
     @Builder.Default
     Boolean isEdited = false;
 
+    @Column(name = "is_delete", nullable = false)
     @Builder.Default
     Boolean isDeleted = false;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     Instant createdAt;
 
+    @Column(name = "updated_at")
     @UpdateTimestamp
     Instant updatedAt;
 

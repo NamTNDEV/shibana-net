@@ -1,14 +1,19 @@
 package com.shibana.post_service.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.shibana.post_service.exception.AppException;
 import com.shibana.post_service.exception.ErrorCode;
 import com.shibana.post_service.http_client.SocialClient;
 import com.shibana.post_service.mapper.CommentMapper;
+import com.shibana.post_service.model.dto.response.AuthorResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.entity.Comment;
 import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
+import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
 import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
+import com.shibana.post_service.repo.CommentRepo;
+import com.shibana.post_service.utils.UuidUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,35 +30,28 @@ import java.util.List;
 @Transactional(readOnly = true)
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CommentService {
-    //    CommentRepo commentRepo;
+    CommentRepo commentRepo;
+    AuthorService authorService;
     PostQueryService postQueryService;
     PostCommandService postCommandService;
-    SocialClient socialClient;
     CommentMapper commentMapper;
 
     @Transactional
-    public void createComment(CommentCreationCommand command) {
-//        if (!postQueryService.checkPostIsExist(command.postId())) {
-//            throw new AppException(ErrorCode.POST_NOT_FOUND);
-//        }
+    public CommentResponse createRootComment(CommentRootCreationCommand command) {
+        var targetPost = postQueryService.getPostById(command.postId());
+        var author = authorService.findExistedAuthor(command.commnentorId());
 
-//        Comment parentComment = getCommentById(command.parentId());
+                UUID commentId = UuidCreator.getTimeOrderedEpoch();
+        Comment comment = Comment.builder()
+                .id(commentId)
+                .postId(targetPost.getId())
+                .content(command.content())
+                .path(UuidUtils.formatUuidForLTree(commentId))
+                .authorId(command.commnentorId())
+                .build();
+        var result = commentRepo.save(comment);
 
-//        Author author = socialClient.getAuthorProfileByUserId(command.commnentorId()).getData();
-
-//        int commentLevel = parentComment == null ? 0 : parentComment.getLevel() + 1;
-//        String commentPath = generateCommentPath(parentComment);
-
-//        Comment comment = Comment.builder()
-//                .author(author)
-//                .content(command.content())
-//                .postId(command.postId())
-//                .level(commentLevel)
-//                .path(commentPath)
-//                .build();
-
-//        commentRepo.save(comment);
-//        syncCounts(comment);
+        return commentMapper.toCommentResponse(result, author);
     }
 
     @Transactional
@@ -143,7 +142,7 @@ public class CommentService {
     }
 
     // --- Helpers ---
-    String generateCommentPath(Comment parentComment) {
+    private String generateCommentPath(Comment parentComment) {
         if (parentComment == null) {
             return null;
         } else if (parentComment.getPath() == null) {
