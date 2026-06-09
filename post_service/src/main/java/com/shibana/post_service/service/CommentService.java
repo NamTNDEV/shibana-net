@@ -148,30 +148,27 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(String authorId, String commentId) {
-//        Comment targetComment = safetyGetModifiedComment(commentId, authorId);
+    public void softDeleteComment(UUID authorId, UUID commentId) {
+        Comment targetComment = getCommentById(commentId);
 
-//        if (Boolean.TRUE.equals(targetComment.getIsDeleted())) {
-//            throw new AppException(ErrorCode.COMMENT_DELETE_FAILED);
-//        }
-//
-//        String basePath = targetComment.getPath() == null ? "," : targetComment.getPath();
-//        String regexDescendants = "^" + basePath + targetComment.getId() + ",";
-//
-//        int deletedDescendantsCount = commentRepo.softDeleteDescendants(targetComment.getPostId(), regexDescendants);
+        if (!Objects.equals(targetComment.getAuthorId(), authorId)) {
+            throw new AppException(ErrorCode.COMMENT_DELETE_DENIED);
+        }
 
-//        targetComment.setIsDeleted(true);
-//        commentRepo.save(targetComment);
+        String targetPath = targetComment.getPath();
+        int deletedCount = commentRepo.countActiveDescendants(targetPath);
+        if (deletedCount == 0) return;
 
-//        int delta = deletedDescendantsCount + 1;
-//        postCommandService.adjustCommentCount(targetComment.getPostId(), -delta);
-//
-//        if (targetComment.getPath() != null) {
-//            List<String> ancestorIds = getAncestorIds(targetComment.getPath());
-//            commentRepo.adjustReplyCountForAncestors(ancestorIds, -delta);
-//        }
+        commentRepo.softDeleteSubTree(targetPath);
+
+        commentRepo.syncReplyCountForAncestors(targetPath, targetComment.getId(), -deletedCount);
+        postCommandService.adjustCommentCount(targetComment.getPostId(), -deletedCount);
     }
 
+    /**
+     * Deffered Solution: Cần bổ sung bảng lưu trữ
+     * lịch sử thay đổi
+     */
     @Transactional
     public CommentResponse updateComment(CommentUpdateCommand command) {
         var existingComment = getCommentById(command.commentId());

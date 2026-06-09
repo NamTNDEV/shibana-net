@@ -51,4 +51,19 @@ public interface CommentRepo extends JpaRepository<Comment, UUID> {
             """,
             nativeQuery = true)
     void syncReplyCountForAncestors(@Param("childPath") String childPath, @Param("childId") UUID childId, @Param("modifiedCount") int modifiedCount);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM comments 
+            WHERE path <@ cast(:parentPath as ltree) 
+            AND is_delete = false
+            """, nativeQuery = true)
+    int countActiveDescendants(@Param("parentPath") String parentPath);
+
+    @Modifying
+    @Query(value = """
+            UPDATE comments 
+            SET is_delete = true 
+            WHERE path <@ cast(:parentPath as ltree)
+            """, nativeQuery = true)
+    void softDeleteSubTree(@Param("parentPath") String parentPath);
 }

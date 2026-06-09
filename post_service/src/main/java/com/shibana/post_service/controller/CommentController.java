@@ -98,7 +98,7 @@ public class CommentController {
     }
 
     /**
-     * GET ROOT COMMENTS: GET /posts/comments/{parentId}/replies?cursor={cursor}&size={size}
+     * GET REPLY COMMENTS: GET /posts/comments/{parentId}/replies?cursor={cursor}&size={size}
      */
     @GetMapping("/comments/{parentId}/replies")
     public ApiResponse<CursorResponse<CommentResponse>> getReplies(
@@ -116,6 +116,9 @@ public class CommentController {
                 .build();
     }
 
+    /**
+     * UPDATE A COMMENT: PUT /posts/comments/{id}
+     */
     @PutMapping("/comments/{id}")
     public ApiResponse<CommentResponse> updateComment(
             @PathVariable String id,
@@ -137,18 +140,20 @@ public class CommentController {
                 .data(commentService.updateComment(command))
                 .build();
     }
-//
-//    @DeleteMapping("/comments/{commentId}")
-//    public ApiResponse<Void> deleteComment(
-//            @PathVariable String commentId,
-//            @AuthenticationPrincipal Jwt jwt
-//    ) {
-//        log.info(":: Delete comment controller ::");
-//        String authorId = jwt.getClaim("user_id").toString();
-//        commentService.deleteComment(authorId, commentId);
-//        return ApiResponse.<Void>builder()
-//                .code(200)
-//                .message("Delete comment successfully")
-//                .build();
-//    }
+
+
+    @DeleteMapping("/comments/{id}")
+    public ApiResponse<Void> deleteComment(
+            @PathVariable String id,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Delete comment controller ::");
+        UUID authorId = UUID.fromString(jwt.getClaim("user_id"));
+        UUID commentUUID = UUID.fromString(id);
+        commentService.softDeleteComment(authorId, commentUUID);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Delete comment successfully")
+                .build();
+    }
 }
