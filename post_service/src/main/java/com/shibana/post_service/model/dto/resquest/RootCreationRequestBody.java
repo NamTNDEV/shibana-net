@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class RootCommentCreationRequestBody {
+public class RootCreationRequestBody {
     @NotBlank(message = "INVALID_CONTENT_LENGHT")
     @Size(max = 500, message = "INVALID_CONTENT_LENGHT")
     String content;

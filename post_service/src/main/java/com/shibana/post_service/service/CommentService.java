@@ -3,16 +3,15 @@ package com.shibana.post_service.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.shibana.post_service.exception.AppException;
 import com.shibana.post_service.exception.ErrorCode;
-import com.shibana.post_service.http_client.SocialClient;
 import com.shibana.post_service.mapper.CommentMapper;
-import com.shibana.post_service.model.dto.response.AuthorResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
 import com.shibana.post_service.model.entity.Comment;
-import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
 import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
 import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
+import com.shibana.post_service.model.service_command.comments.ReplyCommentCreationCommand;
 import com.shibana.post_service.repo.CommentRepo;
+import com.shibana.post_service.repo.PostRepo;
 import com.shibana.post_service.utils.UuidUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,21 +34,61 @@ public class CommentService {
     PostQueryService postQueryService;
     PostCommandService postCommandService;
     CommentMapper commentMapper;
+    private final PostRepo postRepo;
+
+    int MAX_LEVEL_COMMENT = 2;
 
     @Transactional
     public CommentResponse createRootComment(CommentRootCreationCommand command) {
         var targetPost = postQueryService.getPostById(command.postId());
         var author = authorService.findExistedAuthor(command.commnentorId());
 
-                UUID commentId = UuidCreator.getTimeOrderedEpoch();
+        UUID commentId = UuidCreator.getTimeOrderedEpoch();
         Comment comment = Comment.builder()
                 .id(commentId)
                 .postId(targetPost.getId())
                 .content(command.content())
-                .path(UuidUtils.formatUuidForLTree(commentId))
+                .path(generateCommentPath(null, commentId))
                 .authorId(command.commnentorId())
                 .build();
         var result = commentRepo.save(comment);
+
+        return commentMapper.toCommentResponse(result, author);
+    }
+
+    @Transactional
+    public CommentResponse createReplyComment(ReplyCommentCreationCommand command) {
+        var parentComment = getCommentById(command.parentId());
+        var author = authorService.findExistedAuthor(command.commnentorId());
+
+        UUID newChildId = UuidCreator.getTimeOrderedEpoch();
+
+        int targetLevel = parentComment.getLevel() + 1;
+        UUID actualParentId = parentComment.getId();
+        String actualParentPath = parentComment.getPath();
+
+        if (targetLevel > MAX_LEVEL_COMMENT) {
+            var grandParentComment = getCommentById(parentComment.getParentId());
+
+            targetLevel = grandParentComment.getLevel() + 1;
+            actualParentId = grandParentComment.getId();
+            actualParentPath = grandParentComment.getPath();
+        }
+
+        String childPath = generateCommentPath(actualParentPath, newChildId);
+        Comment comment = Comment.builder()
+                .id(newChildId)
+                .postId(parentComment.getPostId())
+                .content(command.content())
+                .path(childPath)
+                .parentId(actualParentId)
+                .authorId(command.commnentorId())
+                .level(targetLevel)
+                .build();
+
+        var result = commentRepo.save(comment);
+
+        commentRepo.syncReplyCountForAncestors(childPath, comment.getId(), 1);
 
         return commentMapper.toCommentResponse(result, author);
     }
@@ -142,45 +181,13 @@ public class CommentService {
     }
 
     // --- Helpers ---
-    private String generateCommentPath(Comment parentComment) {
-        if (parentComment == null) {
-            return null;
-        } else if (parentComment.getPath() == null) {
-            return "," + parentComment.getId() + ",";
-        }
-
-        return parentComment.getPath() + parentComment.getId() + ",";
+    private String generateCommentPath(String parentPath, UUID commentId) {
+        String ltreeUUID = UuidUtils.formatUuidForLTree(commentId);
+        return parentPath == null ? ltreeUUID : parentPath + "." + ltreeUUID;
     }
 
-    Comment getCommentById(String parentId) {
-        Comment comment = null;
-        if (parentId != null && !parentId.isBlank()) {
-//            comment = commentRepo.findById(parentId)
-//                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-        }
-        return comment;
-    }
-
-    void syncCounts(Comment comment) {
-//        postCommandService.adjustCommentCount(comment.getPostId(), 1);
-//
-//        if (comment.getPath() == null) return;
-//
-//        List<String> ancestorIds = getAncestorIds(comment.getPath());
-//        commentRepo.incrementReplyCountForAncestors(ancestorIds);
-    }
-
-    Comment safetyGetModifiedComment(String commentId, String modifierId) {
-//        Comment comment = getCommentById(commentId);
-////        if (!comment.getAuthor().getUserId().equals(modifierId)) {
-////            throw new AppException(ErrorCode.COMMENT_UPDATE_DENIED);
-////        }
-////        return comment;
-        return null;
-    }
-
-    List<String> getAncestorIds(String commentPath) {
-        String clearPath = commentPath.substring(1, commentPath.length() - 1);
-        return Arrays.asList(clearPath.split(","));
+    Comment getCommentById(UUID commentId) {
+        return commentRepo.findById(commentId)
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
     }
 }

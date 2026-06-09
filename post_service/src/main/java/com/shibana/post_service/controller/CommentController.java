@@ -3,12 +3,11 @@ package com.shibana.post_service.controller;
 import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
 import com.shibana.post_service.model.dto.response.PageResponse;
-import com.shibana.post_service.model.dto.resquest.CommentCreationRequestBody;
 import com.shibana.post_service.model.dto.resquest.CommentUpdateRequestBody;
-import com.shibana.post_service.model.dto.resquest.RootCommentCreationRequestBody;
-import com.shibana.post_service.model.service_command.comments.CommentCreationCommand;
+import com.shibana.post_service.model.dto.resquest.RootCreationRequestBody;
 import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
 import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
+import com.shibana.post_service.model.service_command.comments.ReplyCommentCreationCommand;
 import com.shibana.post_service.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,12 +27,12 @@ public class CommentController {
     CommentService commentService;
 
     @PostMapping("/{postId}/comments")
-    public ApiResponse<CommentResponse> createComment(
+    public ApiResponse<CommentResponse> createRootComment(
             @PathVariable String postId,
-            @Validated @RequestBody RootCommentCreationRequestBody body,
+            @Validated @RequestBody RootCreationRequestBody body,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        log.info(":: Create comment controller ::");
+        log.info(":: Create root comment controller ::");
         UUID authorId = UUID.fromString(jwt.getClaim("user_id"));
         UUID postUUID = UUID.fromString(postId);
 
@@ -47,6 +46,29 @@ public class CommentController {
                 .code(201)
                 .message("Comment created successfully")
                 .data(commentService.createRootComment(command))
+                .build();
+    }
+
+    @PostMapping("/comments/{parentId}/replies")
+    public ApiResponse<CommentResponse> createReplyComment(
+            @PathVariable String parentId,
+            @Validated @RequestBody RootCreationRequestBody body,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        log.info(":: Create reply comment controller ::");
+        UUID authorUUID = UUID.fromString(jwt.getClaim("user_id"));
+        UUID parentUUID = UUID.fromString(parentId);
+
+        var command = new ReplyCommentCreationCommand(
+                body.getContent(),
+                parentUUID,
+                authorUUID
+        );
+
+        return ApiResponse.<CommentResponse>builder()
+                .code(201)
+                .message("Reply comment created successfully")
+                .data(commentService.createReplyComment(command))
                 .build();
     }
 
