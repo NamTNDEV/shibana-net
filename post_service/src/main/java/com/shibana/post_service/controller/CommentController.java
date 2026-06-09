@@ -2,11 +2,9 @@ package com.shibana.post_service.controller;
 
 import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
-import com.shibana.post_service.model.dto.response.PageResponse;
-import com.shibana.post_service.model.dto.resquest.CommentUpdateRequestBody;
+import com.shibana.post_service.model.dto.response.CursorResponse;
 import com.shibana.post_service.model.dto.resquest.RootCreationRequestBody;
 import com.shibana.post_service.model.service_command.comments.CommentRootCreationCommand;
-import com.shibana.post_service.model.service_command.comments.CommentUpdateCommand;
 import com.shibana.post_service.model.service_command.comments.ReplyCommentCreationCommand;
 import com.shibana.post_service.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +24,9 @@ import java.util.UUID;
 public class CommentController {
     CommentService commentService;
 
+    /**
+     * CREATE ROOT COMMENT: POST /posts/{postId}/comments
+     */
     @PostMapping("/{postId}/comments")
     public ApiResponse<CommentResponse> createRootComment(
             @PathVariable String postId,
@@ -49,6 +50,9 @@ public class CommentController {
                 .build();
     }
 
+    /**
+     * CREATE REPLY COMMENT: POST /comments/{parentId}/replies
+     */
     @PostMapping("/comments/{parentId}/replies")
     public ApiResponse<CommentResponse> createReplyComment(
             @PathVariable String parentId,
@@ -72,67 +76,76 @@ public class CommentController {
                 .build();
     }
 
+    /**
+     * GET ROOT COMMENTS: GET /posts/{postId}/comments?cursor={cursor}&size={size}
+     */
     @GetMapping("/{postId}/comments")
-    public ApiResponse<PageResponse<CommentResponse>> getRootComments(
+    public ApiResponse<CursorResponse<CommentResponse>> getRootComments(
             @PathVariable String postId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size
     ) {
-        log.info(":: Get comments controller ::");
-        return ApiResponse.<PageResponse<CommentResponse>>builder()
+        log.info(":: Get root comments controller ::");
+        UUID postUUID = UUID.fromString(postId);
+        UUID cursorUUID = UUID.fromString(cursor);
+
+        return ApiResponse.<CursorResponse<CommentResponse>>builder()
                 .code(200)
                 .message("Retrieve comments successfully")
-                .data(commentService.getRootCommentsByPostId(postId, page, size))
+                .data(commentService.getRootCommentsByPostId(postUUID, cursorUUID, size))
                 .build();
     }
 
-    @GetMapping("/{postId}/comments/{commentId}/replies")
-    public ApiResponse<PageResponse<CommentResponse>> getReplies(
-            @PathVariable String postId,
-            @PathVariable String commentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        log.info(":: Get replies controller ::");
-        return ApiResponse.<PageResponse<CommentResponse>>builder()
-                .code(200)
-                .message("Retrieve replies successfully")
-                .data(commentService.getRepliesByCommentId(postId, commentId, page, size))
-                .build();
-    }
+    /**
+     * GET ROOT COMMENTS: GET /posts/comments/{parentId}/replies?cursor={cursor}&size={size}
+     */
+//    @GetMapping("/comments/{parentId}/replies")
+//    public ApiResponse<PageResponse<CommentResponse>> getReplies(
+//            @PathVariable String postId,
+//            @PathVariable String commentId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size
+//    ) {
+//        log.info(":: Get replies controller ::");
+//        return ApiResponse.<PageResponse<CommentResponse>>builder()
+//                .code(200)
+//                .message("Retrieve replies successfully")
+//                .data(commentService.getRepliesByCommentId(postId, commentId, page, size))
+//                .build();
+//    }
 
-    @PutMapping("/comments/{commentId}")
-    public ApiResponse<Void> updateComment(
-            @PathVariable String commentId,
-            @RequestBody CommentUpdateRequestBody body,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        log.info(":: Update comment controller ::");
-        String authorId = jwt.getClaim("user_id").toString();
-        CommentUpdateCommand command = new CommentUpdateCommand(
-                authorId,
-                commentId,
-                body.getContent()
-        );
-
-        commentService.updateComment(command);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Update comment successfully")
-                .build();
-    }
-
-    @DeleteMapping("/comments/{commentId}")
-    public ApiResponse<Void> deleteComment(
-            @PathVariable String commentId,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        log.info(":: Delete comment controller ::");
-        String authorId = jwt.getClaim("user_id").toString();
-        commentService.deleteComment(authorId, commentId);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Delete comment successfully")
-                .build();
-    }
+//    @PutMapping("/comments/{commentId}")
+//    public ApiResponse<Void> updateComment(
+//            @PathVariable String commentId,
+//            @RequestBody CommentUpdateRequestBody body,
+//            @AuthenticationPrincipal Jwt jwt
+//    ) {
+//        log.info(":: Update comment controller ::");
+//        String authorId = jwt.getClaim("user_id").toString();
+//        CommentUpdateCommand command = new CommentUpdateCommand(
+//                authorId,
+//                commentId,
+//                body.getContent()
+//        );
+//
+//        commentService.updateComment(command);
+//        return ApiResponse.<Void>builder()
+//                .code(200)
+//                .message("Update comment successfully")
+//                .build();
+//    }
+//
+//    @DeleteMapping("/comments/{commentId}")
+//    public ApiResponse<Void> deleteComment(
+//            @PathVariable String commentId,
+//            @AuthenticationPrincipal Jwt jwt
+//    ) {
+//        log.info(":: Delete comment controller ::");
+//        String authorId = jwt.getClaim("user_id").toString();
+//        commentService.deleteComment(authorId, commentId);
+//        return ApiResponse.<Void>builder()
+//                .code(200)
+//                .message("Delete comment successfully")
+//                .build();
+//    }
 }

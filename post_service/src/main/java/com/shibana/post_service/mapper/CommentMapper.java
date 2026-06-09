@@ -2,10 +2,8 @@ package com.shibana.post_service.mapper;
 
 import com.shibana.post_service.model.dto.response.AuthorResponse;
 import com.shibana.post_service.model.dto.response.CommentResponse;
-import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.entity.Author;
 import com.shibana.post_service.model.entity.Comment;
-import com.shibana.post_service.model.entity.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

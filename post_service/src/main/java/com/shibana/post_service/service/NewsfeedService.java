@@ -107,17 +107,8 @@ public class NewsfeedService {
                 .map(
                         post -> postMapper.toPostResponse(
                                 post,
-                                authorsMap.getOrDefault(post.getAuthorId(), getFallbackAuthor(post.getAuthorId()))
+                                authorsMap.getOrDefault(post.getAuthorId(), authorService.getFallbackAuthor(post.getAuthorId()))
                         )
                 ).toList();
-    }
-
-    private Author getFallbackAuthor(UUID authorId) {
-        return Author.builder()
-                .userId(authorId)
-                .firstName("Người dùng")
-                .lastName("Shibana")
-                .username("unknown_user")
-                .build();
     }
 }

@@ -66,4 +66,13 @@ public class AuthorService {
         authorRepo.save(existedAuthor);
         log.info("\uD83D\uDFE2 Updated avatar for userId: {}", request.getUserId());
     }
+
+    public Author getFallbackAuthor(UUID authorId) {
+        return Author.builder()
+                .userId(authorId)
+                .firstName("Người dùng")
+                .lastName("Shibana")
+                .username("unknown_user")
+                .build();
+    }
 }

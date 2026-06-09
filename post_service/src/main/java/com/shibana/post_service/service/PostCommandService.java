@@ -82,7 +82,7 @@ public class PostCommandService {
 //        postRepo.deleteById(postId);
     }
 
-    public void adjustCommentCount(String postId, int delta) {
+    public void adjustCommentCount(UUID postId, int delta) {
 //        postRepo.adjustCommentCount(postId, delta);
     }
 

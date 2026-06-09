@@ -23,8 +23,10 @@ import java.util.*;
 @Table(
         name = "comments",
         indexes = {
-                @Index(name = "idx_comments_root_query", columnList = "post_id, is_delete, level, created_at DESC"),
-                @Index(name = "idx_comments_reply_query", columnList = "parent_id, is_delete, created_at ASC"),
+                // Phục vụ Root: Sắp xếp DESC
+                @Index(name = "idx_comments_root_query", columnList = "post_id, is_delete, level, id DESC"),
+                // Phục vụ Reply: Sắp xếp ASC
+                @Index(name = "idx_comments_reply_query", columnList = "parent_id, is_delete, id ASC")
 //                @Index(name = "idx_comments_author_feeds", columnList = "author_id, created_at DESC")
         }
 )
