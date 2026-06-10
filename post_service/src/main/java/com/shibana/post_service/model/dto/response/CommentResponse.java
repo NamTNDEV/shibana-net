@@ -7,6 +7,7 @@ import java.util.UUID;
 public record CommentResponse(
         UUID id,
         UUID parentId,
+        UUID postId,
         int level,
 
         String content,
