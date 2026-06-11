@@ -108,9 +108,8 @@ public class CommentService {
         var post = postQueryService.getPostById(postUuid);
 
         int plusOneSize = size + 1;
-        UUID actualCursor = cursor == null ? null : UuidCreator.getTimeOrderedEpoch();
+        UUID actualCursor = cursor == null ? null : UUID.fromString(cursor);
         List<Comment> rootCommentLists = new ArrayList<>(commentRepo.getRootComments(post.getId(), actualCursor, plusOneSize));
-
         var hasNext = rootCommentLists.size() > size;
         if (hasNext) {
             rootCommentLists.removeLast();
