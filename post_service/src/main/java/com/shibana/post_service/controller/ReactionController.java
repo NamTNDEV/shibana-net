@@ -35,7 +35,7 @@ public class ReactionController {
         UUID requesterUUID = UUID.fromString(userId);
         UUID targetUUID = UUID.fromString(targetId);
 
-        reactionService.handleReaction(requesterUUID, targetUUID, targetType, body.getReactionType());
+        reactionService.handleReactionV1(requesterUUID, targetUUID, targetType, body.getReactionType());
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Reaction toggled successfully")

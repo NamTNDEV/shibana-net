@@ -25,7 +25,7 @@ public class ReactionService {
     ReactionStrategyFactory strategyFactory;
 
     @Transactional
-    public void handleReaction(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum  reactionTypeEnum) {
+    public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum  reactionTypeEnum) {
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
@@ -45,5 +45,13 @@ public class ReactionService {
             reactionRepo.save(reactionEntity);
             strategy.updateStats(requesterUUID, targetUUID, 1, reactionTypeEnum);
         }
+    }
+
+    /**
+     * V2 - using Redis for handling high-concurrency requesting
+     */
+    @Transactional
+    public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum  reactionTypeEnum) {
+
     }
 }
