@@ -30,8 +30,8 @@ public class PostQueryService {
     SocialClient socialClient;
     AuthorService authorService;
 
-    public long getTotalPostCount() {
-        return postRepo.findAll().size();
+    public boolean checkPostExist(UUID postId) {
+        return postRepo.existsById(postId);
     }
 
     public Post getPostById(UUID postId) {

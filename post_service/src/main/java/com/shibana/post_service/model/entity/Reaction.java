@@ -55,10 +55,4 @@ public class Reaction {
     @CreationTimestamp
     @Column(updatable = false)
     Instant createdAt;
-
-    @UpdateTimestamp
-    Instant updatedAt;
-
-    @Version
-    Long version;
 }

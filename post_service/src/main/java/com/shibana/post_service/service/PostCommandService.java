@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -86,5 +87,14 @@ public class PostCommandService {
     @Transactional
     public void adjustCommentCount(UUID postId, int delta) {
         postRepo.adjustCommentCount(postId, delta);
+    }
+
+    @Transactional
+    public void updatePostReactionStats(UUID postId, int amount, String reactionType) {
+        Post post = postQueryService.getPostById(postId);
+        Map<String, Integer> stats = post.getReactionStats();
+        int currentCount = stats.getOrDefault(reactionType, 0);
+        stats.put(reactionType, Math.max(0, currentCount + amount));
+        postRepo.save(post);
     }
 }

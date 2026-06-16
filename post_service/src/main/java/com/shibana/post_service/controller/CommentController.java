@@ -55,19 +55,19 @@ public class CommentController {
     /**
      * CREATE REPLY COMMENT: POST /comments/{parentId}/replies
      */
-    @PostMapping("/comments/{parentId}/replies")
+    @PostMapping("/comments/{commentId}/replies")
     public ApiResponse<CommentResponse> createReplyComment(
-            @PathVariable String parentId,
+            @PathVariable String commentId,
             @Validated @RequestBody RootCreationRequestBody body,
             @AuthenticationPrincipal Jwt jwt
     ) {
         log.info(":: Create reply comment controller ::");
         UUID authorUUID = UUID.fromString(jwt.getClaim("user_id"));
-        UUID parentUUID = UUID.fromString(parentId);
+        UUID commentUUID = UUID.fromString(commentId);
 
         var command = new ReplyCommentCreationCommand(
                 body.getContent(),
-                parentUUID,
+                commentUUID,
                 authorUUID
         );
 
@@ -98,21 +98,21 @@ public class CommentController {
     }
 
     /**
-     * GET REPLY COMMENTS: GET /posts/comments/{parentId}/replies?cursor={cursor}&size={size}
+     * GET REPLY COMMENTS: GET /posts/comments/{commentId}/replies?cursor={cursor}&size={size}
      */
-    @GetMapping("/comments/{parentId}/replies")
+    @GetMapping("/comments/{commentId}/replies")
     public ApiResponse<CursorResponse<CommentResponse>> getReplies(
-            @PathVariable String parentId,
+            @PathVariable String commentId,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info(":: Get replies controller ::");
-        UUID parentUUID = UUID.fromString(parentId);
+        UUID commentIdUUID = UUID.fromString(commentId);
 
         return ApiResponse.<CursorResponse<CommentResponse>>builder()
                 .code(200)
                 .message("Retrieve replies successfully")
-                .data(commentService.getRepliesByCommentId(parentUUID, cursor, size))
+                .data(commentService.getRepliesByCommentId(commentIdUUID, cursor, size))
                 .build();
     }
 
@@ -148,9 +148,9 @@ public class CommentController {
             @AuthenticationPrincipal Jwt jwt
     ) {
         log.info(":: Delete comment controller ::");
-        UUID authorId = UUID.fromString(jwt.getClaim("user_id"));
+        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
         UUID commentUUID = UUID.fromString(id);
-        commentService.softDeleteComment(authorId, commentUUID);
+        commentService.softDeleteComment(requesterUUID, commentUUID);
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Delete comment successfully")

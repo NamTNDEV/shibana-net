@@ -117,6 +117,7 @@ public class CommentService {
         String nextCursor = rootCommentLists.isEmpty() ? null : rootCommentLists.getLast().getId().toString();
 
         List<CommentResponse> commentResponses = mappingOwnerComments(rootCommentLists);
+
         return CursorResponse.<CommentResponse>builder()
                 .payload(commentResponses)
                 .hasNext(hasNext)
@@ -125,8 +126,8 @@ public class CommentService {
                 .build();
     }
 
-    public CursorResponse<CommentResponse> getRepliesByCommentId(UUID parentId, String cursor, int size) {
-        Comment parentComment = getCommentById(parentId);
+    public CursorResponse<CommentResponse> getRepliesByCommentId(UUID commentId, String cursor, int size) {
+        Comment parentComment = getCommentById(commentId);
 
         int plusOneSize = size + 1;
         UUID actualCursor = cursor == null ? null : UUID.fromString(cursor);
@@ -138,6 +139,7 @@ public class CommentService {
         String nextCursor = replyCommentLists.isEmpty() ? null : replyCommentLists.getLast().getId().toString();
 
         List<CommentResponse> commentResponses = mappingOwnerComments(replyCommentLists);
+
         return CursorResponse.<CommentResponse>builder()
                 .payload(commentResponses)
                 .hasNext(hasNext)
@@ -147,10 +149,11 @@ public class CommentService {
     }
 
     @Transactional
-    public void softDeleteComment(UUID authorId, UUID commentId) {
+    public void softDeleteComment(UUID requesterUUID, UUID commentId) {
         Comment targetComment = getCommentById(commentId);
+        var post = postQueryService.getPostById(targetComment.getPostId());
 
-        if (!Objects.equals(targetComment.getAuthorId(), authorId)) {
+        if (!Objects.equals(post.getAuthorId(), requesterUUID)) {
             throw new AppException(ErrorCode.COMMENT_DELETE_DENIED);
         }
 
