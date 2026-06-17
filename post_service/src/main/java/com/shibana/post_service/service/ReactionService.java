@@ -4,6 +4,7 @@ import com.shibana.post_service.model.entity.Reaction;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.ReactionRepo;
+import com.shibana.post_service.service.cache.ReactionCacheService;
 import com.shibana.post_service.strategy.ReactionStrategy;
 import com.shibana.post_service.strategy.ReactionStrategyFactory;
 import lombok.AccessLevel;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class ReactionService {
     ReactionRepo reactionRepo;
     ReactionStrategyFactory strategyFactory;
+    ReactionCacheService reactionCacheService;
 
     @Transactional
     public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
@@ -51,23 +54,22 @@ public class ReactionService {
      * V2 - using Redis for handling high-concurrency requesting
      */
     public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+        // [BƯỚC 1]: FAIL-FAST (Check DB)
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
-        // [Application]:[Entity]:[Identifier]:[Attribute]
-        String redisKey = String.format("p:%s:%s:reactions", reactionTargetTypeEnum.name(), targetUUID);
+        // [BƯỚC 2]: GIAO PHÓ CHO CACHE SERVICE (Xử lý Hash & Warm-up)
+        // Hàm toggleReaction sẽ tự động tính toán xem đây là hành động Thêm/Sửa (LIKE/LOVE) hay Xóa (UNLIKE)
+        // và trả về true (nếu là LIKE/SỬA) hoặc false (nếu là UNLIKE).
+        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
 
-//        boolean isReacted = redisService.isMemberOfSet(redisKey, requesterUUID);
-        if (true) {
-            log.info("User {} tiến hành UNLIKE target UUID {}", requesterUUID, targetUUID);
-//            redisService.removeFromSet(redisKey, requesterUUID);
-            // Publish event
+        // [BƯỚC 3]: PUBLISH KAFKA EVENT DỰA VÀO KẾT QUẢ TỪ RAM
+        if (!isAddedOrUpdated) {
+            log.info("User {} tiến hành UNLIKE/REMOVE target UUID {}", requesterUUID, targetUUID);
+//            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "UNLIKE");
         } else {
-            log.info("User {} tiến hành LIKE target UUID {}", requesterUUID, targetUUID);
-//            redisService.addToSet(redisKey, requesterUUID);
-            //  redisService.setExpire(redisKey, Duration.ofDays(7));
-
-            //  Publish event
+            log.info("User {} tiến hành {} target UUID {}", requesterUUID, reactionTypeEnum.name(), targetUUID);
+//            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "LIKE");
         }
     }
 }

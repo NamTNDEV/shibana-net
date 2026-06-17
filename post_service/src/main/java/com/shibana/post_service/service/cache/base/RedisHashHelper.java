@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RedisHashHelper {
@@ -18,6 +20,20 @@ public class RedisHashHelper {
 
     public void hSet(String key, String field, Object value) {
         redisTemplate.opsForHash().put(key, field, value);
+    }
+
+    public void hSet(String key, String field, Object value, Duration duration) {
+        redisTemplate.opsForHash().put(key, field, value);
+        redisTemplate.expire(key, duration);
+    }
+
+    public void hPutAll(String key, Map<String, Object> map) {
+        redisTemplate.opsForHash().putAll(key, map);
+    }
+
+    public void hPutAll(String key, Map<String, Object> map, Duration duration) {
+        redisTemplate.opsForHash().putAll(key, map);
+        redisTemplate.expire(key, duration);
     }
 
     public Object hGet(String key, String field) {
@@ -30,5 +46,9 @@ public class RedisHashHelper {
 
     public void hDelete(String key, String field) {
         redisTemplate.opsForHash().delete(key, field);
+    }
+
+    public boolean hasKey(String key) {
+        return redisTemplate.hasKey(key);
     }
 }
