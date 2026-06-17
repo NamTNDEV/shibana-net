@@ -22,15 +22,15 @@ import java.util.UUID;
 public class ReactionController {
     ReactionService reactionService;
 
-    @PostMapping("/{targetType}/{targetId}")
-    public ApiResponse<Void> toggleReaction(
+    @PostMapping("/v1/{targetType}/{targetId}")
+    public ApiResponse<Void> toggleReactionV1(
             @PathVariable ReactionTargetTypeEnum targetType,
             @PathVariable String targetId,
             @Validated @RequestBody ReactionRequestBody body,
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader("X-User-Id") String userId
     ) {
-        log.info(":: Toggle reaction Controller ::");
+        log.info(":: Toggle reaction Controller V1 ::");
 
         UUID requesterUUID = UUID.fromString(userId);
         UUID targetUUID = UUID.fromString(targetId);
@@ -42,5 +42,23 @@ public class ReactionController {
                 .build();
     }
 
-    ;
+    @PostMapping("/v2/{targetType}/{targetId}")
+    public ApiResponse<Void> toggleReactionV2(
+            @PathVariable ReactionTargetTypeEnum targetType,
+            @PathVariable String targetId,
+            @Validated @RequestBody ReactionRequestBody body,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        log.info(":: Toggle reaction Controller V2 ::");
+
+        UUID requesterUUID = UUID.fromString(userId);
+        UUID targetUUID = UUID.fromString(targetId);
+
+        reactionService.handleReactionV2(requesterUUID, targetUUID, targetType, body.getReactionType());
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Reaction toggled successfully")
+                .build();
+    }
 }

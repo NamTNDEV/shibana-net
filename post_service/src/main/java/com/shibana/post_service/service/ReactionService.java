@@ -21,11 +21,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReactionService {
-    ReactionRepo  reactionRepo;
+    ReactionRepo reactionRepo;
     ReactionStrategyFactory strategyFactory;
 
     @Transactional
-    public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum  reactionTypeEnum) {
+    public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
@@ -34,7 +34,7 @@ public class ReactionService {
             log.info("Reaction already exists for target UUID {}", targetUUID);
             reactionRepo.delete(existingReaction.get());
             strategy.updateStats(requesterUUID, targetUUID, -1, reactionTypeEnum);
-        } else  {
+        } else {
             log.info("Creating reaction for target UUID {}", targetUUID);
             Reaction reactionEntity = Reaction.builder()
                     .targetId(targetUUID)
@@ -50,8 +50,24 @@ public class ReactionService {
     /**
      * V2 - using Redis for handling high-concurrency requesting
      */
-    @Transactional
-    public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum  reactionTypeEnum) {
+    public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+        ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
+        strategy.validateTarget(targetUUID);
 
+        // [Application]:[Entity]:[Identifier]:[Attribute]
+        String redisKey = String.format("p:%s:%s:reactions", reactionTargetTypeEnum.name(), targetUUID);
+
+//        boolean isReacted = redisService.isMemberOfSet(redisKey, requesterUUID);
+        if (true) {
+            log.info("User {} tiến hành UNLIKE target UUID {}", requesterUUID, targetUUID);
+//            redisService.removeFromSet(redisKey, requesterUUID);
+            // Publish event
+        } else {
+            log.info("User {} tiến hành LIKE target UUID {}", requesterUUID, targetUUID);
+//            redisService.addToSet(redisKey, requesterUUID);
+            //  redisService.setExpire(redisKey, Duration.ofDays(7));
+
+            //  Publish event
+        }
     }
 }
