@@ -27,33 +27,27 @@ public class ReactionCacheService {
     ReactionRepo reactionRepo;
     RedisHashHelper redisHashHelper;
 
+    String EMPTY_KEY_REDIS_FLAG = "_EMPTY_FLAG_";
     /**
      * Xử lý logic Toggle Reaction trên cấu trúc Redis Hash.
      *
      * @return true nếu ghi nhận cảm xúc mới/đổi cảm xúc, false nếu hủy cảm xúc.
      */
     public boolean toggleReaction(UUID targetUUID, UUID requesterUUID, ReactionTargetTypeEnum targetType, ReactionTypeEnum reactionType) {
-        // 1. Quản lý định dạng Key nội bộ trong Cache Layer
         String redisKey = String.format("p:%s:%s:react", targetType.name(), targetUUID);
         String userIdStr = requesterUUID.toString();
 
-        // 2. Chốt chặn Hồi sinh Cache (Đảm bảo RAM luôn chứa đủ dữ liệu trước khi xử lý)
         warmUpCacheIfNeeded(redisKey, targetUUID);
 
-        // 3. Xử lý logic Toggle trên Hash
-        // Lấy loại Reaction hiện tại của User (nếu có)
         String currentReaction = (String) redisHashHelper.hGet(redisKey, userIdStr);
 
         if (currentReaction != null && currentReaction.equals(reactionType.name())) {
-            // Trường hợp 1: Đã thả LIKE, giờ bấm LIKE lần nữa -> Trở thành UNLIKE (Hủy)
             redisHashHelper.hDelete(redisKey, userIdStr);
             return false;
 
         } else {
-            // Trường hợp 2: Chưa thả gì -> Cập nhật thành LIKE
-            // Trường hợp 3: Đã thả LIKE, giờ bấm LOVE -> Ghi đè LOVE lên (Cực mượt, không cần phải xóa trước)
-            // Gia hạn Sliding Expiration (7 ngày) vì bài Post vừa có tương tác
             redisHashHelper.hSet(redisKey, userIdStr, reactionType.name(), Duration.ofDays(7));
+            redisHashHelper.hDelete(redisKey, EMPTY_KEY_REDIS_FLAG);
             return true;
         }
     }
@@ -64,12 +58,10 @@ public class ReactionCacheService {
     void warmUpCacheIfNeeded(String redisKey, UUID targetUUID) {
         if (!redisHashHelper.hasKey(redisKey)) {
             log.info("Cache miss cho key {}. Tiến hành Warm-up từ Postgres...", redisKey);
-
-            // Lấy toàn bộ lịch sử reaction của target này từ DB
             List<Reaction> historicalReactions = reactionRepo.findAllByTargetId(targetUUID).orElse(List.of());
 
             if (!historicalReactions.isEmpty()) {
-                // Dùng Map để putAll vào Redis Hash trong 1 lần gọi mạng duy nhất (Tối ưu Pipeline/Batch)
+                log.info("Warm-up thành công cho key {} với {} reactions.", redisKey, historicalReactions.size());
                 Map<String, Object> reactionMap = historicalReactions.stream()
                         .collect(Collectors.toMap(
                                 r -> r.getAuthorId().toString(),
@@ -77,6 +69,10 @@ public class ReactionCacheService {
                         ));
 
                 redisHashHelper.hPutAll(redisKey, reactionMap, Duration.ofDays(7));
+            } else {
+                log.info("Không có dữ liệu lịch sử cho key {}. Không thực hiện Warm-up.", redisKey);
+                // Nạp Dummy Flag chống Penetration
+                redisHashHelper.hSet(redisKey, EMPTY_KEY_REDIS_FLAG, "TRUE", Duration.ofMinutes(7));
             }
         }
     }

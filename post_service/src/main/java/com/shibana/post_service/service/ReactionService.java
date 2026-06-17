@@ -54,16 +54,11 @@ public class ReactionService {
      * V2 - using Redis for handling high-concurrency requesting
      */
     public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
-        // [BƯỚC 1]: FAIL-FAST (Check DB)
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
-        // [BƯỚC 2]: GIAO PHÓ CHO CACHE SERVICE (Xử lý Hash & Warm-up)
-        // Hàm toggleReaction sẽ tự động tính toán xem đây là hành động Thêm/Sửa (LIKE/LOVE) hay Xóa (UNLIKE)
-        // và trả về true (nếu là LIKE/SỬA) hoặc false (nếu là UNLIKE).
         boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
 
-        // [BƯỚC 3]: PUBLISH KAFKA EVENT DỰA VÀO KẾT QUẢ TỪ RAM
         if (!isAddedOrUpdated) {
             log.info("User {} tiến hành UNLIKE/REMOVE target UUID {}", requesterUUID, targetUUID);
 //            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "UNLIKE");
