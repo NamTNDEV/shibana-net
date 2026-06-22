@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,7 +41,7 @@ public class ReactionService {
         } else {
             log.info("Creating reaction for target UUID {}", targetUUID);
             Reaction reactionEntity = Reaction.builder()
-                    .targetId(targetUUID)
+                    .targetId(targetUUID)   
                     .authorId(requesterUUID)
                     .reactionType(reactionTypeEnum)
                     .targetType(reactionTargetTypeEnum)
@@ -54,11 +55,13 @@ public class ReactionService {
      * V2 - using Redis for handling high-concurrency requesting
      */
     public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+        var startTime = Instant.now();
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
+        var endTime = Instant.now();
+        log.info("[handleReactionV2]::Time taken for validateTarget = {} ms", endTime.toEpochMilli() - startTime.toEpochMilli());
 
         boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
-
         if (!isAddedOrUpdated) {
             log.info("User {} tiến hành UNLIKE/REMOVE target UUID {}", requesterUUID, targetUUID);
 //            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "UNLIKE");
