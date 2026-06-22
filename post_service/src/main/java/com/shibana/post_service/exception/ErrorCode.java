@@ -39,7 +39,8 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(5000104, "post-service:: An unknown error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_ERROR_CODE(5000204, "post-service:: Invalid error code", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_JSON_PARSING(5000404, "post-service:: Invalid JSON parsing", HttpStatus.INTERNAL_SERVER_ERROR),
-    REACT_TARGET_TYPE_NOT_SUPPORTED(5000504, "post-service:: Reaction target type is not supported", HttpStatus.INTERNAL_SERVER_ERROR)
+    REACT_TARGET_TYPE_NOT_SUPPORTED(5000504, "post-service:: Reaction target type is not supported", HttpStatus.INTERNAL_SERVER_ERROR),
+    SYSTEM_BUSY(5000604, "post-service:: System is busy, please try again later", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     int code;

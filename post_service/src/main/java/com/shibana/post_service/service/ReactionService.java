@@ -55,11 +55,8 @@ public class ReactionService {
      * V2 - using Redis for handling high-concurrency requesting
      */
     public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
-        var startTime = Instant.now();
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
-        var endTime = Instant.now();
-        log.info("[handleReactionV2]::Time taken for validateTarget = {} ms", endTime.toEpochMilli() - startTime.toEpochMilli());
 
         boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
         if (!isAddedOrUpdated) {

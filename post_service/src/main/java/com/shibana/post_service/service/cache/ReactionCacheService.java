@@ -1,5 +1,7 @@
 package com.shibana.post_service.service.cache;
 
+import com.shibana.post_service.exception.AppException;
+import com.shibana.post_service.exception.ErrorCode;
 import com.shibana.post_service.model.entity.Reaction;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
@@ -9,12 +11,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,11 +29,12 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReactionCacheService {
     ReactionRepo reactionRepo;
+    RedissonClient redissonClient;
     RedisHashHelper redisHashHelper;
 
     static String EMPTY_KEY_REDIS_FLAG = "_EMPTY_FLAG_";
     static Duration TTL_HAS_DATA = Duration.ofDays(7);
-    static Duration TTL_EMPTY = Duration.ofHours(2);
+    static Duration TTL_EMPTY = Duration.ofMinutes(10);
 
     /**
      * Xử lý logic Toggle Reaction trên cấu trúc Redis Hash.
@@ -58,7 +65,29 @@ public class ReactionCacheService {
         if (redisHashHelper.hasKey(redisKey)) return;
         log.info("[warmUpCacheIfNeeded]::Cache miss cho key {}. Tiến hành Warm-up từ Postgres...", redisKey);
 
-        doWarmUpFromDb(redisKey, targetUUID);
+        String redLockKey = "lock:warmup:" + redisKey;
+        RLock rlock = redissonClient.getLock(redLockKey);
+        boolean acquired = false;
+
+        try {
+            acquired = rlock.tryLock(2, TimeUnit.SECONDS);
+
+            if (acquired) {
+                doWarmUpFromDb(redisKey, targetUUID);
+            } else {
+                // Quá 2s không có khóa -> Từ chối khéo để cứu Thread Pool
+                log.warn("[warmUpCacheIfNeeded]::Hệ thống đang nghẽn, từ chối request warm-up cho key: {}", redisKey);
+                throw new AppException(ErrorCode.SYSTEM_BUSY);
+            }
+        } catch (Exception e) {
+            log.error("[warmUpCacheIfNeeded]::Luồng lấy khóa bị ngắt", e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Tiến trình bị gián đoạn");
+        } finally {
+            if (acquired && rlock.isHeldByCurrentThread()) {
+                rlock.unlock();
+            }
+        }
     }
 
     void doWarmUpFromDb(String redisKey, UUID targetUUID) {
