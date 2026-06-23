@@ -73,7 +73,10 @@ public class ReactionCacheService {
             acquired = rlock.tryLock(2, TimeUnit.SECONDS);
 
             if (acquired) {
-                doWarmUpFromDb(redisKey, targetUUID);
+                if (!redisHashHelper.hasKey(redisKey)) {
+                    log.info("[warmUpCacheIfNeeded]::Đoạt Lock thành công. Tiến hành chọc DB cho key: {}", redisKey);
+                    doWarmUpFromDb(redisKey, targetUUID);
+                }
             } else {
                 // Quá 2s không có khóa -> Từ chối khéo để cứu Thread Pool
                 log.warn("[warmUpCacheIfNeeded]::Hệ thống đang nghẽn, từ chối request warm-up cho key: {}", redisKey);
