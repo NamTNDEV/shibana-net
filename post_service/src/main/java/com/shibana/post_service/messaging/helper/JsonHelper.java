@@ -17,6 +17,15 @@ import org.springframework.stereotype.Component;
 public class JsonHelper {
     ObjectMapper mapper;
 
+    public String serialize(Object obj) {
+        try {
+            return mapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize object: {}", e.getMessage());
+            throw new AppException(ErrorCode.SERIALIZATION_ERROR);
+        }
+    }
+
     public EventType extractEventType(String rawJsonEvent) {
         try {
             var root = mapper.readTree(rawJsonEvent);

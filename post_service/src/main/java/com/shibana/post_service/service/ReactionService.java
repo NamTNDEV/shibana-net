@@ -1,6 +1,11 @@
 package com.shibana.post_service.service;
 
+import com.shibana.post_service.messaging.dto.EventType;
+import com.shibana.post_service.messaging.dto.payloads.PostReactedPayload;
+import com.shibana.post_service.messaging.publisher.impl.KafkaEventPublisher;
 import com.shibana.post_service.model.entity.Reaction;
+import com.shibana.post_service.model.enums.AggregateTypeEnum;
+import com.shibana.post_service.model.enums.ReactionActionEnum;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.ReactionRepo;
@@ -26,6 +31,7 @@ import java.util.UUID;
 public class ReactionService {
     ReactionRepo reactionRepo;
     ReactionStrategyFactory strategyFactory;
+    KafkaEventPublisher kafkaEventPublisher;
     ReactionCacheService reactionCacheService;
 
     @Transactional
@@ -41,7 +47,7 @@ public class ReactionService {
         } else {
             log.info("Creating reaction for target UUID {}", targetUUID);
             Reaction reactionEntity = Reaction.builder()
-                    .targetId(targetUUID)   
+                    .targetId(targetUUID)
                     .authorId(requesterUUID)
                     .reactionType(reactionTypeEnum)
                     .targetType(reactionTargetTypeEnum)
@@ -59,12 +65,28 @@ public class ReactionService {
         strategy.validateTarget(targetUUID);
 
         boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
+
+        PostReactedPayload eventPayload = PostReactedPayload.builder()
+                .requesterId(requesterUUID)
+                .targetId(targetUUID)
+                .reactionType(reactionTypeEnum)
+                .reactionTargetType(reactionTargetTypeEnum)
+                .build();
+
         if (!isAddedOrUpdated) {
             log.info("User {} tiến hành UNLIKE/REMOVE target UUID {}", requesterUUID, targetUUID);
-//            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "UNLIKE");
+            eventPayload.setReactionAction(ReactionActionEnum.DELETE);
+
         } else {
             log.info("User {} tiến hành {} target UUID {}", requesterUUID, reactionTypeEnum.name(), targetUUID);
-//            kafkaEventPublisher.sendReactionEvent(requesterUUID, targetUUID, targetType, reactionType, "LIKE");
+            eventPayload.setReactionAction(ReactionActionEnum.CREATE);
         }
+
+        kafkaEventPublisher.publishEvent(
+                eventPayload,
+                AggregateTypeEnum.REACTION,
+                targetUUID.toString(),
+                EventType.POST_REACTED
+        );
     }
 }

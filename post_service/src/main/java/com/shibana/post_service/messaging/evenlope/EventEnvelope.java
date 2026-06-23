@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MessageEnvelope<T> {
-    MessageEnvelopeMetadata metadata;
+public class EventEnvelope<T> {
+    EventEnvelopeMetadata metadata;
     T payload;
 }
