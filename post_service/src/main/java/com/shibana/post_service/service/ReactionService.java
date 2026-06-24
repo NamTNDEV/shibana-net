@@ -64,7 +64,8 @@ public class ReactionService {
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
-        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
+//        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
+        boolean isAddedOrUpdated = true;
 
         PostReactedPayload eventPayload = PostReactedPayload.builder()
                 .requesterId(requesterUUID)

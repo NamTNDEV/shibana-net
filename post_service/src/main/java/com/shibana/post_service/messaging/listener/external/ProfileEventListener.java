@@ -22,7 +22,7 @@ public class ProfileEventListener {
     AuthorService authorService;
 
     @KafkaListener(
-            topics = "${infra.kafka.topics.profile-event}",
+            topics = "${infra.kafka.topics.profile-event.name}",
             groupId = "${spring.kafka.consumer.group-id}")
     public void handleProfileEvents(ConsumerRecord<String, String> rawJsonEvent) {
         EventType eventType = jsonHelper.extractEventType(rawJsonEvent.value());

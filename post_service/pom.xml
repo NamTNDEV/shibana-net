@@ -160,11 +160,8 @@
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
-                        <!-- Sinh bean mapper có @Component để @Autowired -->
                         <arg>-Amapstruct.defaultComponentModel=spring</arg>
-                        <!-- Build idempotent (không dính timestamp) -->
                         <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
-                        <!-- <arg>-Amapstruct.verbose=true</arg>  // bật log chi tiết khi cần debug -->
                     </compilerArgs>
                 </configuration>
             </plugin>

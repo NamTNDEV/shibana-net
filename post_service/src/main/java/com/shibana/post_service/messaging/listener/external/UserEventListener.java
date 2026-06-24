@@ -22,7 +22,7 @@ public class UserEventListener {
     AuthorService authorService;
 
     @KafkaListener(
-            topics = "${infra.kafka.topics.user-event}",
+            topics = "${infra.kafka.topics.user-event.name}",
             groupId = "${spring.kafka.consumer.group-id}")
     public void handleUserEvents(ConsumerRecord<String, String> rawJsonEvent) {
         EventType eventType = jsonHelper.extractEventType(rawJsonEvent.value());

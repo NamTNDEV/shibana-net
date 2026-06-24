@@ -24,7 +24,6 @@ public class InternalOutboxEventListener {
     EventPublisher eventPublisher;
 
     @Async
-    @Transactional
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePublishLocalEvent(OutboxCreatedLocalEvent event) {
         log.info("Handling publish local event");
