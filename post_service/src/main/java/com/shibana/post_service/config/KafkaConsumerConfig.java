@@ -2,34 +2,39 @@ package com.shibana.post_service.config;
 
 import com.shibana.post_service.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.boot.autoconfigure.kafka.ConcurrentKafkaListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Configuration
 public class KafkaConsumerConfig {
-    @Bean("batchFactory") // Đặt tên Bean để xài riêng
+    @Bean("microBatchFactory")
     public ConcurrentKafkaListenerContainerFactory<?, ?> batchFactory(
-            ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
-            ConsumerFactory<Object, Object> kafkaConsumerFactory) {
-
+            ConsumerFactory<Object, Object> kafkaConsumerFactory
+    ) {
         ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-        // 1. Kế thừa toàn bộ cấu hình gốc từ YML (bao gồm max-poll-records)
-        configurer.configure(factory, kafkaConsumerFactory);
+        Map<String, Object> consumerProps = new HashMap<>(((DefaultKafkaConsumerFactory<Object, Object>) kafkaConsumerFactory).getConfigurationProperties());
+        consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
+        consumerProps.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 1000);
+        consumerProps.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 65536); // Mặc định là 1 byte, tăng lên 64KB để giảm số lần poll
 
-        // 2. 🚀 CHỈ ĐỊNH RIÊNG cái Factory này phải chạy ở chế độ BATCH
+        factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps));
         factory.setBatchListener(true);
-
         return factory;
     }
 

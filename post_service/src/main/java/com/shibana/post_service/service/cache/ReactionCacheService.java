@@ -63,7 +63,6 @@ public class ReactionCacheService {
      */
     void warmUpCacheIfNeeded(String redisKey, UUID targetUUID) {
         if (redisHashHelper.hasKey(redisKey)) return;
-        log.info("[warmUpCacheIfNeeded]::Cache miss cho key {}. Tiến hành Warm-up từ Postgres...", redisKey);
 
         String redLockKey = "lock:warmup:" + redisKey;
         RLock rlock = redissonClient.getLock(redLockKey);
@@ -74,7 +73,6 @@ public class ReactionCacheService {
 
             if (acquired) {
                 if (!redisHashHelper.hasKey(redisKey)) {
-                    log.info("[warmUpCacheIfNeeded]::Đoạt Lock thành công. Tiến hành chọc DB cho key: {}", redisKey);
                     doWarmUpFromDb(redisKey, targetUUID);
                 }
             } else {
@@ -96,7 +94,6 @@ public class ReactionCacheService {
     void doWarmUpFromDb(String redisKey, UUID targetUUID) {
         List<Reaction> historicalReactions = reactionRepo.findAllByTargetId(targetUUID).orElse(List.of());
         if (!historicalReactions.isEmpty()) {
-            log.info("[doWarmUpFromDb]::Warm-up thành công cho key {} với {} reactions.", redisKey, historicalReactions.size());
             Map<String, Object> reactionMap = historicalReactions.stream()
                     .collect(Collectors.toMap(
                             r -> r.getAuthorId().toString(),
@@ -104,7 +101,6 @@ public class ReactionCacheService {
                     ));
             redisHashHelper.hPutAll(redisKey, reactionMap, TTL_HAS_DATA);
         } else {
-            log.info("[doWarmUpFromDb]::Không có dữ liệu lịch sử cho key {}. Không thực hiện Warm-up.", redisKey);
             redisHashHelper.hSet(redisKey, EMPTY_KEY_REDIS_FLAG, "TRUE", TTL_EMPTY);
         }
     }

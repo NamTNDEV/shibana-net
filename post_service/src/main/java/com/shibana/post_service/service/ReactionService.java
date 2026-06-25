@@ -41,11 +41,9 @@ public class ReactionService {
 
         Optional<Reaction> existingReaction = reactionRepo.findByTargetIdAndAuthorId(targetUUID, requesterUUID);
         if (existingReaction.isPresent()) {
-            log.info("Reaction already exists for target UUID {}", targetUUID);
             reactionRepo.delete(existingReaction.get());
             strategy.updateStats(requesterUUID, targetUUID, -1, reactionTypeEnum);
         } else {
-            log.info("Creating reaction for target UUID {}", targetUUID);
             Reaction reactionEntity = Reaction.builder()
                     .targetId(targetUUID)
                     .authorId(requesterUUID)
@@ -60,12 +58,11 @@ public class ReactionService {
     /**
      * V2 - using Redis for handling high-concurrency requesting
      */
-    public void handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+    public String handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
 
-//        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
-        boolean isAddedOrUpdated = true;
+        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
 
         PostReactedPayload eventPayload = PostReactedPayload.builder()
                 .requesterId(requesterUUID)
@@ -74,12 +71,10 @@ public class ReactionService {
                 .reactionTargetType(reactionTargetTypeEnum)
                 .build();
 
+        String result = isAddedOrUpdated ? "React successfully" : "Unreact successfully";
         if (!isAddedOrUpdated) {
-            log.info("User {} tiến hành UNLIKE/REMOVE target UUID {}", requesterUUID, targetUUID);
             eventPayload.setReactionAction(ReactionActionEnum.DELETE);
-
         } else {
-            log.info("User {} tiến hành {} target UUID {}", requesterUUID, reactionTypeEnum.name(), targetUUID);
             eventPayload.setReactionAction(ReactionActionEnum.CREATE);
         }
 
@@ -89,5 +84,7 @@ public class ReactionService {
                 targetUUID.toString(),
                 EventType.POST_REACTED
         );
+
+        return result;
     }
 }

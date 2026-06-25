@@ -27,12 +27,9 @@ public class ReactionController {
             @PathVariable ReactionTargetTypeEnum targetType,
             @PathVariable String targetId,
             @Validated @RequestBody ReactionRequestBody body,
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestHeader("X-User-Id") String userId
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        log.info(":: Toggle reaction Controller V1 ::");
-
-        UUID requesterUUID = UUID.fromString(userId);
+        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
         UUID targetUUID = UUID.fromString(targetId);
 
         reactionService.handleReactionV1(requesterUUID, targetUUID, targetType, body.getReactionType());
@@ -47,17 +44,16 @@ public class ReactionController {
             @PathVariable ReactionTargetTypeEnum targetType,
             @PathVariable String targetId,
             @Validated @RequestBody ReactionRequestBody body,
-            @AuthenticationPrincipal Jwt jwt
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader("X-User-Id") String userId
     ) {
-        log.info(":: Toggle reaction Controller V2 ::");
-
-        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
+        UUID requesterUUID = UUID.fromString(userId);
         UUID targetUUID = UUID.fromString(targetId);
 
-        reactionService.handleReactionV2(requesterUUID, targetUUID, targetType, body.getReactionType());
+        var message = reactionService.handleReactionV2(requesterUUID, targetUUID, targetType, body.getReactionType());
         return ApiResponse.<Void>builder()
                 .code(200)
-                .message("Reaction toggled successfully")
+                .message(message)
                 .build();
     }
 }

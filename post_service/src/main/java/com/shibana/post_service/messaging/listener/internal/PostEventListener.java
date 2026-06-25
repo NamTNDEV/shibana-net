@@ -21,9 +21,10 @@ public class PostEventListener {
 
     @KafkaListener(
             topics = "${infra.kafka.topics.reaction-event.name}",
-            groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "batchFactory")
+            groupId = "${infra.kafka.group-ids.reaction-sync-db}",
+            containerFactory = "microBatchFactory")
     public void handleReactionEvents(List<ConsumerRecord<String, String>> rawJsonEvents) {
-        log.info("[handleReactionEvents]::Received reaction event: {}", rawJsonEvents);
+//        log.info("🚚 [Sync DB Flow] Vừa kéo về một lưới gồm {} reaction events.", rawJsonEvents.size());
+        if (rawJsonEvents.isEmpty()) return;
     }
 }

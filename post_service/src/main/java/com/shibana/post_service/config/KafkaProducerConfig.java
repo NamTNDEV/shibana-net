@@ -14,12 +14,12 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
     @Primary
-    @Bean("defaultKafkaTemplate")
+    @Bean("instantKafkaTemplate")
     public KafkaTemplate<Object, Object> defaultKafkaTemplate(ProducerFactory<Object, Object> defaultProducerFactory) {
         return new KafkaTemplate<>(defaultProducerFactory);
     }
 
-    @Bean("reactionKafkaTemplate")
+    @Bean("microBatchKafkaTemplate")
     public KafkaTemplate<Object, Object> reactionKafkaTemplate(
             ProducerFactory<Object, Object> defaultProducerFactory) {
 

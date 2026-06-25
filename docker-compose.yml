@@ -1,4 +1,7 @@
 services:
+  # ==========================================
+  # KAFKA CLUSTER (Giữ nguyên phom chuẩn của em)
+  # ==========================================
   kafka:
     # 1. Hàng chính chủ, có version đàng hoàng
     image: apache/kafka:3.7.0
@@ -52,6 +55,26 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
     restart: unless-stopped
 
+  # ==========================================
+  # REDIS CLUSTER (Tốc độ ánh sáng cho Local)
+  # ==========================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: shibana-redis
+    ports:
+      - "6379:6379"
+    # 🚀 BÙA CHÚ: Ép Redis Local xài đúng cái Password Cloud của em để code khỏi phải sửa nhiều
+    command: redis-server --requirepass 123123
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "123123", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
 # Khai báo Volume
 volumes:
   kafka_data:
+  redis_data:

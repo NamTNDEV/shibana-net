@@ -42,8 +42,8 @@ public class KafkaEventPublisher implements EventPublisher {
             throw new AppException(ErrorCode.MISSING_TOPIC_ROUTING);
         }
 
-        String templateBeanName = "reactionKafkaTemplate";
-        if(infraKafkaProperties.getTemplateRouting() != null && infraKafkaProperties.getTemplateRouting().containsKey(aggregateType)) {
+        String templateBeanName = "instantKafkaTemplate";
+        if (infraKafkaProperties.getTemplateRouting() != null && infraKafkaProperties.getTemplateRouting().containsKey(aggregateType)) {
             templateBeanName = infraKafkaProperties.getTemplateRouting().get(aggregateType);
         }
         KafkaTemplate<Object, Object> kafkaTemplate = kafkaTemplates.get(templateBeanName);
@@ -61,17 +61,10 @@ public class KafkaEventPublisher implements EventPublisher {
                 .build();
 
         String serializedEventPayload = jsonHelper.serialize(eventEnvelope);
-
-        log.info("🚀 [Routing System] Đẩy Event [{}] của [{}] -> Topic: [{}], dùng Bean: [{}]",
-                eventType, aggregateType, targetTopic, templateBeanName);
-
         kafkaTemplate.send(targetTopic, aggregateId, serializedEventPayload)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("\uD83D\uDCA5 Bắn event thất bại cho target {}", aggregateId, ex);
-                    } else {
-                        log.info("✅Bắn event thành công vào Partition: {}, Key: {}",
-                                result.getRecordMetadata().partition(), aggregateId);
                     }
                 });
         ;
