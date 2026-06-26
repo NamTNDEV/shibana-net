@@ -69,14 +69,13 @@ public class ReactionCacheService {
         boolean acquired = false;
 
         try {
-            acquired = rlock.tryLock(2, TimeUnit.SECONDS);
+            acquired = rlock.tryLock(500, TimeUnit.MILLISECONDS);
 
             if (acquired) {
                 if (!redisHashHelper.hasKey(redisKey)) {
                     doWarmUpFromDb(redisKey, targetUUID);
                 }
             } else {
-                // Quá 2s không có khóa -> Từ chối khéo để cứu Thread Pool
                 log.warn("[warmUpCacheIfNeeded]::Hệ thống đang nghẽn, từ chối request warm-up cho key: {}", redisKey);
                 throw new AppException(ErrorCode.SYSTEM_BUSY);
             }
@@ -92,6 +91,7 @@ public class ReactionCacheService {
     }
 
     void doWarmUpFromDb(String redisKey, UUID targetUUID) {
+        log.info("[doWarmUpFromDb]::Warm-up cache for key: {}", redisKey);
         List<Reaction> historicalReactions = reactionRepo.findAllByTargetId(targetUUID).orElse(List.of());
         if (!historicalReactions.isEmpty()) {
             Map<String, Object> reactionMap = historicalReactions.stream()

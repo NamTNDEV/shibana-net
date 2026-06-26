@@ -27,7 +27,7 @@ public class KafkaProducerConfig {
                 ((DefaultKafkaProducerFactory<Object, Object>) defaultProducerFactory).getConfigurationProperties()
         );
 
-        props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 15);
         props.put(ProducerConfig.BATCH_SIZE_CONFIG, 32768);
 
         ProducerFactory<Object, Object> customProducerFactory = new DefaultKafkaProducerFactory<>(props);

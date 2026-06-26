@@ -29,9 +29,9 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
         Map<String, Object> consumerProps = new HashMap<>(((DefaultKafkaConsumerFactory<Object, Object>) kafkaConsumerFactory).getConfigurationProperties());
-        consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
-        consumerProps.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 1000);
-        consumerProps.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 65536); // Mặc định là 1 byte, tăng lên 64KB để giảm số lần poll
+        consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2000);
+        consumerProps.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 2000);
+        consumerProps.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 200000); //347B * 2k ~ 694KB ~ 678KB => (25%-30%) = ~ 200KB
 
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps));
         factory.setBatchListener(true);

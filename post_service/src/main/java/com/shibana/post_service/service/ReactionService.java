@@ -9,6 +9,7 @@ import com.shibana.post_service.model.enums.ReactionActionEnum;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.ReactionRepo;
+import com.shibana.post_service.repo.jdbc_repo.ReactionJdbcRepository;
 import com.shibana.post_service.service.cache.ReactionCacheService;
 import com.shibana.post_service.strategy.ReactionStrategy;
 import com.shibana.post_service.strategy.ReactionStrategyFactory;
@@ -20,9 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,6 +33,7 @@ public class ReactionService {
     ReactionStrategyFactory strategyFactory;
     KafkaEventPublisher kafkaEventPublisher;
     ReactionCacheService reactionCacheService;
+    ReactionJdbcRepository reactionJdbcRepository;
 
     @Transactional
     public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
@@ -86,5 +87,66 @@ public class ReactionService {
         );
 
         return result;
+    }
+
+    @Transactional
+    public void batchUpsertToDb(List<PostReactedPayload> payloads) {
+        if (payloads.isEmpty()) {
+            return;
+        }
+
+        Map<Boolean, List<PostReactedPayload>> groupedPayloads = payloads.stream()
+                .collect(Collectors.partitioningBy(payload -> payload.getReactionAction() == ReactionActionEnum.CREATE));
+
+        List<PostReactedPayload> upsertPayloads = groupedPayloads.get(true);
+        List<PostReactedPayload> deletePayloads = groupedPayloads.get(false);
+
+        if (!upsertPayloads.isEmpty()) {
+            reactionJdbcRepository.batchUpsert(upsertPayloads);
+        }
+        if (!deletePayloads.isEmpty()) {
+            reactionJdbcRepository.batchDelete(deletePayloads);
+        }
+    }
+
+    public List<PostReactedPayload> generateFakePayloads(int n) {
+        List<PostReactedPayload> payloads = new ArrayList<>(n);
+        Random random = new Random();
+
+        // 1. Giả lập một danh sách "Hot Posts" (Khoảng 5 bài viết đang nổi đình nổi đám)
+        // Để cố tình ép hệ thống tạo ra các cú "ON CONFLICT" và Update đè dữ liệu
+        List<UUID> hotPostIds = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            hotPostIds.add(UUID.randomUUID());
+        }
+
+        // 2. Lấy danh sách các Enum hiện có
+        ReactionTypeEnum[] reactionTypes = ReactionTypeEnum.values();
+        // Tỉ lệ nghiêng về thả Like (CREATE) nhiều hơn là Rút Like (DELETE) để giống thực tế
+        ReactionActionEnum[] actions = {
+                ReactionActionEnum.CREATE, ReactionActionEnum.CREATE, ReactionActionEnum.CREATE,
+                ReactionActionEnum.DELETE
+        };
+
+        for (int i = 0; i < n; i++) {
+            // 80% traffic dồn vào 5 bài Hot Posts, 20% rơi vào các bài viết vãng lai
+            UUID targetId = random.nextInt(100) < 80
+                    ? hotPostIds.get(random.nextInt(hotPostIds.size()))
+                    : UUID.randomUUID();
+
+            // Mỗi event là một User khác nhau thả cảm xúc
+            UUID requesterId = UUID.randomUUID();
+
+            PostReactedPayload payload = PostReactedPayload.builder()
+                    .targetId(targetId)
+                    .requesterId(requesterId)
+                    .reactionType(reactionTypes[random.nextInt(reactionTypes.length)])
+                    .reactionAction(actions[random.nextInt(actions.length)])
+                    .reactionTargetType(ReactionTargetTypeEnum.POST)
+                    .build();
+
+            payloads.add(payload);
+        }
+        return payloads;
     }
 }
