@@ -57,10 +57,9 @@ public class Post {
     @Builder.Default
     private List<Media> media = new ArrayList<>();
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "reaction_stats", columnDefinition = "jsonb")
     @Builder.Default
-    Map<String, Integer> reactionStats = new HashMap<>();
+    @Column(name = "reaction_counts")
+    Integer reactionCounts = 0;
 
     @Builder.Default
     @Column(name = "comment_counts")

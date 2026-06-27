@@ -27,8 +27,8 @@ public class PostReactionStrategy implements ReactionStrategy {
     }
 
     @Override
-    public void updateStats(UUID requesterUUID, UUID targetUUID, int amount, ReactionTypeEnum reactionTypeEnum) {
-        postCommandService.updatePostReactionStats(targetUUID, amount, reactionTypeEnum.name());
+    public void updateStats(UUID requesterUUID, UUID targetUUID, int amount) {
+        postCommandService.updatePostReactionStats(targetUUID, amount);
     }
 
     @Override

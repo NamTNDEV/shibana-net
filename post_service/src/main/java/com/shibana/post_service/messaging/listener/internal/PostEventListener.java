@@ -1,9 +1,8 @@
 package com.shibana.post_service.messaging.listener.internal;
 
 import com.shibana.post_service.messaging.dto.EventType;
-import com.shibana.post_service.messaging.dto.payloads.PostReactedPayload;
+import com.shibana.post_service.messaging.dto.payloads.ReactedPayload;
 import com.shibana.post_service.messaging.helper.JsonHelper;
-import com.shibana.post_service.service.AuthorService;
 import com.shibana.post_service.service.ReactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,7 +34,7 @@ public class PostEventListener {
                 .collect(Collectors.groupingBy(event -> jsonHelper.extractEventType(event.value())));
         groupedEvents.forEach((eventType, records) -> {
             switch (eventType) {
-                case POST_REACTED -> handleReactionToggleBatch(records);
+                case USER_REACTED -> handleReactionToggleBatch(records);
                 default ->
                         log.warn("⚠ Found unsupported event type [{}] in batch with {} records. Ignored!", eventType, records.size());
             }
@@ -43,14 +42,14 @@ public class PostEventListener {
     }
 
     private void handleReactionToggleBatch(List<ConsumerRecord<String, String>> records) {
-        Map<String, PostReactedPayload> events = records.stream()
-                .map(record -> jsonHelper.parsePayload(record.value(), PostReactedPayload.class))
+        Map<String, ReactedPayload> events = records.stream()
+                .map(record -> jsonHelper.parsePayload(record.value(), ReactedPayload.class))
                 .collect(Collectors.toMap(
                         payload -> payload.getTargetId() + "_" + payload.getRequesterId(),
                         payload -> payload,
                         (existing, replacement) -> replacement
                 ));
-        List<PostReactedPayload> uniqueBatch = new ArrayList<>(events.values());
+        List<ReactedPayload> uniqueBatch = new ArrayList<>(events.values());
         reactionService.batchUpsertToDb(uniqueBatch);
     }
 }

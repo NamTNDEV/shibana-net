@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface ReactionStrategy {
     ReactionTargetTypeEnum getTargetType();
-    void updateStats(UUID requesterUUID, UUID targetUUID, int amount, ReactionTypeEnum reactionTypeEnum);
+    void updateStats(UUID requesterUUID, UUID targetUUID, int amount);
     void validateTarget(UUID id);
 }

@@ -90,11 +90,9 @@ public class PostCommandService {
     }
 
     @Transactional
-    public void updatePostReactionStats(UUID postId, int amount, String reactionType) {
+    public void updatePostReactionStats(UUID postId, int amount) {
         Post post = postQueryService.getPostById(postId);
-        Map<String, Integer> stats = post.getReactionStats();
-        int currentCount = stats.getOrDefault(reactionType, 0);
-        stats.put(reactionType, Math.max(0, currentCount + amount));
+        post.setReactionCounts(post.getReactionCounts() + amount);
         postRepo.save(post);
     }
 }

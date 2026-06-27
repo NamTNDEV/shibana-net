@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostReactedPayload {
+public class ReactedPayload {
     UUID requesterId;
     UUID targetId;
     ReactionTargetTypeEnum reactionTargetType;

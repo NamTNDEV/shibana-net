@@ -1,7 +1,7 @@
 package com.shibana.post_service.repo.jdbc_repo;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import com.shibana.post_service.messaging.dto.payloads.PostReactedPayload;
+import com.shibana.post_service.messaging.dto.payloads.ReactedPayload;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ReactionJdbcRepository {
     JdbcTemplate jdbcTemplate;
 
-    public void batchUpsert(List<PostReactedPayload> batch) {
+    public void batchUpsert(List<ReactedPayload> batch) {
         String sql = """
                     INSERT INTO reactions (id, target_id, author_id, reaction_type, target_type, created_at)
                     VALUES (?, ?, ?, ?, ?, ?)
@@ -34,7 +34,7 @@ public class ReactionJdbcRepository {
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                PostReactedPayload payload = batch.get(i);
+                ReactedPayload payload = batch.get(i);
 
                 ps.setObject(1, UuidCreator.getTimeOrderedEpoch());
                 ps.setObject(2, payload.getTargetId());
@@ -51,7 +51,7 @@ public class ReactionJdbcRepository {
         });
     }
 
-    public void batchDelete(List<PostReactedPayload> payloads) {
+    public void batchDelete(List<ReactedPayload> payloads) {
         String sql = """
                 DELETE FROM reactions WHERE target_id = ? AND author_id = ?
                 """;
@@ -59,7 +59,7 @@ public class ReactionJdbcRepository {
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                PostReactedPayload p = payloads.get(i);
+                ReactedPayload p = payloads.get(i);
                 ps.setObject(1, p.getTargetId());
                 ps.setObject(2, p.getRequesterId());
             }

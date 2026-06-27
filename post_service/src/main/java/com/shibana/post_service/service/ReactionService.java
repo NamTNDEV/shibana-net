@@ -1,7 +1,7 @@
 package com.shibana.post_service.service;
 
 import com.shibana.post_service.messaging.dto.EventType;
-import com.shibana.post_service.messaging.dto.payloads.PostReactedPayload;
+import com.shibana.post_service.messaging.dto.payloads.ReactedPayload;
 import com.shibana.post_service.messaging.publisher.impl.KafkaEventPublisher;
 import com.shibana.post_service.model.entity.Reaction;
 import com.shibana.post_service.model.enums.AggregateTypeEnum;
@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,7 +42,7 @@ public class ReactionService {
         Optional<Reaction> existingReaction = reactionRepo.findByTargetIdAndAuthorId(targetUUID, requesterUUID);
         if (existingReaction.isPresent()) {
             reactionRepo.delete(existingReaction.get());
-            strategy.updateStats(requesterUUID, targetUUID, -1, reactionTypeEnum);
+            strategy.updateStats(requesterUUID, targetUUID, -1);
         } else {
             Reaction reactionEntity = Reaction.builder()
                     .targetId(targetUUID)
@@ -52,7 +51,7 @@ public class ReactionService {
                     .targetType(reactionTargetTypeEnum)
                     .build();
             reactionRepo.save(reactionEntity);
-            strategy.updateStats(requesterUUID, targetUUID, 1, reactionTypeEnum);
+            strategy.updateStats(requesterUUID, targetUUID, 1);
         }
     }
 
@@ -65,7 +64,7 @@ public class ReactionService {
 
         boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
 
-        PostReactedPayload eventPayload = PostReactedPayload.builder()
+        ReactedPayload eventPayload = ReactedPayload.builder()
                 .requesterId(requesterUUID)
                 .targetId(targetUUID)
                 .reactionType(reactionTypeEnum)
@@ -83,23 +82,23 @@ public class ReactionService {
                 eventPayload,
                 AggregateTypeEnum.REACTION,
                 targetUUID.toString(),
-                EventType.POST_REACTED
+                EventType.USER_REACTED
         );
 
         return result;
     }
 
     @Transactional
-    public void batchUpsertToDb(List<PostReactedPayload> payloads) {
+    public void batchUpsertToDb(List<ReactedPayload> payloads) {
         if (payloads.isEmpty()) {
             return;
         }
 
-        Map<Boolean, List<PostReactedPayload>> groupedPayloads = payloads.stream()
+        Map<Boolean, List<ReactedPayload>> groupedPayloads = payloads.stream()
                 .collect(Collectors.partitioningBy(payload -> payload.getReactionAction() == ReactionActionEnum.CREATE));
 
-        List<PostReactedPayload> upsertPayloads = groupedPayloads.get(true);
-        List<PostReactedPayload> deletePayloads = groupedPayloads.get(false);
+        List<ReactedPayload> upsertPayloads = groupedPayloads.get(true);
+        List<ReactedPayload> deletePayloads = groupedPayloads.get(false);
 
         if (!upsertPayloads.isEmpty()) {
             reactionJdbcRepository.batchUpsert(upsertPayloads);
@@ -109,8 +108,8 @@ public class ReactionService {
         }
     }
 
-    public List<PostReactedPayload> generateFakePayloads(int n) {
-        List<PostReactedPayload> payloads = new ArrayList<>(n);
+    public List<ReactedPayload> generateFakePayloads(int n) {
+        List<ReactedPayload> payloads = new ArrayList<>(n);
         Random random = new Random();
 
         // 1. Giả lập một danh sách "Hot Posts" (Khoảng 5 bài viết đang nổi đình nổi đám)
@@ -137,7 +136,7 @@ public class ReactionService {
             // Mỗi event là một User khác nhau thả cảm xúc
             UUID requesterId = UUID.randomUUID();
 
-            PostReactedPayload payload = PostReactedPayload.builder()
+            ReactedPayload payload = ReactedPayload.builder()
                     .targetId(targetId)
                     .requesterId(requesterId)
                     .reactionType(reactionTypes[random.nextInt(reactionTypes.length)])

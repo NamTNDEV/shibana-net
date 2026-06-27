@@ -1,6 +1,6 @@
 package com.shibana.post_service.controller;
 
-import com.shibana.post_service.messaging.dto.payloads.PostReactedPayload;
+import com.shibana.post_service.messaging.dto.payloads.ReactedPayload;
 import com.shibana.post_service.model.dto.response.ApiResponse;
 import com.shibana.post_service.model.dto.resquest.ReactionRequestBody;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
@@ -27,7 +27,7 @@ public class ReactionController {
     @PostMapping("/v0/{targetType}/{targetId}")
     public ApiResponse<Void> toggleReactionV0(@PathVariable ReactionTargetTypeEnum targetType, @PathVariable String targetId, @Validated @RequestBody ReactionRequestBody body, @AuthenticationPrincipal Jwt jwt) {
         for (int n : List.of(10, 50, 100, 500, 1000, 2000, 3000, 5000, 10000)) {
-        List<PostReactedPayload> testBatch = reactionService.generateFakePayloads(n);
+        List<ReactedPayload> testBatch = reactionService.generateFakePayloads(n);
         long t0 = System.currentTimeMillis();
         reactionService.batchUpsertToDb(testBatch);
         long t1 = System.currentTimeMillis();
