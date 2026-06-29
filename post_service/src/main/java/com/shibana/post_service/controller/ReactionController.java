@@ -37,7 +37,12 @@ public class ReactionController {
     }
 
     @PostMapping("/v1/{targetType}/{targetId}")
-    public ApiResponse<Void> toggleReactionV1(@PathVariable ReactionTargetTypeEnum targetType, @PathVariable String targetId, @Validated @RequestBody ReactionRequestBody body, @AuthenticationPrincipal Jwt jwt) {
+    public ApiResponse<Void> toggleReactionV1(
+            @PathVariable String targetId,
+            @AuthenticationPrincipal Jwt jwt,
+            @Validated @RequestBody ReactionRequestBody body,
+            @PathVariable ReactionTargetTypeEnum targetType
+    ) {
         UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
         UUID targetUUID = UUID.fromString(targetId);
         reactionService.handleReactionV1(requesterUUID, targetUUID, targetType, body.getReactionType());
@@ -45,8 +50,13 @@ public class ReactionController {
     }
 
     @PostMapping("/v2/{targetType}/{targetId}")
-    public ApiResponse<Void> toggleReactionV2(@PathVariable ReactionTargetTypeEnum targetType, @PathVariable String targetId, @Validated @RequestBody ReactionRequestBody body, @AuthenticationPrincipal Jwt jwt, @RequestHeader("X-User-Id") String userId) {
-        UUID requesterUUID = UUID.fromString(userId);
+    public ApiResponse<Void> toggleReactionV2(
+            @PathVariable ReactionTargetTypeEnum targetType,
+            @PathVariable String targetId,
+            @Validated @RequestBody ReactionRequestBody body,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
         UUID targetUUID = UUID.fromString(targetId);
 
         var message = reactionService.handleReactionV2(requesterUUID, targetUUID, targetType, body.getReactionType());
