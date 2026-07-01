@@ -134,12 +134,17 @@ public class NewsfeedService {
                     response.setReactionCounts(Integer.parseInt(String.valueOf(reactionStats.get(ReactionCacheService.TOTAL_STATS_REDIS_KEY))));
                 }
             } else {
-                // TRƯỜNG HỢP 2: CACHE MISS (Xài Lớp nền DB)
-                // Tạm thời em đã có getReactionCounts() từ bảng Post.
-                // TODO: Ở step sau, khi em làm field JSONB dưới Postgres xong,
-                // ta sẽ parse cái field đó ra đây để đắp vào topReactions.
-                // Hiện tại UI cứ để rỗng hoặc null, số Like vẫn hiển thị đúng từ DB.
-                response.setTopReactions(Collections.emptyList());
+                var top3ReactionsInDB = post.getReactionStats();
+                if (top3ReactionsInDB != null && !top3ReactionsInDB.isEmpty()) {
+                    List<ReactionTypeEnum> top3Reactions = top3ReactionsInDB.entrySet().stream()
+                            .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+                            .limit(3)
+                            .map(entry -> ReactionTypeEnum.valueOf(entry.getKey()))
+                            .toList();
+                    response.setTopReactions(top3Reactions);
+                } else {
+                    response.setTopReactions(Collections.emptyList());
+                }
             }
 
             return response;
