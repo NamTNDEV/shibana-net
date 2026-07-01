@@ -42,14 +42,9 @@ public class PostEventListener {
     }
 
     private void handleReactionToggleBatch(List<ConsumerRecord<String, String>> records) {
-        Map<String, ReactedPayload> events = records.stream()
+        List<ReactedPayload> allEvents = records.stream()
                 .map(record -> jsonHelper.parsePayload(record.value(), ReactedPayload.class))
-                .collect(Collectors.toMap(
-                        payload -> payload.getTargetId() + "_" + payload.getRequesterId(),
-                        payload -> payload,
-                        (existing, replacement) -> replacement
-                ));
-        List<ReactedPayload> uniqueBatch = new ArrayList<>(events.values());
-        reactionService.batchUpsertToDb(uniqueBatch);
+                .toList();
+        reactionService.batchUpsertToDb(allEvents);
     }
 }

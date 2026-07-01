@@ -1,6 +1,7 @@
 package com.shibana.post_service.service.cache;
 
 import com.shibana.post_service.model.entity.Reaction;
+import com.shibana.post_service.model.enums.ReactionActionEnum;
 import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.ReactionRepo;
@@ -11,6 +12,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -28,6 +31,8 @@ public class ReactionCacheService {
     ReactionRepo reactionRepo;
     RedisHashHelper redisHashHelper;
     RedisCacheTemplate redisCacheTemplate;
+    StringRedisTemplate stringRedisTemplate;
+    RedisScript<String> toggleReactionScript;
 
     String EMPTY_KEY_REDIS_FLAG = "_EMPTY_FLAG_";
     Duration TTL_HAS_DATA = Duration.ofDays(7);
@@ -39,12 +44,11 @@ public class ReactionCacheService {
         }
     }
 
-    public boolean toggleReaction(UUID targetUUID, UUID requesterUUID, ReactionTargetTypeEnum targetType, ReactionTypeEnum reactionType) {
+    public ReactionActionEnum toggleReaction(UUID targetUUID, UUID requesterUUID, ReactionTargetTypeEnum targetType, ReactionTypeEnum reactionType) {
         String reactionCacheKey = String.format("p:%s:%s:react", targetType.name(), targetUUID);
         String statsCacheKey = String.format("p:%s:%s:stats", targetType.name(), targetUUID);
         String userIdStr = requesterUUID.toString();
         long WARMUP_LOCK_TIMEOUT_MS = 500L;
-        String TOTAL_STATS_REDIS_KEY = "TOTAL";
 
         redisCacheTemplate.executeWithDoubleCheckLock(
                 reactionCacheKey,
@@ -58,38 +62,16 @@ public class ReactionCacheService {
                 WARMUP_LOCK_TIMEOUT_MS
         );
 
-        String currentReaction = (String) redisHashHelper.hGet(reactionCacheKey, userIdStr);
-        if (currentReaction == null) {
-            // Trường hợp 1: Chưa có Reaction
-            redisHashHelper.hSet(reactionCacheKey, userIdStr, reactionType.name(), TTL_HAS_DATA);
-            redisHashHelper.hDelete(reactionCacheKey, EMPTY_KEY_REDIS_FLAG);
+        String actionStr = stringRedisTemplate.execute(
+                toggleReactionScript,
+                List.of(reactionCacheKey, statsCacheKey),
+                userIdStr,
+                reactionType.name(),
+                EMPTY_KEY_REDIS_FLAG,
+                String.valueOf(TTL_HAS_DATA.toSeconds())
+        );
 
-            redisHashHelper.hIncrBy(statsCacheKey, reactionType.name(), 1);
-            redisHashHelper.hIncrBy(statsCacheKey, TOTAL_STATS_REDIS_KEY, 1);
-            redisHashHelper.hDelete(statsCacheKey, EMPTY_KEY_REDIS_FLAG);
-            return true;
-        }
-
-        // Trường hợp 2: Đã có Reaction và giống với Reaction hiện tại => Xóa Reaction
-        if (currentReaction.equals(reactionType.name())) {
-            redisHashHelper.hDelete(reactionCacheKey, userIdStr);
-
-            Long newReactionCount = redisHashHelper.hIncrBy(statsCacheKey, reactionType.name(), -1);
-            Long newTotalCount = redisHashHelper.hIncrBy(statsCacheKey, TOTAL_STATS_REDIS_KEY, -1);
-
-            handleRemoveStatsField(newReactionCount, statsCacheKey, reactionType.name());
-            handleRemoveStatsField(newTotalCount, statsCacheKey, TOTAL_STATS_REDIS_KEY);
-            return false;
-        }
-
-        // Trường hợp 3: Đã có Reaction nhưng khác với Reaction hiện tại => Cập nhật Reaction
-        redisHashHelper.hSet(reactionCacheKey, userIdStr, reactionType.name(), TTL_HAS_DATA);
-
-        Long newOldReactionCount = redisHashHelper.hIncrBy(statsCacheKey, currentReaction, -1);
-        redisHashHelper.hIncrBy(statsCacheKey, reactionType.name(), 1);
-
-        handleRemoveStatsField(newOldReactionCount, statsCacheKey, currentReaction);
-        return true;
+        return ReactionActionEnum.valueOf(actionStr);
     }
 
     void fetchReactionDetailsFromDb(String redisKey, UUID targetUUID) {

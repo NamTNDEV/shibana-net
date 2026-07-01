@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -91,8 +92,14 @@ public class PostCommandService {
 
     @Transactional
     public void updatePostReactionStats(UUID postId, int amount) {
-        Post post = postQueryService.getPostById(postId);
-        post.setReactionCounts(post.getReactionCounts() + amount);
-        postRepo.save(post);
+        postRepo.adjustReactionCount(postId, amount);
+    }
+
+    @Transactional
+    public void updatePostBatchReactionStats(Set<UUID> targetIds) {
+        targetIds.forEach(postId -> {
+            log.info("🔄 [Idempotent Sync] Đồng bộ số đếm tuyệt đối cho Post ID: {}", postId);
+            postRepo.synchronizeAbsoluteReactionCount(postId);
+        });
     }
 }

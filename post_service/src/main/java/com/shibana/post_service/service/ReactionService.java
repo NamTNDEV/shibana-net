@@ -34,80 +34,6 @@ public class ReactionService {
     ReactionCacheService reactionCacheService;
     ReactionJdbcRepository reactionJdbcRepository;
 
-    @Transactional
-    public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
-        ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
-        strategy.validateTarget(targetUUID);
-
-        Optional<Reaction> existingReaction = reactionRepo.findByTargetIdAndAuthorId(targetUUID, requesterUUID);
-        if (existingReaction.isPresent()) {
-            reactionRepo.delete(existingReaction.get());
-            strategy.updateStats(requesterUUID, targetUUID, -1);
-        } else {
-            Reaction reactionEntity = Reaction.builder()
-                    .targetId(targetUUID)
-                    .authorId(requesterUUID)
-                    .reactionType(reactionTypeEnum)
-                    .targetType(reactionTargetTypeEnum)
-                    .build();
-            reactionRepo.save(reactionEntity);
-            strategy.updateStats(requesterUUID, targetUUID, 1);
-        }
-    }
-
-    /**
-     * V2 - using Redis for handling high-concurrency requesting
-     */
-    public String handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
-        ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
-        strategy.validateTarget(targetUUID);
-
-        boolean isAddedOrUpdated = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
-
-        ReactedPayload eventPayload = ReactedPayload.builder()
-                .requesterId(requesterUUID)
-                .targetId(targetUUID)
-                .reactionType(reactionTypeEnum)
-                .reactionTargetType(reactionTargetTypeEnum)
-                .build();
-
-        String result = isAddedOrUpdated ? "React successfully" : "Unreact successfully";
-        if (!isAddedOrUpdated) {
-            eventPayload.setReactionAction(ReactionActionEnum.DELETE);
-        } else {
-            eventPayload.setReactionAction(ReactionActionEnum.CREATE);
-        }
-
-        kafkaEventPublisher.publishEvent(
-                eventPayload,
-                AggregateTypeEnum.REACTION,
-                targetUUID.toString(),
-                EventType.USER_REACTED
-        );
-
-        return result;
-    }
-
-    @Transactional
-    public void batchUpsertToDb(List<ReactedPayload> payloads) {
-        if (payloads.isEmpty()) {
-            return;
-        }
-
-        Map<Boolean, List<ReactedPayload>> groupedPayloads = payloads.stream()
-                .collect(Collectors.partitioningBy(payload -> payload.getReactionAction() == ReactionActionEnum.CREATE));
-
-        List<ReactedPayload> upsertPayloads = groupedPayloads.get(true);
-        List<ReactedPayload> deletePayloads = groupedPayloads.get(false);
-
-        if (!upsertPayloads.isEmpty()) {
-            reactionJdbcRepository.batchUpsert(upsertPayloads);
-        }
-        if (!deletePayloads.isEmpty()) {
-            reactionJdbcRepository.batchDelete(deletePayloads);
-        }
-    }
-
     public List<ReactedPayload> generateFakePayloads(int n) {
         List<ReactedPayload> payloads = new ArrayList<>(n);
         Random random = new Random();
@@ -147,5 +73,99 @@ public class ReactionService {
             payloads.add(payload);
         }
         return payloads;
+    }
+
+    @Transactional
+    public void handleReactionV1(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+        ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
+        strategy.validateTarget(targetUUID);
+
+        Optional<Reaction> existingReaction = reactionRepo.findByTargetIdAndAuthorId(targetUUID, requesterUUID);
+        if (existingReaction.isPresent()) {
+            reactionRepo.delete(existingReaction.get());
+            strategy.updateStats(targetUUID, -1);
+        } else {
+            Reaction reactionEntity = Reaction.builder()
+                    .targetId(targetUUID)
+                    .authorId(requesterUUID)
+                    .reactionType(reactionTypeEnum)
+                    .targetType(reactionTargetTypeEnum)
+                    .build();
+            reactionRepo.save(reactionEntity);
+            strategy.updateStats(targetUUID, 1);
+        }
+    }
+
+    /**
+     * V2 - using Redis for handling high-concurrency requesting
+     */
+    public String handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
+        ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
+        strategy.validateTarget(targetUUID);
+
+        ReactionActionEnum reactionActionType = reactionCacheService.toggleReaction(targetUUID, requesterUUID, reactionTargetTypeEnum, reactionTypeEnum);
+
+        ReactedPayload eventPayload = ReactedPayload.builder()
+                .requesterId(requesterUUID)
+                .targetId(targetUUID)
+                .reactionType(reactionTypeEnum)
+                .reactionTargetType(reactionTargetTypeEnum)
+                .reactionAction(reactionActionType)
+                .build();
+
+        kafkaEventPublisher.publishEvent(
+                eventPayload,
+                AggregateTypeEnum.REACTION,
+                targetUUID.toString(),
+                EventType.USER_REACTED
+        );
+
+        return reactionActionType.name();
+    }
+
+    @Transactional
+    public void batchUpsertToDb(List<ReactedPayload> payloads) {
+        if (payloads.isEmpty()) return;
+
+        syncReactionHistory(payloads);
+        syncReactionStats(payloads);
+    }
+
+    void syncReactionStats(List<ReactedPayload> payloads) {
+        // Lấy ra danh sách các TargetId duy nhất xuất hiện trong batch này để đồng bộ
+        Set<UUID> targetIds = payloads.stream()
+                .map(ReactedPayload::getTargetId)
+                .collect(Collectors.toSet());
+
+        ReactionTargetTypeEnum targetType = payloads.getFirst().getReactionTargetType();
+        ReactionStrategy strategy = strategyFactory.getStrategy(targetType);
+
+        // Kích hoạt Strategy để quét và gán lại số đếm chuẩn
+        if (!targetIds.isEmpty()) {
+            strategy.updateBatchStats(targetIds); // Đổi tham số truyền vào thành Set<UUID>
+        }
+    }
+
+    void syncReactionHistory(List<ReactedPayload> payloads) {
+        Map<String, ReactedPayload> uniqueEventsMap = payloads.stream()
+                .collect(Collectors.toMap(
+                        payload -> payload.getTargetId() + "_" + payload.getRequesterId(),
+                        payload -> payload,
+                        (existing, replacement) -> replacement
+                ));
+        List<ReactedPayload> uniquePayloads = new ArrayList<>(uniqueEventsMap.values());
+
+        Map<Boolean, List<ReactedPayload>> groupedPayloads = uniquePayloads.stream()
+                .collect(Collectors.partitioningBy(payload -> payload.getReactionAction() != ReactionActionEnum.DELETE));
+
+        List<ReactedPayload> upsertPayloads = groupedPayloads.get(true);
+        List<ReactedPayload> deletePayloads = groupedPayloads.get(false);
+
+        if (!upsertPayloads.isEmpty()) {
+            reactionJdbcRepository.batchUpsert(upsertPayloads);
+        }
+        if (!deletePayloads.isEmpty()) {
+            reactionJdbcRepository.batchDelete(deletePayloads);
+        }
     }
 }

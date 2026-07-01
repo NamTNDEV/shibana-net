@@ -11,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -27,8 +29,13 @@ public class PostReactionStrategy implements ReactionStrategy {
     }
 
     @Override
-    public void updateStats(UUID requesterUUID, UUID targetUUID, int amount) {
+    public void updateStats(UUID targetUUID, int amount) {
         postCommandService.updatePostReactionStats(targetUUID, amount);
+    }
+
+    @Override
+    public void updateBatchStats(Set<UUID> targetIds) {
+        postCommandService.updatePostBatchReactionStats(targetIds);
     }
 
     @Override
