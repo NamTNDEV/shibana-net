@@ -62,6 +62,11 @@ public class Post {
     Integer reactionCounts = 0;
 
     @Builder.Default
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", name = "reaction_stats")
+    Map<String, Integer> reactionStats = new HashMap<>();
+
+    @Builder.Default
     @Column(name = "comment_counts")
     Integer commentCounts = 0;
 

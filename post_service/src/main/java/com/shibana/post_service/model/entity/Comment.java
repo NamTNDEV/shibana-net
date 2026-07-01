@@ -61,6 +61,10 @@ public class Comment {
     @Column(name = "media_type", length = 20)
     String mediaType;
 
+    @Builder.Default
+    @Column(name = "reaction_counts")
+    Integer reactionCounts = 0;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", name = "reaction_stats")
     @Builder.Default

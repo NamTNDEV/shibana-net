@@ -12,6 +12,8 @@ import com.shibana.post_service.model.enums.PostPrivacyEnum;
 import com.shibana.post_service.model.service_command.posts.PostCreationCommand;
 import com.shibana.post_service.repo.AuthorRepo;
 import com.shibana.post_service.repo.PostRepo;
+import com.shibana.post_service.repo.ReactionRepo;
+import com.shibana.post_service.repo.projection.ReactionCountProjection;
 import com.shibana.post_service.utils.HashtagUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,6 +33,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostCommandService {
     PostRepo postRepo;
+    ReactionRepo  reactionRepo;
 
     PostMapper postMapper;
 
@@ -98,8 +98,23 @@ public class PostCommandService {
     @Transactional
     public void updatePostBatchReactionStats(Set<UUID> targetIds) {
         targetIds.forEach(postId -> {
-            log.info("🔄 [Idempotent Sync] Đồng bộ số đếm tuyệt đối cho Post ID: {}", postId);
-            postRepo.synchronizeAbsoluteReactionCount(postId);
+            log.info("🔄 [Idempotent Sync] Tính toán và đồng bộ JSONB cho Post ID: {}", postId);
+            List<ReactionCountProjection> reactionCountProjections = reactionRepo.countReactionsByTargetId(postId);
+
+            Map<String, Integer> reactionDetails = new HashMap<>();
+            int totalCounts = 0;
+
+            if (reactionCountProjections != null && !reactionCountProjections.isEmpty()) {
+                for (ReactionCountProjection reactionCountProjection : reactionCountProjections) {
+                    String key = reactionCountProjection.getReactionType().name();
+                    int count = reactionCountProjection.getCount().intValue();
+                    reactionDetails.put(key, count);
+                    totalCounts += count;
+                }
+            }
+
+            postRepo.updateReactionStatsAndCounts(postId, totalCounts, reactionDetails);
+            log.info("✅ Done Post {}: Total = {}, Details = {}", postId, totalCounts, reactionDetails);
         });
     }
 }

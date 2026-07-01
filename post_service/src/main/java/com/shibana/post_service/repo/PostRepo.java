@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -80,13 +81,26 @@ public interface PostRepo extends JpaRepository<Post, UUID> {
 
     @Modifying
     @Query("""
-        UPDATE Post p
-        SET p.reactionCounts = (
-            SELECT COUNT(r.id)
-            FROM Reaction r
-            WHERE r.targetId = :postId
-        )
-        WHERE p.id = :postId
-        """)
+            UPDATE Post p
+            SET p.reactionCounts = (
+                SELECT COUNT(r.id)
+                FROM Reaction r
+                WHERE r.targetId = :postId
+            )
+            WHERE p.id = :postId
+            """)
     void synchronizeAbsoluteReactionCount(@Param("postId") UUID postId);
+
+    @Modifying
+    @Query("""
+            UPDATE Post p
+            SET p.reactionCounts = :reactionCounts,
+                p.reactionStats = :reactionStats
+            WHERE p.id = :postId
+            """)
+    void updateReactionStatsAndCounts(
+            @Param("postId") UUID postId,
+            @Param("reactionCounts") Integer reactionCounts,
+            @Param("reactionStats") Map<String, Integer> reactionStats
+    );
 }

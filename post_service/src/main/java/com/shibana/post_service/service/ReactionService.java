@@ -10,6 +10,7 @@ import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
 import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.ReactionRepo;
 import com.shibana.post_service.repo.jdbc_repo.ReactionJdbcRepository;
+import com.shibana.post_service.repo.projection.ReactionCountProjection;
 import com.shibana.post_service.service.cache.ReactionCacheService;
 import com.shibana.post_service.strategy.ReactionStrategy;
 import com.shibana.post_service.strategy.ReactionStrategyFactory;
@@ -96,9 +97,6 @@ public class ReactionService {
         }
     }
 
-    /**
-     * V2 - using Redis for handling high-concurrency requesting
-     */
     public String handleReactionV2(UUID requesterUUID, UUID targetUUID, ReactionTargetTypeEnum reactionTargetTypeEnum, ReactionTypeEnum reactionTypeEnum) {
         ReactionStrategy strategy = strategyFactory.getStrategy(reactionTargetTypeEnum);
         strategy.validateTarget(targetUUID);
@@ -130,6 +128,12 @@ public class ReactionService {
         syncReactionHistory(payloads);
         syncReactionStats(payloads);
     }
+
+    public List<ReactionCountProjection> getReactionCountProjections(UUID postId) {
+        return reactionRepo.countReactionsByTargetId(postId);
+    }
+
+    // --- PRIVATE METHODS ---
 
     void syncReactionStats(List<ReactedPayload> payloads) {
         // Lấy ra danh sách các TargetId duy nhất xuất hiện trong batch này để đồng bộ
