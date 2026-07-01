@@ -54,9 +54,10 @@ public class ReactionController {
             @PathVariable ReactionTargetTypeEnum targetType,
             @PathVariable String targetId,
             @Validated @RequestBody ReactionRequestBody body,
-            @AuthenticationPrincipal Jwt jwt
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader("x-user-id") String userId
     ) {
-        UUID requesterUUID = UUID.fromString(jwt.getClaim("user_id"));
+        UUID requesterUUID = UUID.fromString(userId);
         UUID targetUUID = UUID.fromString(targetId);
 
         var message = reactionService.handleReactionV2(requesterUUID, targetUUID, targetType, body.getReactionType());

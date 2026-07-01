@@ -4,13 +4,18 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -56,5 +61,32 @@ public class RedisHashHelper {
 
     public Long hIncrBy(String key, Object field, long delta) {
         return stringRedisTemplate.opsForHash().increment(key, field, delta);
+    }
+
+    public List<Map<Object, Object>> hGetAllPipeline(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Object> rawResults = stringRedisTemplate.executePipelined(
+                (RedisCallback<Object>) connection -> {
+                    for (String key : keys) {
+                        connection.hashCommands().hGetAll(key.getBytes());
+                    }
+                    return null;
+                }
+        );
+
+        log.info(rawResults.toString());
+
+        return rawResults.stream()
+                .map(result -> {
+                    if (result instanceof Map<?,?>) {
+                        return (Map<Object, Object>) result;
+                    } else {
+                        return Collections.emptyMap();
+                    }
+                })
+                .toList();
     }
 }

@@ -10,7 +10,10 @@ import com.shibana.post_service.model.dto.response.PostResponse;
 import com.shibana.post_service.model.entity.Author;
 import com.shibana.post_service.model.entity.Post;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
+import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
+import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import com.shibana.post_service.repo.PostRepo;
+import com.shibana.post_service.service.cache.ReactionCacheService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +31,7 @@ public class NewsfeedService {
     PostRepo postRepo;
     SocialClient socialClient;
     AuthorService authorService;
+    ReactionCacheService reactionCacheService;
 
     UUID NIL_UUID = new UUID(0L, 0L);
     private final PostMapper postMapper;
@@ -68,8 +72,10 @@ public class NewsfeedService {
         }
 
         String nextCursor = posts.isEmpty() ? null : posts.getLast().getId().toString();
+        List<UUID> postIds = posts.stream().map(Post::getId).toList();
+        var batchReactionStats = reactionCacheService.getBatchReactionStats(postIds, ReactionTargetTypeEnum.POST);
 
-        List<PostResponse> newsfeed = mapAuthorData(posts);
+        List<PostResponse> newsfeed = mapAuthorAndReactionData(posts, batchReactionStats);
 
         return CursorResponse.<PostResponse>builder()
                 .size(newsfeed.size())
@@ -94,7 +100,7 @@ public class NewsfeedService {
         );
     }
 
-    private List<PostResponse> mapAuthorData(List<Post> posts) {
+    private List<PostResponse> mapAuthorAndReactionData(List<Post> posts, Map<UUID, Map<String, Object>> batchReactionStats) {
         if (posts.isEmpty()) {
             return Collections.emptyList();
         }
@@ -103,12 +109,40 @@ public class NewsfeedService {
         Map<UUID, Author> authorsMap = authorService.findAllAuthors(authorIds).stream()
                 .collect(Collectors.toMap(Author::getUserId, author -> author));
 
-        return posts.stream()
-                .map(
-                        post -> postMapper.toPostResponse(
-                                post,
-                                authorsMap.getOrDefault(post.getAuthorId(), authorService.getFallbackAuthor(post.getAuthorId()))
-                        )
-                ).toList();
+        return posts.stream().map(post -> {
+            PostResponse response = postMapper.toPostResponse(
+                    post,
+                    authorsMap.getOrDefault(post.getAuthorId(), authorService.getFallbackAuthor(post.getAuthorId()))
+            );
+
+            Map<String, Object> reactionStats = batchReactionStats.get(post.getId());
+            if (reactionStats != null && !reactionStats.isEmpty()) {
+                // TRƯỜNG HỢP 1: CACHE HIT (Xài dữ liệu từ Redis)
+                List<ReactionTypeEnum> top3Reactions = reactionStats.entrySet().stream()
+                        .filter(entry -> !entry.getKey().equals(ReactionCacheService.TOTAL_STATS_REDIS_KEY))
+                        .sorted((e1, e2) -> {
+                            long count1 = Long.parseLong(String.valueOf(e1.getValue()));
+                            long count2 = Long.parseLong(String.valueOf(e2.getValue()));
+                            return Long.compare(count2, count1);
+                        })
+                        .limit(3)
+                        .map(entry -> ReactionTypeEnum.valueOf(entry.getKey()))
+                        .toList();
+                response.setTopReactions(top3Reactions);
+
+                if (reactionStats.containsKey(ReactionCacheService.TOTAL_STATS_REDIS_KEY)) {
+                    response.setReactionCounts(Integer.parseInt(String.valueOf(reactionStats.get(ReactionCacheService.TOTAL_STATS_REDIS_KEY))));
+                }
+            } else {
+                // TRƯỜNG HỢP 2: CACHE MISS (Xài Lớp nền DB)
+                // Tạm thời em đã có getReactionCounts() từ bảng Post.
+                // TODO: Ở step sau, khi em làm field JSONB dưới Postgres xong,
+                // ta sẽ parse cái field đó ra đây để đắp vào topReactions.
+                // Hiện tại UI cứ để rỗng hoặc null, số Like vẫn hiển thị đúng từ DB.
+                response.setTopReactions(Collections.emptyList());
+            }
+
+            return response;
+        }).toList();
     }
 }

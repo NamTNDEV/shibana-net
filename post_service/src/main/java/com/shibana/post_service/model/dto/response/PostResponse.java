@@ -2,6 +2,8 @@ package com.shibana.post_service.model.dto.response;
 
 import com.shibana.post_service.model.entity.Author;
 import com.shibana.post_service.model.enums.PostPrivacyEnum;
+import com.shibana.post_service.model.enums.ReactionTargetTypeEnum;
+import com.shibana.post_service.model.enums.ReactionTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -22,6 +25,8 @@ public class PostResponse {
     PostPrivacyEnum privacy;
     Instant createdAt;
     Integer commentCounts;
+    Integer reactionCounts;
 
     AuthorResponse author;
+    List<ReactionTypeEnum> topReactions;
 }

@@ -17,10 +17,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,19 +31,44 @@ public class ReactionCacheService {
     StringRedisTemplate stringRedisTemplate;
     RedisScript<String> toggleReactionScript;
 
-    String EMPTY_KEY_REDIS_FLAG = "_EMPTY_FLAG_";
-    Duration TTL_HAS_DATA = Duration.ofDays(7);
-    Duration TTL_EMPTY = Duration.ofMinutes(10);
+    public static final String TOTAL_STATS_REDIS_KEY = "TOTAL";
+    public static final String EMPTY_KEY_REDIS_FLAG = "_EMPTY_FLAG_";
+    public static final String CACHE_KEY_PREFIX = "p:%s:%s";
+    public static final String STATS_CACHE_KEY = CACHE_KEY_PREFIX + ":stats";
+    public static final String REACTION_CACHE_KEY = CACHE_KEY_PREFIX + ":reactions";
 
-    private void handleRemoveStatsField(Long count, String statsCacheKey, String field) {
-        if (count != null && count <= 0) {
-            redisHashHelper.hDelete(statsCacheKey, field);
+    public static final Duration TTL_HAS_DATA = Duration.ofDays(7);
+    public static final Duration TTL_EMPTY = Duration.ofMinutes(10);
+
+    public Map<UUID, Map<String, Object>> getBatchReactionStats(List<UUID> targetUUIDs, ReactionTargetTypeEnum targetType) {
+        if (targetUUIDs == null || targetUUIDs.isEmpty()) {
+            return Collections.emptyMap();
         }
+
+        List<String> keys = targetUUIDs.stream()
+                .map(uuid -> String.format(STATS_CACHE_KEY, targetType.name(), uuid))
+                .toList();
+        List<Map<Object, Object>> rawResults = redisHashHelper.hGetAllPipeline(keys);
+        Map<UUID, Map<String, Object>> finalResult = new HashMap<>();
+        for (int i = 0; i < rawResults.size(); i++) {
+            Map<Object, Object> rawResult = rawResults.get(i);
+
+            if (rawResult != null && !rawResult.isEmpty() && !rawResult.containsKey(EMPTY_KEY_REDIS_FLAG)) {
+                Map<String, Object> cleanMap = rawResult.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                e ->String.valueOf(e.getKey()),
+                                Map.Entry::getValue
+                        ));
+                finalResult.put(targetUUIDs.get(i), cleanMap);
+            }
+        }
+
+        return finalResult;
     }
 
     public ReactionActionEnum toggleReaction(UUID targetUUID, UUID requesterUUID, ReactionTargetTypeEnum targetType, ReactionTypeEnum reactionType) {
-        String reactionCacheKey = String.format("p:%s:%s:react", targetType.name(), targetUUID);
-        String statsCacheKey = String.format("p:%s:%s:stats", targetType.name(), targetUUID);
+        String reactionCacheKey = String.format(REACTION_CACHE_KEY, targetType.name(), targetUUID);
+        String statsCacheKey = String.format(STATS_CACHE_KEY, targetType.name(), targetUUID);
         String userIdStr = requesterUUID.toString();
         long WARMUP_LOCK_TIMEOUT_MS = 500L;
 
@@ -90,14 +112,11 @@ public class ReactionCacheService {
     }
 
     void fetchReactionStatsFromDb(String statsCacheKey, UUID targetUUID) {
-        log.info("[ReactionCacheService::fetchReactionStatsFromDb] Bắt đầu múc dữ liệu Stats cho targetId: {}", targetUUID);
-
         // 1. Gọi Database thực hiện tính toán (Count & Group By)
         List<ReactionCountProjection> statsProjections = reactionRepo.countReactionsByTargetId(targetUUID);
 
         // 2. Tấm khiên chống Xuyên thấu Cache (Penetration)
         if (statsProjections == null || statsProjections.isEmpty()) {
-            log.info("[ReactionCacheService::fetchReactionStatsFromDb] TargetId: {} chưa có lượt tương tác nào. Đặt cờ EMPTY.", targetUUID);
             redisHashHelper.hSet(statsCacheKey, EMPTY_KEY_REDIS_FLAG, "TRUE", TTL_EMPTY);
             return;
         }
@@ -119,13 +138,9 @@ public class ReactionCacheService {
         }
 
         // 5. Gắn con số TỔNG (TOTAL) vào Map
-        String TOTAL_STATS_REDIS_KEY = "TOTAL"; // Có thể đưa biến này lên làm hằng số chung của class
         statsMap.put(TOTAL_STATS_REDIS_KEY, String.valueOf(totalReactions));
 
         // 6. Đẩy toàn bộ cấu trúc Hash lên Redis trong 1 hit duy nhất (O(1) Network I/O)
-        log.info("[ReactionCacheService::fetchReactionStatsFromDb] Đẩy dữ liệu Stats lên Redis cho targetId: {}. Dữ liệu: {}", targetUUID, statsMap);
         redisHashHelper.hPutAll(statsCacheKey, statsMap, TTL_HAS_DATA);
-
-        log.info("[ReactionCacheService::fetchReactionStatsFromDb] Warm-up thành công! TargetId: {} có tổng cộng {} lượt tương tác.", targetUUID, totalReactions);
     }
 }

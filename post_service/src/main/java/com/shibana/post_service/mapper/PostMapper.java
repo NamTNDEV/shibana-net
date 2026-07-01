@@ -16,6 +16,7 @@ public abstract class PostMapper {
 
     @Mapping(target = "createdAt", source = "post.createdAt")
     @Mapping(target = "author", expression = "java(toAuthorResponse(author))")
+    @Mapping(target = "topReactions", ignore = true)
     public abstract PostResponse toPostResponse(Post post, Author author);
 
     @Mapping(target = "id", source = "userId")
